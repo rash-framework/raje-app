@@ -1,3 +1,5 @@
+![RAJE icon](https://github.com/rash-framework/raje-app/blob/master/icons/raje-icon.png?raw=true)
+
 # RAJEApp is a multi-platform standalone software based on raje-core
 
 RAJE is a WYSIWYG word processor based on Electron and the node.js framework in order to create a multi-platform software.
