@@ -69,11 +69,13 @@ const windows = {
 
     // Open the splash window
     windowManager.open(SPLASH_WINDOW, 'RAJE', splashWindowUrl, null, {
-      height: 600,
-      width: 600,
+      height: 500,
+      width: 800,
       resizable: false,
+      frame: false,
       movable: true,
-      fullscreenable: false
+      //fullscreenable: false,
+      icon: path.join(__dirname, 'icons/raje-icon1024px.png')
     })
 
     // Set the menu 
@@ -147,7 +149,8 @@ const windows = {
       windowManager.open(EDITOR_WINDOW, 'RAJE', editorWindowUrl, null, {
         width: global.screenSize.width,
         height: global.screenSize.height,
-        resizable: true
+        resizable: true,
+        icon: path.join(__dirname, 'icons/raje-icon1024px.png')
       })
 
       // Update the app menu

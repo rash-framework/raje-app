@@ -12,6 +12,17 @@
   <link href="css/bootstrap.min.css" rel="stylesheet">
 
   <style>
+    html,
+    body,
+    .container-fluid,
+    .row {
+      height: 100%
+    }
+
+    .container-fluid {
+      padding-top: 0!important
+    }
+
     .list-group-item,
     div[data-article] {
       cursor: pointer
@@ -28,6 +39,51 @@
     .container {
       padding-top: 20px
     }
+
+    .icon-image {
+      height: 100px;
+      margin: 0 auto;
+      display: block;
+      margin-top: 40px
+    }
+
+    .sidebar {
+      height: 100%;
+      background-color: #2E3948
+    }
+
+    .recentarticles {
+      height: 100%;
+      box-shadow: 1px 0px 5px 0px rgba(0, 0, 0, 0.75)
+    }
+
+    .recentarticles h3 {
+      color: #2E3948;
+    }
+
+    header {
+      color: #fcfcfd
+    }
+
+    header small {
+      color: #7B8A9A
+    }
+
+    .button-list {
+      color: white;
+      margin-top: 50px;
+      padding: 0 20px
+    }
+
+    .button {
+      padding: 10px;
+      margin-top: 10px
+    }
+
+    .button:hover {
+      background-color: #4e5968;
+      cursor: pointer
+    }
   </style>
 
   <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
@@ -40,69 +96,67 @@
 </head>
 
 <body>
-  <div class="container">
+  <div class="container-fluid">
     <div class="row">
-      <div class="col-xs-10 col-xs-offset-1">
 
-        <div class="page-header">
-          <h1 class="text-center">Welcome to RAJE
+      <div class="sidebar col-xs-4">
+
+        <!--
+        <button type="button" class="close pull-left" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      -->
+
+        <header>
+          <img class="icon-image" src="raje-icon.png" alt="RAJE app icon">
+          <h3 class="text-center">Welcome to RAJE
             <small>v2.0.1</small>
-          </h1>
-        </div>
+          </h3>
+        </header>
 
-        <div class="list-group">
-
-          <a class="list-group-item" id="btnCreateArticle">
+        <div class="button-list">
+          <div class="button" id="btnCreateArticle">
             <p class="list-group-item-text">Create new RASH article</p>
-          </a>
-
-          <a class="list-group-item" id="btnOpenArticle">
+          </div>
+          <div class="button" id="btnOpenArticle">
             <p class="list-group-item-text">Open existing RASH article</p>
-          </a>
-
-          <a class="list-group-item disabled" id="btnCloneArticle">
-            <p class="list-group-item-text">Create from Github URL</p>
-          </a>
-
+          </div>
+          <div class="button" id="btnCloneArticle">
+            <p class="list-group-item-text">Import from Github URL</p>
+          </div>
         </div>
-
       </div>
-    </div>
 
-
-
-    <div class="row">
-      <div class="col-xs-offset-1 col-xs-10">
-        <h1 class="text-center">
-          <small>Recent articles</small>
-        </h1>
+      <div class="recentarticles col-xs-8">
+        <h3>
+          Recent articles
+        </h3>
         <div id="recents"></div>
         <div class="list-group" id="recent-articles">
         </div>
       </div>
     </div>
-  </div>
 
-  <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
-  <script>
-    window.$ = window.jQuery = require('jquery');
-  </script>
-  <!-- Include all compiled plugins (below), or include individual files as needed -->
-  <script src="js/bootstrap.min.js"></script>
+    <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+    <script>
+      window.$ = window.jQuery = require('jquery');
+    </script>
+    <!-- Include all compiled plugins (below), or include individual files as needed -->
+    <script src="js/bootstrap.min.js"></script>
 
-  <script>
-    ipcRenderer = require('electron').ipcRenderer
+    <script>
+      ipcRenderer = require('electron').ipcRenderer
 
-    // Save the window size in electron
-    ipcRenderer.send('saveScreenSize',getWindowSize())
+      // Save the window size in electron
+      ipcRenderer.send('saveScreenSize', getWindowSize())
 
-    let recentArticles = ipcRenderer.sendSync('getRecentArticles')
+      let recentArticles = ipcRenderer.sendSync('getRecentArticles')
 
-    if (recentArticles) {
-      let listGroup = $('div.list-group#recent-articles')
-      recentArticles.forEach(function (recentArticle) {
-        listGroup.append(
-          `
+      if (recentArticles) {
+        let listGroup = $('div.list-group#recent-articles')
+        recentArticles.forEach(function (recentArticle) {
+          listGroup.append(
+            `
           <div class="list-group-item recentArticleEntry" data-recent-article-path="${recentArticle.path}">
 
             <div class="pull-right"><button type="button" class="close btnRemoveRecentArticle" aria-label="Close"><span aria-hidden="true">&times;</span></button></div>
@@ -110,52 +164,52 @@
             <small class="text-success">${recentArticle.date}</small>
             <p class="list-group-item-text">${recentArticle.path}</p>
           </div>`
-        )
-      })
+          )
+        })
 
-      $('.btnRemoveRecentArticle').on('click', function () {
+        $('.btnRemoveRecentArticle').on('click', function () {
 
-        let arg = {
-          path: $(this).parents('.recentArticleEntry').attr('data-recent-article-path')
-        }
+          let arg = {
+            path: $(this).parents('.recentArticleEntry').attr('data-recent-article-path')
+          }
 
-        ipcRenderer.send('popRecentArticleEntry', arg)
-        $(this).parents('.recentArticleEntry').remove()
-      })
+          ipcRenderer.send('popRecentArticleEntry', arg)
+          $(this).parents('.recentArticleEntry').remove()
+        })
 
-      $('.recentArticleEntry').on('click', function () {
-        let arg = {
-          path: $(this).attr('data-recent-article-path'),
-          size: getWindowSize()
-        }
+        $('.recentArticleEntry').on('click', function () {
+          let arg = {
+            path: $(this).attr('data-recent-article-path'),
+            size: getWindowSize()
+          }
 
-        ipcRenderer.send('openRecentArticleEntry', arg)
-      })
-    }
-
-    function getWindowSize() {
-      return {
-        width: screen.width,
-        height: screen.height
+          ipcRenderer.send('openRecentArticleEntry', arg)
+        })
       }
-    }
 
-    $(document).ready(function () {
-      const {
-        ipcRenderer
-      } = require('electron')
+      function getWindowSize() {
+        return {
+          width: screen.width,
+          height: screen.height
+        }
+      }
 
-      $('#btnCreateArticle').on('click', function () {
+      $(document).ready(function () {
+        const {
+          ipcRenderer
+        } = require('electron')
 
-        ipcRenderer.send('createArticle')
+        $('#btnCreateArticle').on('click', function () {
+
+          ipcRenderer.send('createArticle')
+        })
+
+        $('#btnOpenArticle').on('click', function () {
+
+          ipcRenderer.send('openArticle')
+        })
       })
-
-      $('#btnOpenArticle').on('click', function () {
-
-        ipcRenderer.send('openArticle')
-      })
-    })
-  </script>
+    </script>
 </body>
 
 </html>
