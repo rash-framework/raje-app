@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+  <title>RAje | splash window</title>
+
+  <!-- Bootstrap -->
+  <link href="css/bootstrap.min.css" rel="stylesheet">
+
+  <style>
+    .list-group-item,
+    div[data-article] {
+      cursor: pointer
+    }
+
+    button.close {
+      color: red
+    }
+
+    button.close:hover {
+      color: red
+    }
+
+    .container {
+      padding-top: 20px
+    }
+  </style>
+
+  <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+  <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+  <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+</head>
+
+<body>
+  <div class="container">
+    <div class="row">
+      <div class="col-xs-10 col-xs-offset-1">
+
+        <div class="page-header">
+          <h1 class="text-center">Welcome to RAJE
+            <small>v2.0.1</small>
+          </h1>
+        </div>
+
+        <div class="list-group">
+
+          <a class="list-group-item" id="btnCreateArticle">
+            <p class="list-group-item-text">Create new RASH article</p>
+          </a>
+
+          <a class="list-group-item" id="btnOpenArticle">
+            <p class="list-group-item-text">Open existing RASH article</p>
+          </a>
+
+          <a class="list-group-item disabled" id="btnCloneArticle">
+            <p class="list-group-item-text">Create from Github URL</p>
+          </a>
+
+        </div>
+
+      </div>
+    </div>
+
+
+
+    <div class="row">
+      <div class="col-xs-offset-1 col-xs-10">
+        <h1 class="text-center">
+          <small>Recent articles</small>
+        </h1>
+        <div id="recents"></div>
+        <div class="list-group" id="recent-articles">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+  <script>
+    window.$ = window.jQuery = require('jquery');
+  </script>
+  <!-- Include all compiled plugins (below), or include individual files as needed -->
+  <script src="js/bootstrap.min.js"></script>
+
+  <script>
+    ipcRenderer = require('electron').ipcRenderer
+
+    // Save the window size in electron
+    ipcRenderer.send('saveScreenSize',getWindowSize())
+
+    let recentArticles = ipcRenderer.sendSync('getRecentArticles')
+
+    if (recentArticles) {
+      let listGroup = $('div.list-group#recent-articles')
+      recentArticles.forEach(function (recentArticle) {
+        listGroup.append(
+          `
+          <div class="list-group-item recentArticleEntry" data-recent-article-path="${recentArticle.path}">
+
+            <div class="pull-right"><button type="button" class="close btnRemoveRecentArticle" aria-label="Close"><span aria-hidden="true">&times;</span></button></div>
+            <h4 class="list-group-item-heading">${recentArticle.title}</h4>
+            <small class="text-success">${recentArticle.date}</small>
+            <p class="list-group-item-text">${recentArticle.path}</p>
+          </div>`
+        )
+      })
+
+      $('.btnRemoveRecentArticle').on('click', function () {
+
+        let arg = {
+          path: $(this).parents('.recentArticleEntry').attr('data-recent-article-path')
+        }
+
+        ipcRenderer.send('popRecentArticleEntry', arg)
+        $(this).parents('.recentArticleEntry').remove()
+      })
+
+      $('.recentArticleEntry').on('click', function () {
+        let arg = {
+          path: $(this).attr('data-recent-article-path'),
+          size: getWindowSize()
+        }
+
+        ipcRenderer.send('openRecentArticleEntry', arg)
+      })
+    }
+
+    function getWindowSize() {
+      return {
+        width: screen.width,
+        height: screen.height
+      }
+    }
+
+    $(document).ready(function () {
+      const {
+        ipcRenderer
+      } = require('electron')
+
+      $('#btnCreateArticle').on('click', function () {
+
+        ipcRenderer.send('createArticle')
+      })
+
+      $('#btnOpenArticle').on('click', function () {
+
+        ipcRenderer.send('openArticle')
+      })
+    })
+  </script>
+</body>
+
+</html>
