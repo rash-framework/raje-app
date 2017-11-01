@@ -194,21 +194,23 @@ module.exports = {
   getSplashMenu: function () {
 
     const template = [{
-      label: 'Article',
-      submenu: [{
-        label: 'New',
-        accelerator: 'CmdOrCtrl+N',
-        click: () => {
-          global.newArticle()
-        }
-      }, {
-        label: 'Open...',
-        accelerator: 'CmdOrCtrl+O',
-        click: () => {
-          global.openArticle()
-        }
-      }]
-    },this.getTabView()]
+        label: 'Article',
+        submenu: [{
+          label: 'New',
+          accelerator: 'CmdOrCtrl+N',
+          click: () => {
+            global.newArticle()
+          }
+        }, {
+          label: 'Open...',
+          accelerator: 'CmdOrCtrl+O',
+          click: () => {
+            global.openArticle()
+          }
+        }]
+      },
+      this.getTabView()
+    ]
 
     if (process.platform === 'darwin') {
       template.unshift({

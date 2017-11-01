@@ -44,7 +44,12 @@
       height: 100px;
       margin: 0 auto;
       display: block;
-      margin-top: 40px
+      margin-top: 40px;
+      user-select: none;
+      -moz-user-select: none;
+      -webkit-user-drag: none;
+      -webkit-user-select: none;
+      -ms-user-select: none;
     }
 
     .sidebar {
@@ -80,28 +85,45 @@
       margin-top: 10px
     }
 
+    .button.inactive {
+      color: #7B8A9A;
+    }
+
+    .button.inactive:hover {
+      background-color: #2e3948;
+      cursor: default;
+    }
+
     .button:hover {
       background-color: #4e5968;
       cursor: pointer
     }
 
-    .close {
+    #btnCloseSplash {
+      position: relative;
+      top: 10px;
+      opacity: .4!important;
       color: #fff!important;
       text-shadow: 0 1px 0 rgba(0, 0, 0, 0.75)!important
     }
 
-    .close:hover {
-      cursor: pointer!important
+    #btnCloseSplash:hover {
+      cursor: pointer!important;
+      opacity: .6!important;
     }
 
-    .recentArticleEntry{
+    .list-group {
+      margin-top: 50px
+    }
+
+    .recentArticleEntry {
       border-radius: 0px!important;
       border: none!important;
       border-left: 4px solid #4e5968!important;
       margin: 10px 0!important
     }
 
-    .recentArticleEntry:hover{
+    .recentArticleEntry:hover {
       background-color: #f6f6f6
     }
   </style>
@@ -137,7 +159,7 @@
           <div class="button" id="btnOpenArticle">
             <p class="list-group-item-text">Open existing RASH article</p>
           </div>
-          <div class="button" id="btnCloneArticle">
+          <div class="button inactive" id="btnCloneArticle">
             <p class="list-group-item-text">Import from Github URL</p>
           </div>
         </div>
