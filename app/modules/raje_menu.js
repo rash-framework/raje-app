@@ -208,7 +208,7 @@ module.exports = {
           global.openArticle()
         }
       }]
-    }]
+    },this.getTabView()]
 
     if (process.platform === 'darwin') {
       template.unshift({

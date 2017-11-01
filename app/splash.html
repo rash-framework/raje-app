@@ -84,6 +84,26 @@
       background-color: #4e5968;
       cursor: pointer
     }
+
+    .close {
+      color: #fff!important;
+      text-shadow: 0 1px 0 rgba(0, 0, 0, 0.75)!important
+    }
+
+    .close:hover {
+      cursor: pointer!important
+    }
+
+    .recentArticleEntry{
+      border-radius: 0px!important;
+      border: none!important;
+      border-left: 4px solid #4e5968!important;
+      margin: 10px 0!important
+    }
+
+    .recentArticleEntry:hover{
+      background-color: #f6f6f6
+    }
   </style>
 
   <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
@@ -101,11 +121,7 @@
 
       <div class="sidebar col-xs-4">
 
-        <!--
-        <button type="button" class="close pull-left" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      -->
+        <span class="close pull-left" id="btnCloseSplash" aria-hidden="true">&times;</span>
 
         <header>
           <img class="icon-image" src="raje-icon.png" alt="RAJE app icon">
@@ -200,13 +216,15 @@
         } = require('electron')
 
         $('#btnCreateArticle').on('click', function () {
-
           ipcRenderer.send('createArticle')
         })
 
         $('#btnOpenArticle').on('click', function () {
-
           ipcRenderer.send('openArticle')
+        })
+
+        $('#btnCloseSplash').on('click', function () {
+          ipcRenderer.send('closeSplash')
         })
       })
     </script>

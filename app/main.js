@@ -420,6 +420,13 @@ ipcMain.on('saveScreenSize', (event, arg) => {
 })
 
 /**
+ * 
+ */
+ipcMain.on('closeSplash', (event, arg) => {
+  windows.closeSplash()
+})
+
+/**
  * Send a message to the renderer process
  * Start the save as process
  */
