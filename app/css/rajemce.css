@@ -21,7 +21,7 @@ ul ul ul {
   margin-top: 10px
 }
 
-li.hidden-list-style{
+li.hidden-list-style {
   list-style-type: none
 }
 
@@ -82,4 +82,25 @@ i.mce-i-icon-ul:before {
 
 span>svg:hover {
   cursor: pointer
+}
+
+@media (min-width:768px) {
+  .mce-toolbar-grp {
+    margin: 0 auto!important;
+    width: 750px!important;
+  }
+}
+
+@media (min-width:992px) {
+  .mce-toolbar-grp {
+    margin: 0 auto!important;
+    width: 970px!important;
+  }
+}
+
+@media (min-width:1200px) {
+  .mce-toolbar-grp {
+    margin: 0 auto!important;
+    width: 1170px!important;
+  }
 }
