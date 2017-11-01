@@ -419,8 +419,7 @@ function openInlineFormulaEditor(formulaValue, callback) {
 tinymce.PluginManager.add('raje_inline_formula', function (editor, url) {
 
   editor.addButton('raje_inline_formula', {
-    text: 'raje_inline_formula',
-    icon: false,
+    icon: 'icon-inline-formula',
     tooltip: 'Inline formula',
     disabledStateSelector: DISABLE_SELECTOR_FIGURES,
 

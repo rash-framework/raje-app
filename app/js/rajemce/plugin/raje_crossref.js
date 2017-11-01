@@ -206,7 +206,7 @@ tinymce.PluginManager.add('raje_footnotes', function (editor, url) {
 
   editor.addButton('raje_footnotes', {
     title: 'raje_footnotes',
-    icon: 'icon-asterisk',
+    icon: 'icon-footnotes',
     tooltip: 'Footnote',
     disabledStateSelector: DISABLE_SELECTOR_FIGURES,
 
