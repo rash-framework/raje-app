@@ -377,7 +377,7 @@ section = {
         // Remove the selected section
         selectedElement.html(selectedElement.text().trim().substring(0, tinymce.activeEditor.selection.getRng().startOffset))
 
-        moveCaret(newSection.find(':header').first()[0])
+        moveCaret(newSection.find(':header').first()[0], true)
 
         // Update editor
         tinymce.triggerSave()
