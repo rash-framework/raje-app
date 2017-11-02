@@ -75,7 +75,7 @@ const windows = {
       frame: false,
       movable: true,
       //fullscreenable: false,
-      icon: path.join(__dirname, 'icons/raje-icon1024px.png')
+      icon: path.join(__dirname, 'build/icon.png')
     })
 
     // Set the menu 
@@ -192,6 +192,8 @@ const windows = {
             }
           })
         }
+
+        windows.openSplash()
       })
 
       /**
