@@ -150,7 +150,7 @@ const windows = {
         width: global.screenSize.width,
         height: global.screenSize.height,
         resizable: true,
-        icon: path.join(__dirname, 'icons/raje-icon1024px.png')
+        icon: path.join(__dirname, 'build/icon.png')
       })
 
       // Update the app menu

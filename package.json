@@ -2,8 +2,8 @@
   "name": "raje",
   "version": "0.0.1",
   "scripts": {
-    "dist": "electron-packager ./app --all --out=./dist --icon=icons/raje-app --overwrite",
-    "dist-osx": "electron-packager ./app --platform=darwin --out=./dist --icon=icons/raje-app.icns --prune=true --overwrite"
+    "dist": "electron-packager ./app --all --out=./dist --icon=./build/icon --overwrite",
+    "dist-osx": "electron-packager ./app --platform=darwin --out=./dist --icon=./build/icon --overwrite"
   },
   "repository": "https://github.com/gspinaci/raje-software",
   "author": "Gianmarco Spinaci <spino9330@gmail.com>",
