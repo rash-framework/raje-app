@@ -74,10 +74,7 @@ module.exports = {
         }
       }, {
         label: 'Recents',
-        enabled: false,
-        submenu: [{
-          label: 'rencent'
-        }]
+        enabled: false
       }, {
         type: 'separator'
       }, {
