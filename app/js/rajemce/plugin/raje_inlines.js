@@ -77,6 +77,23 @@ let inline = {
         tinymce.activeEditor.selection.setCursorLocation(parentContent[index + 1], 0)
       }
     })
+  },
+
+  /**
+   * 
+   */
+  replaceText: function (char) {
+    
+    let selectedElement = $(tinymce.activeEditor.selection.getNode())
+    tinymce.activeEditor.undoManager.transact(function () {
+
+      // Set the new char and overwrite current text
+      selectedElement.html(char)
+
+      // Move the caret at the end of current text
+      let content = selectedElement.contents()
+      moveCaret(content[content.length - 1])
+    })
   }
 }
 
@@ -113,6 +130,18 @@ tinymce.PluginManager.add('raje_inlineCode', function (editor, url) {
 
         e.preventDefault()
         inline.exit()
+      }
+
+      /**
+       * Check if a PRINTABLE CHAR is pressed
+       */
+      if (checkIfPrintableChar(e.keyCode)) {
+
+        // If the first char is ZERO_SPACE and the code has no char
+        if (selectedElement.text().length == 2 && `&#${selectedElement.text().charCodeAt(0)};` == ZERO_SPACE) {
+          e.preventDefault()
+          inline.replaceText(e.key)
+        }
       }
     }
   })
