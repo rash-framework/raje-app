@@ -190,10 +190,10 @@ const windows = {
                 windowManager.get(EDITOR_WINDOW).object.close()
                 break
             }
+
+            windows.openSplash()
           })
         }
-
-        windows.openSplash()
       })
 
       /**
@@ -248,8 +248,9 @@ app.on('window-all-closed', function () {
   }
 })
 
-
-
+/**
+ * Remove temporary img folder
+ */
 app.on('quit', RAJE_FS.removeImageTempFolder)
 
 /**
