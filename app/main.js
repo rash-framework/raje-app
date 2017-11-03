@@ -98,230 +98,150 @@ const windows = {
 
     global.hasChanged = false
 
-    // Set the URL of the document
-    let editorWindowUrl
-
     /**
      * If localRootPath exists, the user is trying to one an existing article
      */
-    if (localRootPath) {
+    if (localRootPath)
+      this.alreadyExistingArticle(localRootPath)
+    else
 
-      let getDirectory = function () {
+      this.newArticle()
+  },
 
-        let tmp = localRootPath.split('/')
-        tmp.pop()
+  /**
+   * 
+   */
+  newArticle: function () {
 
-        return `${tmp.join('/')}/`
-      }
+    // Remember that the document isn't saved yet
+    global.isNew = true
+    global.isWrapper = true
 
-      // Remember that the document is already saved
-      global.isNew = false
-      global.savePath = getDirectory()
-      global.isWrapper = false
+    let editorWindowUrl = url.format({
+      pathname: path.join(__dirname, TEMPLATE),
+      protocol: 'file:',
+      slashes: true
+    })
 
-      // TODO check if the document has validated RASH content
+    // Add the init_rajemce script
+    RAJE_FS.addRajeCoreInArticle(editorWindowUrl, err => {
 
-      // Get the URL to open the editor
-      editorWindowUrl = url.format({
-        pathname: localRootPath,
-        protocol: 'file:',
-        slashes: true
-      })
+      this.showEditor(editorWindowUrl)
+    })
+  },
 
-      // The title is the folder name, the path has to be splitted
-      let tmp = savePath.split('/')
+  /**
+   * 
+   */
+  alreadyExistingArticle: function (localRootPath) {
 
-      /**
-       * Copy the entire asset set inside the existing directory
-       */
-      RAJE_FS.copyAssets(global.savePath, err => {
-        if (err) throw err
+    let splittedRootPath = localRootPath.split('/')
 
-        // Add the already created article here
-        RAJE_STORAGE.pushRecentArticleEntry(RAJE_STORAGE.createRecentArticleEntry(savePath, tmp[tmp.length - 2]))
+    let getFileName = function () {
+      return splittedRootPath[splittedRootPath.length - 1]
+    }
 
-        // Add the init_rajemce script
-        RAJE_FS.addRajeCoreInArticle(editorWindowUrl, err => {
+    let getDirectoryPath = function () {
+      splittedRootPath.pop()
+      return `${splittedRootPath.join('/')}/`
+    }
 
-          // Open the new window with the size given by the splash window
-          windowManager.open(EDITOR_WINDOW, 'RAJE', editorWindowUrl, null, {
-            width: global.screenSize.width,
-            height: global.screenSize.height,
-            resizable: true,
-            icon: path.join(__dirname, 'build/icon.png')
-          })
+    // Store some important elements about the document
+    global.isNew = false
+    global.isWrapper = false
+    global.TEMPLATE = getFileName()
+    global.savePath = getDirectoryPath()
 
-          // Update the app menu
-          windows.updateEditorMenu(RAJE_MENU.getEditorMenu())
+    // TODO check if the document has validated RASH content
 
-          /**
-           * Catch the close event
-           */
-          windowManager.get(EDITOR_WINDOW).object.on('close', event => {
+    // Get the URL to open the editor
+    editorWindowUrl = url.format({
+      pathname: localRootPath,
+      protocol: 'file:',
+      slashes: true
+    })
 
-            // If the document is in hasChanged mode (need to be saved)
-            if (global.hasChanged) {
+    /**
+     * Copy the entire asset set inside the existing directory
+     */
+    RAJE_FS.copyAssets(global.savePath, err => {
+      if (err) throw err
 
-              // Cancel the close event
-              event.preventDefault()
-
-              // Show the dialog box "the document need to be saved"
-              dialog.showMessageBox({
-                type: 'warning',
-                buttons: ['Save changes [NOT IMPLEMENTED YET]', 'Discard changes', 'Continue editing'],
-                title: 'Unsaved changes',
-                message: 'The article has been changed, do you want to save the changes?',
-                cancelId: 2
-              }, (response) => {
-                switch (response) {
-
-                  // The user wants to save the document
-                  case 0:
-                    // TODO save the document
-                    global.hasChanged = false
-                    windowManager.get(EDITOR_WINDOW).object.close()
-                    break
-
-                    // The user doesn't want to save the document
-                  case 1:
-                    global.hasChanged = false
-                    windowManager.get(EDITOR_WINDOW).object.close()
-                    break
-                }
-              })
-            }
-          })
-
-          /**
-           * When the editor is closed, remove rajemce from the article if is still there
-           */
-          windowManager.get(EDITOR_WINDOW).object.on('closed', event => {
-
-            windows.openSplash()
-
-            RAJE_FS.removeRajeCoreInArticle(editorWindowUrl, err => {
-              if (err) throw err
-            })
-          })
-        })
-      })
-    } else {
-
-      // Remember that the document isn't saved yet
-      global.isNew = true
-      global.isWrapper = true
-
-      editorWindowUrl = editorWindowUrl = url.format({
-        pathname: path.join(__dirname, TEMPLATE),
-        protocol: 'file:',
-        slashes: true
-      })
+      // Add the already created article here
+      RAJE_STORAGE.pushRecentArticleEntry(RAJE_STORAGE.createRecentArticleEntry(savePath, getFileName()))
 
       // Add the init_rajemce script
       RAJE_FS.addRajeCoreInArticle(editorWindowUrl, err => {
+        this.showEditor(editorWindowUrl)
+      })
+    })
+  },
 
-        // Open the new window with the size given by the splash window
-        windowManager.open(EDITOR_WINDOW, 'RAJE', editorWindowUrl, null, {
-          width: global.screenSize.width,
-          height: global.screenSize.height,
-          resizable: true,
-          icon: path.join(__dirname, 'build/icon.png')
-        })
+  /**
+   * 
+   */
+  showEditor: function (editorWindowUrl) {
 
-<<<<<<< HEAD
-        // Update the app menu
-        windows.updateEditorMenu(RAJE_MENU.getEditorMenu())
+    // Open the new window with the size given by the splash window
+    windowManager.open(EDITOR_WINDOW, 'RAJE', editorWindowUrl, null, {
+      width: global.screenSize.width,
+      height: global.screenSize.height,
+      resizable: true,
+      icon: path.join(__dirname, 'build/icon.png')
+    })
 
-        /**
-         * Catch the close event
-         */
-        windowManager.get(EDITOR_WINDOW).object.on('close', event => {
+    // Update the app menu
+    windows.updateEditorMenu(RAJE_MENU.getEditorMenu())
 
-          // If the document is in hasChanged mode (need to be saved)
-          if (global.hasChanged) {
+    /**
+     * Catch the close event
+     */
+    windowManager.get(EDITOR_WINDOW).object.on('close', event => {
 
-            // Cancel the close event
-            event.preventDefault()
+      // If the document is in hasChanged mode (need to be saved)
+      if (global.hasChanged) {
 
-            // Show the dialog box "the document need to be saved"
-            dialog.showMessageBox({
-              type: 'warning',
-              buttons: ['Save changes [NOT IMPLEMENTED YET]', 'Discard changes', 'Continue editing'],
-              title: 'Unsaved changes',
-              message: 'The article has been changed, do you want to save the changes?',
-              cancelId: 2
-            }, (response) => {
-              switch (response) {
+        // Cancel the close event
+        event.preventDefault()
 
-                // The user wants to save the document
-                case 0:
-                  // TODO save the document
-                  global.hasChanged = false
-                  windowManager.get(EDITOR_WINDOW).object.close()
-                  break
+        // Show the dialog box "the document need to be saved"
+        dialog.showMessageBox({
+          type: 'warning',
+          buttons: ['Save changes [NOT IMPLEMENTED YET]', 'Discard changes', 'Continue editing'],
+          title: 'Unsaved changes',
+          message: 'The article has been changed, do you want to save the changes?',
+          cancelId: 2
+        }, (response) => {
+          switch (response) {
 
-                  // The user doesn't want to save the document
-                case 1:
-                  global.hasChanged = false
-                  windowManager.get(EDITOR_WINDOW).object.close()
-                  break
-              }
-            })
+            // The user wants to save the document
+            case 0:
+              // TODO save the document
+              global.hasChanged = false
+              windowManager.get(EDITOR_WINDOW).object.close()
+              break
+
+              // The user doesn't want to save the document
+            case 1:
+              global.hasChanged = false
+              windowManager.get(EDITOR_WINDOW).object.close()
+              break
           }
         })
-=======
-      /**
-       * Catch the close event
-       */
-      windowManager.get(EDITOR_WINDOW).object.on('close', event => {
+      }
+    })
 
-        // If the document is in hasChanged mode (need to be saved)
-        if (global.hasChanged) {
+    /**
+     * When the editor is closed, remove rajemce from the article if is still there
+     */
+    windowManager.get(EDITOR_WINDOW).object.on('closed', event => {
 
-          // Cancel the close event
-          event.preventDefault()
+      windows.openSplash()
 
-          // Show the dialog box "the document need to be saved"
-          dialog.showMessageBox({
-            type: 'warning',
-            buttons: ['Save changes [NOT IMPLEMENTED YET]', 'Discard changes', 'Continue editing'],
-            title: 'Unsaved changes',
-            message: 'The article has been changed, do you want to save the changes?',
-            cancelId: 2
-          }, (response) => {
-            switch (response) {
-
-              // The user wants to save the document
-              case 0:
-                // TODO save the document
-                global.hasChanged = false
-                windowManager.get(EDITOR_WINDOW).object.close()
-                break
-
-                // The user doesn't want to save the document
-              case 1:
-                global.hasChanged = false
-                windowManager.get(EDITOR_WINDOW).object.close()
-                break
-            }
-          })
-        }
+      RAJE_FS.removeRajeCoreInArticle(editorWindowUrl, err => {
+        if (err) throw err
       })
->>>>>>> master
-
-        /**
-         * When the editor is closed, remove rajemce from the article if is still there
-         */
-        windowManager.get(EDITOR_WINDOW).object.on('closed', event => {
-
-          windows.openSplash()
-
-          RAJE_FS.removeRajeCoreInArticle(editorWindowUrl, err => {
-            if (err) throw err
-          })
-        })
-      })
-    }
+    })
   },
 
   /**
@@ -434,6 +354,10 @@ ipcMain.on('saveAsArticle', (event, arg) => {
 
   // If the user select a folder, the article is saved for the first time
   if (savePath) {
+
+    // Add last slash
+    savePath = `${savePath}/`
+
     RAJE_FS.saveAsArticle(savePath, arg.document, (err, message) => {
       if (err)
         return console.log(`Error: ${err}`)
