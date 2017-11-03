@@ -100,6 +100,10 @@ const windows = {
 
     // Set the URL of the document
     let editorWindowUrl
+
+    /**
+     * If localRootPath exists, the user is trying to one an existing article
+     */
     if (localRootPath) {
 
       let getDirectory = function () {
@@ -130,6 +134,7 @@ const windows = {
       // Add the already created article here
       RAJE_STORAGE.pushRecentArticleEntry(RAJE_STORAGE.createRecentArticleEntry(savePath, tmp[tmp.length - 2]))
 
+      RAJE_FS.updateRajeCore(savePath)
     } else {
 
       // Remember that the document isn't saved yet
@@ -144,7 +149,7 @@ const windows = {
     }
 
     // Add the init_rajemce script
-    RAJE_FS.addRajemceInArticle(editorWindowUrl, err => {
+    RAJE_FS.addRajeCoreInArticle(editorWindowUrl, err => {
 
       // Open the new window with the size given by the splash window
       windowManager.open(EDITOR_WINDOW, 'RAJE', editorWindowUrl, null, {
@@ -201,7 +206,7 @@ const windows = {
        * When the editor is closed, remove rajemce from the article if is still there
        */
       windowManager.get(EDITOR_WINDOW).object.on('closed', event => {
-        RAJE_FS.removeRajemceInArticle(editorWindowUrl, err => {
+        RAJE_FS.removeRajeCoreInArticle(editorWindowUrl, err => {
           if (err) throw err
         })
       })
