@@ -258,7 +258,7 @@ tinymce.PluginManager.add('raje_image', function (editor, url) {
 function openFormulaEditor(formulaValue, callback) {
   tinymce.activeEditor.windowManager.open({
       title: 'Math formula editor',
-      url: 'js/rajemce/plugin/raje_formula.html',
+      url: 'js/raje-core/plugin/raje_formula.html',
       width: 800,
       height: 500,
       onClose: function () {

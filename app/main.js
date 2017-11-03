@@ -228,6 +228,7 @@ const windows = {
           icon: path.join(__dirname, 'build/icon.png')
         })
 
+<<<<<<< HEAD
         // Update the app menu
         windows.updateEditorMenu(RAJE_MENU.getEditorMenu())
 
@@ -268,6 +269,45 @@ const windows = {
             })
           }
         })
+=======
+      /**
+       * Catch the close event
+       */
+      windowManager.get(EDITOR_WINDOW).object.on('close', event => {
+
+        // If the document is in hasChanged mode (need to be saved)
+        if (global.hasChanged) {
+
+          // Cancel the close event
+          event.preventDefault()
+
+          // Show the dialog box "the document need to be saved"
+          dialog.showMessageBox({
+            type: 'warning',
+            buttons: ['Save changes [NOT IMPLEMENTED YET]', 'Discard changes', 'Continue editing'],
+            title: 'Unsaved changes',
+            message: 'The article has been changed, do you want to save the changes?',
+            cancelId: 2
+          }, (response) => {
+            switch (response) {
+
+              // The user wants to save the document
+              case 0:
+                // TODO save the document
+                global.hasChanged = false
+                windowManager.get(EDITOR_WINDOW).object.close()
+                break
+
+                // The user doesn't want to save the document
+              case 1:
+                global.hasChanged = false
+                windowManager.get(EDITOR_WINDOW).object.close()
+                break
+            }
+          })
+        }
+      })
+>>>>>>> master
 
         /**
          * When the editor is closed, remove rajemce from the article if is still there
@@ -600,6 +640,10 @@ global.loginGithub = function () {
   RAJE_GITHUB.getAccessToken((err, access_token) => {
     if (err) throw (err)
 
-    console.log(access_token)
+    RAJE_STORAGE.pushGithubData(access_token, err => {
+      if (err) throw (err)
+
+      console.log('The token is saved')
+    })
   })
 }

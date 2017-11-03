@@ -2,6 +2,7 @@ const storage = require('electron-json-storage')
 const datetime = require('node-datetime')
 
 global.RECENT_ARTICLE_STORAGE = "RECENT_ARTICLE_STORAGE"
+global.GITHUB_DATA = 'GITHUB_DATA'
 
 module.exports = {
 
@@ -16,6 +17,16 @@ module.exports = {
       path: path + global.TEMPLATE,
       title: title,
       date: `Created on ${dt.format('d/m/y')} at ${dt.format('H:M')}`
+    }
+  },
+
+  /**
+   * Create a JSON object with access_token
+   * The token is the id
+   */
+  createGithubData: function (access_token) {
+    return {
+      access_token: access_token
     }
   },
 
@@ -96,6 +107,15 @@ module.exports = {
         recentArticles = []
 
       return recentArticles
+    })
+  },
+
+  /**
+   * 
+   */
+  pushGithubData: function (access_token, callback) {
+    storage.set(global.GITHUB_DATA, this.createGithubData(access_token), err => {
+      if (err) throw callback(err)
     })
   },
 
