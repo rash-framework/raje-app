@@ -197,7 +197,7 @@ const windows = {
                 break
             }
           })
-        } 
+        }
       })
 
       /**
@@ -530,6 +530,10 @@ global.loginGithub = function () {
   RAJE_GITHUB.getAccessToken((err, access_token) => {
     if (err) throw (err)
 
-    console.log(access_token)
+    RAJE_STORAGE.pushGithubData(access_token, err => {
+      if (err) throw (err)
+
+      console.log('The token is saved')
+    })
   })
 }

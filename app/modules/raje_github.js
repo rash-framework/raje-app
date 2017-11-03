@@ -15,7 +15,7 @@ module.exports = {
     var options = {
       client_id: CLIENT_ID,
       client_secret: CLIENT_SECRET,
-      scopes: ["user:email", "notifications"] // Scopes limit access for OAuth tokens.
+      scopes: ['user:user', 'public_repo'] // Scopes limit access for OAuth tokens.
     };
 
     // Build the OAuth consent page URL
