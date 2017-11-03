@@ -28,6 +28,6 @@
     "node-datetime": "^2.0.3",
     "octonode": "^0.7.7",
     "request": "^2.79.0",
-    "superagent": "^3.3.2"
+    "superagent": "^3.8.0"
   }
 }

@@ -43,6 +43,7 @@ const windowManager = require('electron-window-manager')
 const RAJE_FS = require('./modules/raje_fs.js')
 const RAJE_MENU = require('./modules/raje_menu.js')
 const RAJE_STORAGE = require('./modules/raje_storage.js')
+const RAJE_GITHUB = require('./modules/raje_github.js')
 
 const EDITOR_WINDOW = 'editor'
 const SPLASH_WINDOW = 'splash'
@@ -224,6 +225,12 @@ const windows = {
 }
 
 /**
+ * ##########################################################################
+ * ################################### APP EVENTS ###########################
+ * ##########################################################################
+ */
+
+/**
  * Event called when the app is ready
  */
 app.on('ready', windows.openSplash)
@@ -252,6 +259,12 @@ app.on('window-all-closed', function () {
  * Remove temporary img folder
  */
 app.on('quit', RAJE_FS.removeImageTempFolder)
+
+/**
+ * ##########################################################################
+ * ################################### PROCEDURE CALL #######################
+ * ##########################################################################
+ */
 
 /**
  * This method is used to call the function that 
@@ -348,7 +361,6 @@ ipcMain.on('saveArticle', (event, arg) => {
   }
 })
 
-
 /**
  * This method is used to select the image to import in the document
  * 
@@ -430,6 +442,19 @@ ipcMain.on('closeSplash', (event, arg) => {
 })
 
 /**
+ * 
+ */
+ipcMain.on('loginGithub', (event, arg) => {
+  global.loginGithub()
+})
+
+/**
+ * ##########################################################################
+ * ################################### GLOBAL METHOD ########################
+ * ##########################################################################
+ */
+
+/**
  * Send a message to the renderer process
  * Start the save as process
  */
@@ -490,4 +515,15 @@ global.openArticle = function () {
  */
 global.sendNotification = function (message) {
   windowManager.get(EDITOR_WINDOW).object.webContents.send('notify', message)
+}
+
+/**
+ * 
+ */
+global.loginGithub = function () {
+  RAJE_GITHUB.getAccessToken((err, access_token) => {
+    if (err) throw (err)
+
+    console.log(access_token)
+  })
 }

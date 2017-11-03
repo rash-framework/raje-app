@@ -13,6 +13,7 @@ module.exports = {
       this.getTabArticle(),
       this.getTabView(),
       this.getTabEdit(),
+      this.getTabGithub(),
       this.getTabHelp()
     ]
 
@@ -167,6 +168,21 @@ module.exports = {
           role: 'selectall'
         }
       ]
+    }
+  },
+
+  /**
+   * 
+   */
+  getTabGithub: function () {
+    return {
+      label: 'Github',
+      submenu: [{
+        label: 'Login',
+        click() {
+          global.loginGithub()
+        }
+      }]
     }
   },
 
