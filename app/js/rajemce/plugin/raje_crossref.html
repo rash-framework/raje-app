@@ -63,6 +63,16 @@
         })
       }
 
+      if (args.figures.length) {
+
+        addPanel('Figures')
+        args.figures.forEach(function (figure) {
+          $('#listFigures').append(
+            `<a data-type="role" data-reference="${figure.reference}" data-text="${figure.text}" class="list-group-item">${figure.text}</a>`
+          )
+        })
+      }
+
       if (args.listings.length) {
 
         addPanel('Listings')
