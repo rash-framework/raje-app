@@ -21,34 +21,18 @@ module.exports = {
 
       if (err) return callback(err)
 
-      // This copies the content of each directory in this array
-      global.ASSETS_DIRECTORIES.forEach(function (directoryPath) {
-
-        // Tries to copy the folder content only if the directory exists
-        if (fs.existsSync(directoryPath)) {
-
-          // Get the name of the 
-          let directoryPathName = `${path}/${directoryPath.split('/')[directoryPath.split('/').length - 1]}`
-
-          // It tries to create the directory and copy its content
-          fs.mkdir(directoryPathName, err => {
-            if (err) return callback(err)
-
-            fs.copy(directoryPath, directoryPathName, err => {
-              if (err) return callback(err)
-            })
-          })
-        }
-      })
-
-      // Create the template file
-      fs.writeFile(`${path}/${global.TEMPLATE}`, document, (err, res) => {
+      this.copyAssets(path, err => {
         if (err) return callback(err)
 
-        this.writeRajeHiddenFile(path, err => {
+        // Create the template file
+        fs.writeFile(`${path}/${global.TEMPLATE}`, document, (err, res) => {
           if (err) return callback(err)
 
-          return callback(null, 'Hooray! all changes has been saved!')
+          this.writeRajeHiddenFile(path, err => {
+            if (err) return callback(err)
+
+            return callback(null, 'Hooray! all changes has been saved!')
+          })
         })
       })
     })
@@ -74,6 +58,50 @@ module.exports = {
           return callback(null, 'Hooray! all changes has been saved!')
         })
       })
+    })
+  },
+
+  /**
+   * 
+   */
+  copyAssets: function (path, callback) {
+
+
+    let length = global.ASSETS_DIRECTORIES.length - 1
+    let ret = function () {
+
+      length--
+
+      if (length == 0)
+        return callback(null)
+    }
+
+    // This copies the content of each directory in this array
+    global.ASSETS_DIRECTORIES.forEach(function (directoryPath) {
+
+      // Tries to copy the folder content only if the directory exists
+      if (fs.existsSync(directoryPath)) {
+
+        // Get the name of the directory
+        let directoryPathName = path + directoryPath.split('/')[directoryPath.split('/').length - 1]
+
+        // If the current directory exists, remove it
+        if (fs.existsSync(directoryPathName))
+          fs.removeSync(directoryPathName)
+
+        // It tries to create the directory and copy its content
+        fs.mkdir(directoryPathName, {
+          overwrite: true
+        }, err => {
+          if (err) return callback(err)
+
+          fs.copy(directoryPath, directoryPathName, err => {
+            if (err) return callback(err)
+
+            ret()
+          })
+        })
+      }
     })
   },
 
@@ -231,18 +259,5 @@ module.exports = {
 
       return callback(null)
     })
-  },
-
-  /**
-   * 
-   */
-  updateRajeCore: function (path) {
-
-    let suffix = 'js/raje-core/core.js'
-    path = `${path.replace('file://', '')}${suffix}`
-
-    fs.createReadStream(`${global.ROOT}/${suffix}`).pipe(fs.createWriteStream(path, {
-      flags: 'w'
-    }))
   }
 }
