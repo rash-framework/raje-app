@@ -51,7 +51,7 @@ try {
 
 $(document).ready(function () {
   if (hasBackend) {
-    let thisScript = $('script[src="js/rajemce/init_rajemce.js"]')
+    let thisScript = $('script[src="js/raje-core/init_core.js"]')
 
     // Remove and re-add RASH
     // $('script[src="js/rash.js"]').remove()
@@ -59,7 +59,7 @@ $(document).ready(function () {
 
     // Add TinyMCE in the right position
     thisScript.after('<script src="js/tinymce/tinymce.js" data-rash-original-content=""></script>')
-    thisScript.after('<script src="js/rajemce/raje_core.js" data-rash-original-content=""></script>')
+    thisScript.after('<script src="js/raje-core/core.js" data-rash-original-content=""></script>')
 
     // Add CSS stylesheets
     thisScript.after('<link rel="stylesheet" href="css/font-awesome.min.css" data-rash-original-content="">')

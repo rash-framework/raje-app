@@ -2,6 +2,7 @@ const fs = require('fs-extra')
 const cheerio = require('cheerio')
 
 const RAJE_HIDDEN_FILE = '.raje'
+const RAJE_CORE = 'js/raje-core/core.js'
 
 module.exports = {
 
@@ -190,7 +191,7 @@ module.exports = {
   /**
    * 
    */
-  addRajemceInArticle: function (path, callback) {
+  addRajeCoreInArticle: function (path, callback) {
 
     path = path.replace('file://', '')
 
@@ -202,7 +203,7 @@ module.exports = {
       })
 
       $('script[src="js/jquery.min.js"]')
-        .after(`<script src="js/rajemce/init_rajemce.js" data-rash-original-content=""/>`)
+        .after(`<script src="js/raje-core/init_core.js" data-rash-original-content=""/>`)
 
       fs.writeFile(path, $.html())
 
@@ -210,7 +211,10 @@ module.exports = {
     })
   },
 
-  removeRajemceInArticle: function (path, callback) {
+  /**
+   * 
+   */
+  removeRajeCoreInArticle: function (path, callback) {
 
     path = path.replace('file://', '')
 
@@ -221,11 +225,24 @@ module.exports = {
         normalizeWhitespace: true
       })
 
-      $('script[src="js/rajemce/init_rajemce.js"]').remove()
+      $('script[src="js/raje-core/init_core.js"]').remove()
 
       fs.writeFile(path, $.html())
 
       return callback(null)
     })
+  },
+
+  /**
+   * 
+   */
+  updateRajeCore: function (path) {
+
+    let suffix = 'js/raje-core/core.js'
+    path = `${path.replace('file://', '')}${suffix}`
+
+    fs.createReadStream(`${global.ROOT}/${suffix}`).pipe(fs.createWriteStream(path, {
+      flags: 'w'
+    }))
   }
 }
