@@ -23,7 +23,7 @@ tinymce.PluginManager.add('raje_crossref', function (editor, url) {
 
       editor.windowManager.open({
           title: 'Cross-reference editor',
-          url: 'js/rajemce/plugin/raje_crossref.html',
+          url: 'js/raje-core/plugin/raje_crossref.html',
           width: 500,
           height: 800,
           onClose: function () {
