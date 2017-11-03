@@ -196,16 +196,17 @@ const windows = {
                 windowManager.get(EDITOR_WINDOW).object.close()
                 break
             }
-
-            windows.openSplash()
           })
-        }
+        } 
       })
 
       /**
        * When the editor is closed, remove rajemce from the article if is still there
        */
       windowManager.get(EDITOR_WINDOW).object.on('closed', event => {
+
+        windows.openSplash()
+
         RAJE_FS.removeRajeCoreInArticle(editorWindowUrl, err => {
           if (err) throw err
         })
