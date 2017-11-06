@@ -392,15 +392,16 @@ ipcMain.on('saveAsArticle', (event, arg) => {
     ]
   })
 
-  // If the user select a folder, the article is saved for the first time
-  if (savePath) {
-    RAJE_FS.saveAsArticle(savePath, arg.document, (err, message) => {
-      if (err)
-        return console.log(`Error: ${err}`)
+  try {
+
+    global.savePath = `${savePath}/`
+
+    RAJE_FS.saveAsArticle(global.savePath, arg.document, (err, message) => {
+
+      if (err) return
 
       // Store important variables to check the save state
       global.isNew = false
-      global.savePath = `${savePath}/`
 
       windows.updateEditorMenu(RAJE_MENU.getEditorMenu(!global.isNew))
 
@@ -413,6 +414,18 @@ ipcMain.on('saveAsArticle', (event, arg) => {
         type: 'success',
         timeout: 2000
       })
+
+      global.hasChanged = false
+      return global.updateClientContent()
+    })
+  }
+
+  // If savePath doesn't exists
+  catch (exception) {
+    global.sendNotification({
+      text: exception,
+      type: 'danger',
+      timeout: 2000
     })
   }
 })
@@ -425,7 +438,7 @@ ipcMain.on('saveArticle', (event, arg) => {
   // If the document has been saved before
   if (!global.isNew && typeof global.savePath != "undefined") {
     RAJE_FS.saveArticle(global.savePath, arg.document, (err, message) => {
-      if (err) return console.log(err)
+      if (err) return
 
       // Notify the client
       global.sendNotification({
@@ -433,6 +446,10 @@ ipcMain.on('saveArticle', (event, arg) => {
         type: 'success',
         timeout: 2000
       })
+
+      // Update client content
+      global.hasChanged = false
+      return global.updateClientContent()
     })
   }
 })
@@ -551,6 +568,13 @@ global.executeSave = function () {
   // Or call save
   else
     windowManager.get(EDITOR_WINDOW).object.webContents.send('executeSave')
+}
+
+/**
+ * 
+ */
+global.updateClientContent = function () {
+  windowManager.get(EDITOR_WINDOW).object.webContents.send('updateContent')
 }
 
 /**

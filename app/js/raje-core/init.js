@@ -31,7 +31,7 @@ if (hasBackend) {
     })
 
     //hide footer
-    $('footer.footer').hide()
+    $('footer.footer').remove()
 
     //attach whole body inside a placeholder div
     $('body').html(`<div id="raje_root">${$('body').html()}</div>`)
@@ -104,10 +104,7 @@ if (hasBackend) {
             }
           }
 
-          // Check if a change in the structure is made
-          // Then notify the backend 
-          if (tinymce.activeEditor.undoManager.hasUndo())
-            updateDocumentState(true)
+          updateDocumentState()
         })
 
         // Update saved content on undo and redo events
@@ -355,8 +352,14 @@ if (hasBackend) {
    * If the document is draft state = true
    * If the document is saved state = false
    */
-  function updateDocumentState(state) {
-    return ipcRenderer.send('updateDocumentState', state)
+  function updateDocumentState() {
+
+    // Get the Iframe content not in xml 
+    let JqueryIframe = $(`<div>${tinymce.activeEditor.getContent()}</div>`)
+    let JquerySavedContent = $(`#raje_root`)
+
+    // True if they're different, False is they're equal
+    ipcRenderer.send('updateDocumentState', JqueryIframe.html() != JquerySavedContent.html())
   }
 
   /**
@@ -389,11 +392,17 @@ if (hasBackend) {
     saveManager.save()
   })
 
-
   /**
    * 
    */
   ipcRenderer.on('notify', (event, data) => {
     notify(data.text, data.type, data.timeout)
+  })
+
+  /**
+   * 
+   */
+  ipcRenderer.on('updateContent', (event, data) => {
+    tinymce.triggerSave()
   })
 }
