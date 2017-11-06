@@ -193,7 +193,6 @@ const windows = {
     // Update the app menu
     windows.updateEditorMenu(RAJE_MENU.getEditorMenu())
 
-<<<<<<< HEAD
     /**
      * Catch the close event
      */
@@ -231,48 +230,6 @@ const windows = {
         })
       }
     })
-=======
-        // Update the app menu
-        windows.updateEditorMenu(RAJE_MENU.getEditorMenu())
-
-        /**
-         * Catch the close event
-         */
-        windowManager.get(EDITOR_WINDOW).object.on('close', event => {
-
-          // If the document is in hasChanged mode (need to be saved)
-          if (global.hasChanged) {
-
-            // Cancel the close event
-            event.preventDefault()
-
-            // Show the dialog box "the document need to be saved"
-            dialog.showMessageBox({
-              type: 'warning',
-              buttons: ['Save changes [NOT IMPLEMENTED YET]', 'Discard changes', 'Continue editing'],
-              title: 'Unsaved changes',
-              message: 'The article has been changed, do you want to save the changes?',
-              cancelId: 2
-            }, (response) => {
-              switch (response) {
-
-                // The user wants to save the document
-                case 0:
-                  // TODO save the document
-                  global.hasChanged = false
-                  windowManager.get(EDITOR_WINDOW).object.close()
-                  break
-
-                  // The user doesn't want to save the document
-                case 1:
-                  global.hasChanged = false
-                  windowManager.get(EDITOR_WINDOW).object.close()
-                  break
-              }
-            })
-          }
-        })
->>>>>>> fix
 
     /**
      * When the editor is closed, remove rajemce from the article if is still there
