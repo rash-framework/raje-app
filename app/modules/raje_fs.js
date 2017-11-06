@@ -44,7 +44,7 @@ module.exports = {
   saveArticle: function (path, document, callback) {
 
     // Overwrite the index.html with the document
-    fs.writeFile(`${path}/${global.TEMPLATE}`, document, err => {
+    fs.writeFile(`${path}${global.TEMPLATE}`, document, err => {
       if (err) return callback(err)
 
       // Copy/rewrite all images

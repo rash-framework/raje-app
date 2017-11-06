@@ -6,13 +6,6 @@ tinymce.PluginManager.add('raje_save', function (editor, url) {
      * 
      */
     initSave: function () {
-
-      // Clear all undo levels
-      tinymce.activeEditor.undoManager.clear()
-
-      // Update the new document state
-      updateDocumentState(false)
-
       // Return the message for the backend
       return {
         title: saveManager.getTitle(),

@@ -193,6 +193,7 @@ const windows = {
     // Update the app menu
     windows.updateEditorMenu(RAJE_MENU.getEditorMenu())
 
+<<<<<<< HEAD
     /**
      * Catch the close event
      */
@@ -230,6 +231,48 @@ const windows = {
         })
       }
     })
+=======
+        // Update the app menu
+        windows.updateEditorMenu(RAJE_MENU.getEditorMenu())
+
+        /**
+         * Catch the close event
+         */
+        windowManager.get(EDITOR_WINDOW).object.on('close', event => {
+
+          // If the document is in hasChanged mode (need to be saved)
+          if (global.hasChanged) {
+
+            // Cancel the close event
+            event.preventDefault()
+
+            // Show the dialog box "the document need to be saved"
+            dialog.showMessageBox({
+              type: 'warning',
+              buttons: ['Save changes [NOT IMPLEMENTED YET]', 'Discard changes', 'Continue editing'],
+              title: 'Unsaved changes',
+              message: 'The article has been changed, do you want to save the changes?',
+              cancelId: 2
+            }, (response) => {
+              switch (response) {
+
+                // The user wants to save the document
+                case 0:
+                  // TODO save the document
+                  global.hasChanged = false
+                  windowManager.get(EDITOR_WINDOW).object.close()
+                  break
+
+                  // The user doesn't want to save the document
+                case 1:
+                  global.hasChanged = false
+                  windowManager.get(EDITOR_WINDOW).object.close()
+                  break
+              }
+            })
+          }
+        })
+>>>>>>> fix
 
     /**
      * When the editor is closed, remove rajemce from the article if is still there
@@ -352,19 +395,16 @@ ipcMain.on('saveAsArticle', (event, arg) => {
     ]
   })
 
-  // If the user select a folder, the article is saved for the first time
-  if (savePath) {
+  try {
 
-    // Add last slash
-    savePath = `${savePath}/`
+    global.savePath = `${savePath}/`
 
-    RAJE_FS.saveAsArticle(savePath, arg.document, (err, message) => {
-      if (err)
-        return console.log(`Error: ${err}`)
+    RAJE_FS.saveAsArticle(global.savePath, arg.document, (err, message) => {
+
+      if (err) return
 
       // Store important variables to check the save state
       global.isNew = false
-      global.savePath = `${savePath}/`
 
       windows.updateEditorMenu(RAJE_MENU.getEditorMenu(!global.isNew))
 
@@ -377,6 +417,18 @@ ipcMain.on('saveAsArticle', (event, arg) => {
         type: 'success',
         timeout: 2000
       })
+
+      global.hasChanged = false
+      return global.updateClientContent()
+    })
+  }
+
+  // If savePath doesn't exists
+  catch (exception) {
+    global.sendNotification({
+      text: exception,
+      type: 'danger',
+      timeout: 2000
     })
   }
 })
@@ -389,7 +441,7 @@ ipcMain.on('saveArticle', (event, arg) => {
   // If the document has been saved before
   if (!global.isNew && typeof global.savePath != "undefined") {
     RAJE_FS.saveArticle(global.savePath, arg.document, (err, message) => {
-      if (err) return console.log(err)
+      if (err) return
 
       // Notify the client
       global.sendNotification({
@@ -397,6 +449,10 @@ ipcMain.on('saveArticle', (event, arg) => {
         type: 'success',
         timeout: 2000
       })
+
+      // Update client content
+      global.hasChanged = false
+      return global.updateClientContent()
     })
   }
 })
@@ -515,6 +571,13 @@ global.executeSave = function () {
   // Or call save
   else
     windowManager.get(EDITOR_WINDOW).object.webContents.send('executeSave')
+}
+
+/**
+ * 
+ */
+global.updateClientContent = function () {
+  windowManager.get(EDITOR_WINDOW).object.webContents.send('updateContent')
 }
 
 /**
