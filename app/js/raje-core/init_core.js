@@ -63,6 +63,6 @@ $(document).ready(function () {
 
     // Add CSS stylesheets
     thisScript.after('<link rel="stylesheet" href="css/font-awesome.min.css" data-rash-original-content="">')
-    thisScript.after('<link rel="stylesheet" href="css/rajemce.css" data-rash-original-content="">')
+    thisScript.after('<link rel="stylesheet" href="css/raje-core.css" data-rash-original-content="">')
   }
 })

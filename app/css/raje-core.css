@@ -61,6 +61,11 @@ i.mce-i-icon-inline-quote:before {
   font-family: 'raje-icons' !important;
 }
 
+i.mce-i-icon-external-link:before {
+  content: "\e903";
+  font-family: 'raje-icons' !important;
+}
+
 i.mce-i-icon-table:before {
   content: "\f0ce";
   font-family: FontAwesome;

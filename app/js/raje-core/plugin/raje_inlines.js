@@ -200,6 +200,29 @@ tinymce.PluginManager.add('raje_inlineQuote', function (editor, url) {
 /**
  * 
  */
+tinymce.PluginManager.add('raje_externalLink', function (editor, url) {
+
+  editor.addButton('raje_externalLink', {
+    title: 'external_link',
+    icon: 'icon-external-link',
+    tooltip: 'External link',
+    disabledStateSelector: DISABLE_SELECTOR_INLINE,
+
+    // Button behaviour
+    onclick: function () {}
+  })
+
+
+  let link = {
+    add: function () {
+
+    }
+  }
+})
+
+/**
+ * 
+ */
 tinymce.PluginManager.add('raje_inlineFigure', function (editor, url) {
   editor.addButton('raje_inlineFigure', {
     text: 'inline_figure',
