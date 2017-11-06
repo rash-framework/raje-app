@@ -45,7 +45,7 @@ let inline = {
         let previousNodeIndex = selectedElement.contents().index($(tinymce.activeEditor.selection.getRng().startContainer))
 
         // Add code element
-        tinymce.activeEditor.selection.setContent(`<${type}>${text}</${type}>`)
+        tinymce.activeEditor.selection.setContent(`<${type}>${text}</${type}>${(type == 'q' ? ZERO_SPACE : '')}`)
         tinymce.triggerSave()
 
         // Move caret at the end of the successive node of previous selected node
@@ -83,7 +83,7 @@ let inline = {
    * 
    */
   replaceText: function (char) {
-    
+
     let selectedElement = $(tinymce.activeEditor.selection.getNode())
     tinymce.activeEditor.undoManager.transact(function () {
 
@@ -180,6 +180,18 @@ tinymce.PluginManager.add('raje_inlineQuote', function (editor, url) {
 
         e.preventDefault()
         inline.exit()
+      }
+
+      /**
+       * Check if a PRINTABLE CHAR is pressed
+       */
+      if (checkIfPrintableChar(e.keyCode)) {
+
+        // If the first char is ZERO_SPACE and the code has no char
+        if (selectedElement.text().length == 2 && `&#${selectedElement.text().charCodeAt(0)};` == ZERO_SPACE) {
+          e.preventDefault()
+          inline.replaceText(e.key)
+        }
       }
     }
   })
