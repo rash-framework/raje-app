@@ -131,9 +131,7 @@ if (hasBackend) {
 
       // Set formats
       formats: {
-        inline_quote: {
-          inline: 'q'
-        }
+        underline: {}
       },
 
       // Remove "powered by tinymce"
