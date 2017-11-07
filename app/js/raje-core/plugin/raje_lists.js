@@ -128,12 +128,14 @@ tinymce.PluginManager.add('raje_lists', function (editor, url) {
      */
     addListItem: function () {
 
+      const BR = '<br>'
+
       // Get the references of the existing element
       let p = $(tinymce.activeEditor.selection.getNode())
       let listItem = p.parent('li')
 
       // Placeholder text of the new li
-      let newText = '<br>'
+      let newText = BR
       let nodes = p.contents()
 
       // If there is just one node wrapped inside the paragraph
@@ -154,6 +156,9 @@ tinymce.PluginManager.add('raje_lists', function (editor, url) {
 
           // Update the text of the current li
           p.text(pText.substring(0, startOffset))
+
+          if (!p.text().length)
+            p.html(BR)
 
           // Create and add the new li
           let newListItem = $(`<li><p>${newText}</p></li>`)
@@ -186,6 +191,9 @@ tinymce.PluginManager.add('raje_lists', function (editor, url) {
         tinymce.activeEditor.undoManager.transact(function () {
 
           p.html(p.html().replace(newText, ''))
+
+          if (!p.text().length)
+            p.html(BR)
 
           // Create and add the new li
           let newListItem = $(`<li><p>${newText}</p></li>`)
