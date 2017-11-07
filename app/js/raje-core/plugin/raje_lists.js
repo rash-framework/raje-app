@@ -136,16 +136,6 @@ tinymce.PluginManager.add('raje_lists', function (editor, url) {
       let newText = '<br>'
       let nodes = p.contents()
 
-      let getLastNotEmptyNode = function (nodes) {
-
-        for (let i = 0; i < nodes.length; i++) {
-          if (nodes[i].nodeType == 3 && !nodes[i].length)
-            nodes.splice(i, 1)
-        }
-
-        return nodes[nodes.length - 1]
-      }
-
       // If there is just one node wrapped inside the paragraph
       if (nodes.length == 1) {
 
@@ -158,23 +148,23 @@ tinymce.PluginManager.add('raje_lists', function (editor, url) {
 
           // Get the remaining text
           newText = pText.substring(startOffset, pText.length)
-
-          tinymce.activeEditor.undoManager.transact(function () {
-
-            // Update the text of the current li
-            p.text(pText.substring(0, startOffset))
-
-            // Create and add the new li
-            let newListItem = $(`<li><p>${newText}</p></li>`)
-            listItem.after(newListItem)
-
-            // Move the caret to the new li
-            moveCaret(newListItem[0], true)
-
-            // Update the content
-            tinymce.triggerSave()
-          })
         }
+
+        tinymce.activeEditor.undoManager.transact(function () {
+
+          // Update the text of the current li
+          p.text(pText.substring(0, startOffset))
+
+          // Create and add the new li
+          let newListItem = $(`<li><p>${newText}</p></li>`)
+          listItem.after(newListItem)
+
+          // Move the caret to the new li
+          moveCaret(newListItem[0], true)
+
+          // Update the content
+          tinymce.triggerSave()
+        })
       }
 
       // Instead if there are multiple nodes inside the paragraph
@@ -185,7 +175,7 @@ tinymce.PluginManager.add('raje_lists', function (editor, url) {
 
         // Start the range from the selected node and offset and ends it at the end of the last node
         range.setStart(tinymce.activeEditor.selection.getRng().startContainer, tinymce.activeEditor.selection.getRng().startOffset)
-        range.setEnd(getLastNotEmptyNode(nodes), 1)
+        range.setEnd(this.getLastNotEmptyNode(nodes), 1)
 
         // Select the range
         tinymce.activeEditor.selection.setRng(range)
@@ -208,6 +198,19 @@ tinymce.PluginManager.add('raje_lists', function (editor, url) {
           tinymce.triggerSave()
         })
       }
+    },
+
+    /**
+     * 
+     */
+    getLastNotEmptyNode: function (nodes) {
+
+      for (let i = 0; i < nodes.length; i++) {
+        if (nodes[i].nodeType == 3 && !nodes[i].length)
+          nodes.splice(i, 1)
+      }
+
+      return nodes[nodes.length - 1]
     },
 
     /**
