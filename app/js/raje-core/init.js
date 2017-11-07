@@ -57,7 +57,7 @@ if (hasBackend) {
       menubar: false,
 
       // Custom toolbar
-      toolbar: 'undo redo bold italic raje_externalLink superscript subscript raje_inlineCode raje_inlineQuote raje_inline_formula raje_crossref raje_footnotes | raje_ol raje_ul raje_codeblock blockquote raje_table raje_image raje_listing raje_formula | raje_section raje_metadata raje_save',
+      toolbar: 'undo redo bold italic link superscript subscript raje_inlineCode raje_inlineQuote raje_inline_formula raje_crossref raje_footnotes | raje_ol raje_ul raje_codeblock blockquote raje_table raje_image raje_listing raje_formula | raje_section raje_metadata raje_save',
 
       // Setup full screen on init
       setup: function (editor) {
