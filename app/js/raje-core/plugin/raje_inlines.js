@@ -129,6 +129,7 @@ tinymce.PluginManager.add('raje_inlineCode', function (editor, url) {
       if (e.keyCode == 13) {
 
         e.preventDefault()
+        e.stopImmediatePropagation()
         inline.exit()
       }
 
@@ -139,7 +140,9 @@ tinymce.PluginManager.add('raje_inlineCode', function (editor, url) {
 
         // If the first char is ZERO_SPACE and the code has no char
         if (selectedElement.text().length == 2 && `&#${selectedElement.text().charCodeAt(0)};` == ZERO_SPACE) {
+          
           e.preventDefault()
+          e.stopImmediatePropagation()
           inline.replaceText(e.key)
         }
       }
@@ -179,6 +182,7 @@ tinymce.PluginManager.add('raje_inlineQuote', function (editor, url) {
       if (e.keyCode == 13) {
 
         e.preventDefault()
+        e.stopImmediatePropagation()
         inline.exit()
       }
 
@@ -189,7 +193,9 @@ tinymce.PluginManager.add('raje_inlineQuote', function (editor, url) {
 
         // If the first char is ZERO_SPACE and the code has no char
         if (selectedElement.text().length == 2 && `&#${selectedElement.text().charCodeAt(0)};` == ZERO_SPACE) {
+
           e.preventDefault()
+          e.stopImmediatePropagation()
           inline.replaceText(e.key)
         }
       }
