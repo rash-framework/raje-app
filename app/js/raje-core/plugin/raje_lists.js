@@ -134,33 +134,80 @@ tinymce.PluginManager.add('raje_lists', function (editor, url) {
 
       // Placeholder text of the new li
       let newText = '<br>'
+      let nodes = p.contents()
 
-      // Get the start offset and text of the current li
-      let startOffset = tinymce.activeEditor.selection.getRng().startOffset
-      let pText = p.text().trim()
+      let getLastNotEmptyNode = function (nodes) {
 
-      // If the cursor isn't at the end
-      if (startOffset != pText.length) {
+        for (let i = 0; i < nodes.length; i++) {
+          if (nodes[i].nodeType == 3 && !nodes[i].length)
+            nodes.splice(i, 1)
+        }
 
-        // Update the text of the current li
-        p.text(pText.substring(0, startOffset))
-
-        // Get the remaining text
-        newText = pText.substring(startOffset, pText.length)
+        return nodes[nodes.length - 1]
       }
 
-      tinymce.activeEditor.undoManager.transact(function () {
+      // If there is just one node wrapped inside the paragraph
+      if (nodes.length == 1) {
 
-        // Create and add the new li
-        let newListItem = $(`<li><p>${newText}</p></li>`)
-        listItem.after(newListItem)
+        // Get the start offset and text of the current li
+        let startOffset = tinymce.activeEditor.selection.getRng().startOffset
+        let pText = p.text()
 
-        // Move the caret to the new li
-        moveCaret(newListItem[0], true)
+        // If the cursor isn't at the end
+        if (startOffset != pText.length) {
 
-        // Update the content
-        tinymce.triggerSave()
-      })
+          // Get the remaining text
+          newText = pText.substring(startOffset, pText.length)
+
+          tinymce.activeEditor.undoManager.transact(function () {
+
+            // Update the text of the current li
+            p.text(pText.substring(0, startOffset))
+
+            // Create and add the new li
+            let newListItem = $(`<li><p>${newText}</p></li>`)
+            listItem.after(newListItem)
+
+            // Move the caret to the new li
+            moveCaret(newListItem[0], true)
+
+            // Update the content
+            tinymce.triggerSave()
+          })
+        }
+      }
+
+      // Instead if there are multiple nodes inside the paragraph
+      else {
+
+        // Istantiate the range to be selected
+        let range = document.createRange()
+
+        // Start the range from the selected node and offset and ends it at the end of the last node
+        range.setStart(tinymce.activeEditor.selection.getRng().startContainer, tinymce.activeEditor.selection.getRng().startOffset)
+        range.setEnd(getLastNotEmptyNode(nodes), 1)
+
+        // Select the range
+        tinymce.activeEditor.selection.setRng(range)
+
+        // Save the html content
+        newText = tinymce.activeEditor.selection.getContent()
+
+        tinymce.activeEditor.undoManager.transact(function () {
+
+          p.html(p.html().replace(newText, ''))
+
+          // Create and add the new li
+          let newListItem = $(`<li><p>${newText}</p></li>`)
+          listItem.after(newListItem)
+
+          // Move the caret to the new li
+          moveCaret(newListItem[0], true)
+
+          // Update the content
+          tinymce.triggerSave()
+        })
+      }
     },
 
     /**
@@ -303,7 +350,7 @@ tinymce.PluginManager.add('raje_lists', function (editor, url) {
         // Create and add the element
         let newP = $(`<p>${text}</p>`)
         p.after(newP)
-        
+
         moveCaret(newP[0], true)
       })
     }
