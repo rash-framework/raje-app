@@ -192,7 +192,7 @@ tinymce.PluginManager.add('raje_inlineQuote', function (editor, url) {
       if (checkIfPrintableChar(e.keyCode)) {
 
         // If the first char is ZERO_SPACE and the code has no char
-        if (selectedElement.text().length == 2 && `&#${selectedElement.text().charCodeAt(0)};` == ZERO_SPACE) {
+        if (selectedElement.text().length == 1 && `&#${selectedElement.text().charCodeAt(0)};` == ZERO_SPACE) {
 
           e.preventDefault()
           e.stopImmediatePropagation()
