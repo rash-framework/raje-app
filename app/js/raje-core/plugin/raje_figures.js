@@ -708,6 +708,27 @@ tinymce.PluginManager.add('raje_quoteblock', function (editor, url) {
       blockquote.add()
     }
   })
+
+  editor.on('keyDown', function (e) {
+
+    let selectedElement = $(tinymce.activeEditor.selection.getNode())
+    if (selectedElement.is('p') && selectedElement.parent().is('blockquote')) {
+
+      /**
+       * Enter
+       */
+      if (e.keyCode == 13) {
+        e.preventDefault()
+
+        // Exit from the blockquote if the current p is empty
+        if (selectedElement.text().trim().length == 0)
+          return blockquote.exit()
+
+        blockquote.addParagraph()
+      }
+    }
+  })
+
   blockquote = {
     /**
      * 
@@ -748,7 +769,122 @@ tinymce.PluginManager.add('raje_quoteblock', function (editor, url) {
      * 
      */
     create: function (id) {
-      return $(`<blockquote>${ZERO_SPACE}</blockquote>`)
+      return $(`<blockquote><p>${ZERO_SPACE}</p></blockquote>`)
+    },
+
+    /**
+     * 
+     */
+    getLastNotEmptyNode: function (nodes) {
+
+      for (let i = 0; i < nodes.length; i++) {
+        if ((nodes[i].nodeType == 3 || nodes[i].tagName == 'br') && !nodes[i].length)
+          nodes.splice(i, 1)
+      }
+
+      return nodes[nodes.length - 1]
+    },
+
+    /**
+     * 
+     */
+    addParagraph: function () {
+
+      const BR = '<br>'
+
+      // Get the references of the existing element
+      let paragraph = $(tinymce.activeEditor.selection.getNode())
+
+      // Placeholder text of the new li
+      let text = BR
+      let textNodes = paragraph.contents()
+
+      // If there is just one node wrapped inside the paragraph
+      if (textNodes.length == 1) {
+
+        // Get the start offset and text of the current li
+        let startOffset = tinymce.activeEditor.selection.getRng().startOffset
+        let wholeText = paragraph.text()
+
+        // If the cursor isn't at the end but it's in the middle
+        // Get the remaining text from the cursor to the end
+        if (startOffset != wholeText.length)
+          text = wholeText.substring(startOffset, wholeText.length)
+
+        tinymce.activeEditor.undoManager.transact(function () {
+
+          // Update the text of the current li
+          paragraph.text(wholeText.substring(0, startOffset))
+
+          if (!paragraph.text().length)
+            paragraph.html(BR)
+
+          // Create and add the new li
+          let newParagraph = $(`<p>${text}</p>`)
+          paragraph.after(newParagraph)
+
+          // Move the caret to the new li
+          moveCaret(newParagraph[0], true)
+
+          // Update the content
+          tinymce.triggerSave()
+        })
+      }
+
+      // Instead if there are multiple nodes inside the paragraph
+      else {
+
+        // Istantiate the range to be selected
+        let range = document.createRange()
+
+        // Start the range from the selected node and offset and ends it at the end of the last node
+        range.setStart(tinymce.activeEditor.selection.getRng().startContainer, tinymce.activeEditor.selection.getRng().startOffset)
+        range.setEnd(this.getLastNotEmptyNode(textNodes), 1)
+
+        // Select the range
+        tinymce.activeEditor.selection.setRng(range)
+
+        // Save the html content
+        wholeText = tinymce.activeEditor.selection.getContent()
+
+        tinymce.activeEditor.undoManager.transact(function () {
+
+          paragraph.html(paragraph.html().replace(wholeText, ''))
+
+          if (!paragraph.text().length)
+            paragraph.html(BR)
+
+          // Create and add the new li
+          let newParagraph = $(`<p>${wholeText}</p>`)
+          paragraph.after(newParagraph)
+
+          // Move the caret to the new li
+          moveCaret(newParagraph[0], true)
+
+          // Update the content
+          tinymce.triggerSave()
+        })
+      }
+    },
+
+    /**
+     * 
+     */
+    exit: function () {
+      let paragraph = $(tinymce.activeEditor.selection.getNode())
+      let blockquote = paragraph.parent()
+
+      tinymce.activeEditor.undoManager.transact(function () {
+
+        paragraph.remove()
+
+        if (!blockquote.next().length) {
+          blockquote.after($(`<p><br/></p>`))
+        }
+
+        moveCaret(blockquote.next()[0])
+
+      })
     }
   }
 })
