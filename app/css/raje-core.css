@@ -32,6 +32,10 @@ ul ul ul {
   margin-top: 10px
 }
 
+pre>code[data-mce-selected]{
+  background: none!important
+}
+
 li.hidden-list-style {
   list-style-type: none
 }
