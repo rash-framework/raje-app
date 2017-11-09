@@ -51,7 +51,7 @@ if (hasBackend) {
       content_css: ['css/bootstrap.min.css', 'css/rash.css', 'css/raje-core.css'],
 
       // Set plugins
-      plugins: "raje_inlineFigure fullscreen link codesample raje_externalLink raje_inlineCode raje_inlineQuote raje_section table image noneditable raje_image raje_codeblock raje_table raje_listing raje_inline_formula raje_formula raje_crossref raje_footnotes raje_metadata paste raje_lists raje_save",
+      plugins: "raje_inlineFigure fullscreen link codesample raje_externalLink raje_inlineCode raje_inlineQuote raje_section table image noneditable raje_image raje_codeblock raje_table raje_listing raje_inline_formula raje_formula raje_crossref raje_footnotes raje_metadata raje_lists raje_save",
 
       // Remove menubar
       menubar: false,
@@ -61,6 +61,8 @@ if (hasBackend) {
 
       // Setup full screen on init
       setup: function (editor) {
+
+        let pasteBookmark
 
         // Set fullscreen 
         editor.on('init', function (e) {
@@ -75,8 +77,18 @@ if (hasBackend) {
         editor.on('keyDown', function (e) {
 
           // Prevent shift+enter
-          if (e.keyCode == 13 && e.shiftKey) {
+          if (e.keyCode == 13 && e.shiftKey)
             e.preventDefault()
+
+          if (e.keyCode == 86 && e.metaKey) {
+
+            if ($(tinymce.activeEditor.selection.getNode()).is('pre')) {
+
+              e.preventDefault()
+              e.stopImmediatePropagation()
+
+              pasteBookmark = tinymce.activeEditor.selection.getBookmark()
+            }
           }
         })
 
@@ -154,6 +166,25 @@ if (hasBackend) {
 
         editor.on('Redo', function (e) {
           tinymce.triggerSave()
+        })
+
+        editor.on('Paste', function (e) {
+
+          let target = $(e.target)
+
+          // If the paste event is called inside a listing
+          if (pasteBookmark && target.parents('figure:has(pre:has(code))').length) {
+
+            let data = e.clipboardData.getData('Text')
+
+            // Restore the selection saved on cmd+v
+            tinymce.activeEditor.selection.moveToBookmark(pasteBookmark)
+
+            // Update the content
+            tinymce.activeEditor.selection.setContent(e.clipboardData.getData('Text'))
+
+            pasteBookmark = null
+          }
         })
       },
 
@@ -240,6 +271,24 @@ if (hasBackend) {
     tinymce.activeEditor.selection.collapse(toStart)
 
     tinymce.activeEditor.focus()
+  }
+
+  /**
+   * 
+   */
+  function selectRange(startContainer, startOffset, endContainer, endOffset) {
+
+    let range = document.createRange()
+    range.setStart(startContainer, startOffset)
+
+    // If these properties are not in the signature use the start
+    if (!endContainer && !endOffset) {
+      endContainer = startContainer
+      endOffset = startOffset
+    }
+
+    range.setEnd(endContainer, endOffset)
+    tinymce.activeEditor.selection.setRng(range)
   }
 
   /**

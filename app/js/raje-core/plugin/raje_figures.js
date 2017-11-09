@@ -507,6 +507,8 @@ tinymce.PluginManager.add('raje_listing', function (editor, url) {
     }
   })
 
+
+
   // Because some behaviours aren't accepted, RAJE must check selection and accept backspace, canc and enter press
   editor.on('keyDown', function (e) {
 
@@ -522,19 +524,16 @@ tinymce.PluginManager.add('raje_listing', function (editor, url) {
          * ENTER
          */
         if (e.keyCode == 13) {
-
-          // Create new node below
-          tinymce.activeEditor.selection.setContent(`\n${ZERO_SPACE}`)
-          return e.preventDefault()
+          e.preventDefault()
+          return listing.setContent(`\n${ZERO_SPACE}`)
         }
 
         /**
          * TAB
          */
         if (e.keyCode == 9) {
-
-          tinymce.activeEditor.selection.setContent('\t')
-          return e.preventDefault()
+          e.preventDefault()
+          return listing.setContent(`\t`)
         }
       }
 
@@ -602,7 +601,7 @@ tinymce.PluginManager.add('raje_listing', function (editor, url) {
         captions()
 
         // Move the caret
-        moveCaret(newListing.find('code')[0])
+        selectRange(newListing.find('code')[0], 0)
 
         // Update Rendered RASH
         updateIframeFromSavedContent()
@@ -615,6 +614,13 @@ tinymce.PluginManager.add('raje_listing', function (editor, url) {
      */
     create: function (id) {
       return $(`<figure id="${id}"><pre><code>${ZERO_SPACE}</code></pre><figcaption>Caption.</figcaption></figure>`)
+    },
+
+    /**
+     * 
+     */
+    setContent: function (char) {
+      tinymce.activeEditor.selection.setContent(char)
     }
   }
 })
