@@ -354,6 +354,9 @@ ipcMain.on('saveAsArticle', (event, arg) => {
 
   try {
 
+    if (savePath != 'undefinied')
+      throw new Error()
+
     global.savePath = `${savePath}/`
 
     RAJE_FS.saveAsArticle(global.savePath, arg.document, (err, message) => {
@@ -381,13 +384,7 @@ ipcMain.on('saveAsArticle', (event, arg) => {
   }
 
   // If savePath doesn't exists
-  catch (exception) {
-    global.sendNotification({
-      text: exception,
-      type: 'danger',
-      timeout: 2000
-    })
-  }
+  catch (exception) {}
 })
 
 /**
