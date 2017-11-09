@@ -80,6 +80,46 @@ if (hasBackend) {
           }
         })
 
+        /**
+         * 
+         */
+        editor.on('click', function (e) {
+
+          // Capture the triple click event
+          if (e.detail == 3) {
+
+            e.preventDefault()
+            e.stopImmediatePropagation()
+
+            let wrapper = $(tinymce.activeEditor.selection.getRng().startContainer).parents('p,figcaption').first()
+            let startContainer = wrapper[0]
+            let endContainer = wrapper[0]
+            let range = document.createRange()
+
+            // Check if the wrapper has more text node inside
+            if (wrapper.contents().length > 1) {
+
+              // If the first text node is a not editable strong, the selection must start with the second element
+              if (wrapper.contents().first().is('strong[contenteditable=false]'))
+                startContainer = wrapper.contents()[1]
+
+              // In this case the endContainer will be the last text node
+              endContainer = wrapper.contents().last()[0]
+            }
+
+            range.setStart(startContainer, 0)
+
+            if (wrapper.is('figcaption'))
+              range.setEnd(endContainer, endContainer.length)
+
+            else
+              range.setEnd(endContainer, 1)
+
+            tinymce.activeEditor.selection.setRng(range)
+          }
+
+        })
+
         // Prevent span 
         editor.on('nodeChange', function (e) {
 
