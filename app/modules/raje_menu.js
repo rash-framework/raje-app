@@ -156,9 +156,8 @@ module.exports = {
           role: 'copy'
         },
         {
-          role: 'paste'
-        },
-        {
+          label: 'paste',
+          accelerator: 'CmdOrCtrl+V',
           role: 'pasteandmatchstyle'
         },
         {
