@@ -182,7 +182,7 @@ tinymce.PluginManager.add('raje_image', function (editor, url) {
 
       let filename = selectImage()
 
-      if(filename != null)
+      if (filename != null)
         image.add(filename, filename)
     }
   })
@@ -510,18 +510,55 @@ tinymce.PluginManager.add('raje_listing', function (editor, url) {
   // Because some behaviours aren't accepted, RAJE must check selection and accept backspace, canc and enter press
   editor.on('keyDown', function (e) {
 
-    // keyCode 8 is backspace
-    if (e.keyCode == 8)
-      return handleFigureDelete(tinymce.activeEditor.selection)
+    let selectedElement = $(tinymce.activeEditor.selection.getNode())
+    if (selectedElement.parents('figure:has(pre:has(code))').length) {
 
-    if (e.keyCode == 46)
-      return handleFigureCanc(tinymce.activeEditor.selection)
+      /**
+       * Proper listing editor behaviour
+       */
+      if (selectedElement.is('code')) {
 
-    // Handle enter key in figcaption
-    if (e.keyCode == 13)
-      return handleFigureEnter(tinymce.activeEditor.selection)
+        /**
+         * ENTER
+         */
+        if (e.keyCode == 13) {
+
+          // Create new node below
+          tinymce.activeEditor.selection.setContent(`\n${ZERO_SPACE}`)
+          return e.preventDefault()
+        }
+
+        /**
+         * TAB
+         */
+        if (e.keyCode == 9) {
+
+          tinymce.activeEditor.selection.setContent('\t')
+          return e.preventDefault()
+        }
+      }
+
+      if (e.keyCode == 13)
+        return handleFigureEnter(tinymce.activeEditor.selection)
+
+      // keyCode 8 is backspace
+      if (e.keyCode == 8)
+        return handleFigureDelete(tinymce.activeEditor.selection)
 
       /*
+      // keyCode 8 is backspace
+      if (e.keyCode == 8)
+        return handleFigureDelete(tinymce.activeEditor.selection)
+
+      if (e.keyCode == 46)
+        return handleFigureCanc(tinymce.activeEditor.selection)
+
+      // Handle enter key in figcaption
+      if (e.keyCode == 13)
+        return handleFigureEnter(tinymce.activeEditor.selection)
+        */
+    }
+    /*
     if (e.keyCode == 9) {
       if (tinymce.activeEditor.selection.isCollapsed() && $(tinymce.activeEditor.selection.getNode()).parents(`code,${FIGURE_SELECTOR}`).length) {
         tinymce.activeEditor.selection.setContent('\t')
@@ -550,11 +587,11 @@ tinymce.PluginManager.add('raje_listing', function (editor, url) {
 
       tinymce.activeEditor.undoManager.transact(function () {
 
-        // Check if the selected element is not empty, and add table after
+        // Check if the selected paragraph is not empty, add the new listing right below
         if (selectedElement.text().trim().length != 0)
           selectedElement.after(newListing)
 
-        // If selected element is empty, replace it with the new table
+        // If selected paragraph is empty, replace it with the new table
         else
           selectedElement.replaceWith(newListing)
 
@@ -564,8 +601,9 @@ tinymce.PluginManager.add('raje_listing', function (editor, url) {
         // Update all captions with RASH function
         captions()
 
-        tinymce.activeEditor.selection.select(newListing.find('code')[0])
-        tinymce.activeEditor.selection.collapse(false)
+        // Move the caret
+        moveCaret(newListing.find('code')[0])
+
         // Update Rendered RASH
         updateIframeFromSavedContent()
       })
