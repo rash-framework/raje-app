@@ -103,7 +103,7 @@ if (hasBackend) {
             e.preventDefault()
             e.stopImmediatePropagation()
 
-            let wrapper = $(tinymce.activeEditor.selection.getRng().startContainer).parents('p,figcaption').first()
+            let wrapper = $(tinymce.activeEditor.selection.getRng().startContainer).parents('p,figcaption,:header').first()
             let startContainer = wrapper[0]
             let endContainer = wrapper[0]
             let range = document.createRange()
