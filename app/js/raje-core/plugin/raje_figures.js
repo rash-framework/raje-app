@@ -421,7 +421,7 @@ tinymce.PluginManager.add('raje_inline_formula', function (editor, url) {
   editor.addButton('raje_inline_formula', {
     icon: 'icon-inline-formula',
     tooltip: 'Inline formula',
-    disabledStateSelector: DISABLE_SELECTOR_FIGURES,
+    disabledStateSelector: `${DISABLE_SELECTOR_INLINE},:header`,
 
     // Button behaviour
     onclick: function () {

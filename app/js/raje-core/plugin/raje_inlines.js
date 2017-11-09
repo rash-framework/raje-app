@@ -2,7 +2,7 @@
  * raje_inline_code plugin RAJE
  */
 
-const DISABLE_SELECTOR_INLINE = 'figure, section[role=doc-bibliography]'
+const DISABLE_SELECTOR_INLINE = 'table, img, pre, code, section[role=doc-bibliography]'
 
 const INLINE_ERRORS = 'Error, Inline elements can be ONLY created inside the same paragraph'
 

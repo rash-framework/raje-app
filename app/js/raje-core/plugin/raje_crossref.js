@@ -5,7 +5,7 @@ tinymce.PluginManager.add('raje_crossref', function (editor, url) {
     title: 'raje_crossref',
     icon: 'icon-anchor',
     tooltip: 'Cross-reference',
-    disabledStateSelector: DISABLE_SELECTOR_FIGURES,
+    disabledStateSelector: `${DISABLE_SELECTOR_INLINE},:header`,
 
     // Button behaviour
     onclick: function () {
@@ -222,7 +222,7 @@ tinymce.PluginManager.add('raje_footnotes', function (editor, url) {
     title: 'raje_footnotes',
     icon: 'icon-footnotes',
     tooltip: 'Footnote',
-    disabledStateSelector: DISABLE_SELECTOR_FIGURES,
+    disabledStateSelector: `${DISABLE_SELECTOR_INLINE},:header`,
 
     // Button behaviour
     onclick: function () {
