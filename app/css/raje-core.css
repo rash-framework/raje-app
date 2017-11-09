@@ -55,6 +55,16 @@ i.mce-i-icon-inline-code:before {
   font-family: 'raje-icons' !important;
 }
 
+i.mce-i-icon-block-code:before {
+  content: "\e905";
+  font-family: 'raje-icons' !important;
+}
+
+i.mce-i-icon-block-quote:before {
+  content: "\e906";
+  font-family: 'raje-icons' !important;
+}
+
 i.mce-i-icon-inline-formula:before {
   content: "\e902";
   font-family: 'raje-icons' !important;
@@ -65,7 +75,7 @@ i.mce-i-icon-inline-quote:before {
   font-family: 'raje-icons' !important;
 }
 
-i.mce-i-icon-external-link:before {
+i.mce-i-icon-formula:before {
   content: "\e903";
   font-family: 'raje-icons' !important;
 }
@@ -82,11 +92,6 @@ i.mce-i-icon-image:before {
 
 i.mce-i-icon-listing:before {
   content: "\f022";
-  font-family: FontAwesome;
-}
-
-i.mce-i-icon-formula:before {
-  content: "\f1ec";
   font-family: FontAwesome;
 }
 

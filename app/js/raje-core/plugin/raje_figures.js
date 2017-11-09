@@ -291,8 +291,8 @@ tinymce.PluginManager.add('raje_formula', function (editor, url) {
 
   // Add a button that handle the inline element
   editor.addButton('raje_formula', {
-    text: 'raje_formula',
-    icon: false,
+    title: 'raje_formula',
+    icon: 'icon-formula',
     tooltip: 'Formula',
     disabledStateSelector: DISABLE_SELECTOR_FIGURES,
 
@@ -512,8 +512,11 @@ tinymce.PluginManager.add('raje_listing', function (editor, url) {
   // Because some behaviours aren't accepted, RAJE must check selection and accept backspace, canc and enter press
   editor.on('keyDown', function (e) {
 
+    /**
+     * NOTE: this behvaiour is the same for codeblock
+     */
     let selectedElement = $(tinymce.activeEditor.selection.getNode())
-    if (selectedElement.parents('figure:has(pre:has(code))').length) {
+    if (selectedElement.parents('pre:has(code)').length) {
 
       /**
        * Proper listing editor behaviour
@@ -621,6 +624,131 @@ tinymce.PluginManager.add('raje_listing', function (editor, url) {
      */
     setContent: function (char) {
       tinymce.activeEditor.selection.setContent(char)
+    }
+  }
+})
+
+/**
+ * Raje codeblock
+ */
+tinymce.PluginManager.add('raje_codeblock', function (editor, url) {
+
+  // Add a button that handle the inline element
+  editor.addButton('raje_codeblock', {
+    title: 'raje_codeblock',
+    icon: 'icon-block-code',
+    tooltip: 'Block code',
+    disabledStateSelector: `${DISABLE_SELECTOR_FIGURES},code,pre`,
+
+    // Button behaviour
+    onclick: function () {
+      blockcode.add()
+    }
+  })
+
+  blockcode = {
+    /**
+     * 
+     */
+    add: function () {
+
+      let selectedElement = $(tinymce.activeEditor.selection.getNode())
+      let blockCode = this.create(getSuccessiveElementId(FIGURE_LISTING_SELECTOR, LISTING_SUFFIX))
+
+      if (!selectedElement.parents('pre,code').length) {
+
+        tinymce.activeEditor.undoManager.transact(function () {
+
+          // Check if the selected paragraph is not empty, add the new listing right below
+          if (selectedElement.text().trim().length != 0)
+            selectedElement.after(blockCode)
+
+          // If selected paragraph is empty, replace it with the new table
+          else
+            selectedElement.replaceWith(blockCode)
+
+          // Save updates 
+          tinymce.triggerSave()
+
+          // Update all captions with RASH function
+          captions()
+
+          // Move the caret
+          selectRange(blockCode.find('code')[0], 0)
+
+          // Update Rendered RASH
+          updateIframeFromSavedContent()
+        })
+      }
+    },
+
+    /**
+     * 
+     */
+    create: function (id) {
+      return $(`<pre><code>${ZERO_SPACE}</code></pre>`)
+    }
+  }
+})
+
+/**
+ * Raje quoteblock
+ */
+tinymce.PluginManager.add('raje_quoteblock', function (editor, url) {
+
+  // Add a button that handle the inline element
+  editor.addButton('raje_quoteblock', {
+    title: 'raje_quoteblock',
+    icon: 'icon-block-quote',
+    tooltip: 'Block quote',
+    disabledStateSelector: `${DISABLE_SELECTOR_FIGURES},blockquote`,
+
+    // Button behaviour
+    onclick: function () {
+      blockquote.add()
+    }
+  })
+  blockquote = {
+    /**
+     * 
+     */
+    add: function () {
+
+      let selectedElement = $(tinymce.activeEditor.selection.getNode())
+      let blockQuote = this.create(getSuccessiveElementId(FIGURE_LISTING_SELECTOR, LISTING_SUFFIX))
+
+      if (!selectedElement.parents('pre,code').length) {
+
+        tinymce.activeEditor.undoManager.transact(function () {
+
+          // Check if the selected paragraph is not empty, add the new listing right below
+          if (selectedElement.text().trim().length != 0)
+            selectedElement.after(blockQuote)
+
+          // If selected paragraph is empty, replace it with the new table
+          else
+            selectedElement.replaceWith(blockQuote)
+
+          // Save updates 
+          tinymce.triggerSave()
+
+          // Update all captions with RASH function
+          captions()
+
+          // Move the caret
+          moveCaret(blockQuote[0])
+
+          // Update Rendered RASH
+          updateIframeFromSavedContent()
+        })
+      }
+    },
+
+    /**
+     * 
+     */
+    create: function (id) {
+      return $(`<blockquote>${ZERO_SPACE}</blockquote>`)
     }
   }
 })
