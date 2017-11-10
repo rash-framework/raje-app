@@ -147,7 +147,7 @@ tinymce.PluginManager.add('raje_section', function (editor, url) {
       // #################################
       if (e.keyCode == 8 || e.keyCode == 46) {
 
-        let toRemoveSections = section.getSectionsinSelection(tinymce.activeEditor.selection)
+        //let toRemoveSections = section.getSectionsinSelection(tinymce.activeEditor.selection)
         raje_section_flag = true
 
         // Prevent remove from header
@@ -922,7 +922,7 @@ section = {
 
       // Get and detach all next_end
       for (let i = 0; i <= deepness; i++) {
-        currentElement.nextAll('section,p,figure').each(function () {
+        currentElement.nextAll('section,p,figure,pre,ul,ol').each(function () {
           toMoveElements.push($(this))
 
           $(this).detach()
