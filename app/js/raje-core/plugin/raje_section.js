@@ -812,28 +812,24 @@ section = {
         // The text index in list
         let i = deepness - index
 
+        // Update text upgrade and downgrade
+        menu.children(`:eq(${0})`).find('span.mce-text').text('Upgrade')
+        menu.children(`:eq(${1})`).find('span.mce-text').text('Downgrade')
 
         // Check if the current section has a parent
         // In this case the upgrade is permitted
         if (selectedSection.parent(SECTION_SELECTOR).length) {
 
-
           // menu item inside the dropdown
-          let menuItem = menu.children(`:eq(${index-deepness})`)
-
-          menuItem.find('span.mce-text').text('Upgrade')
+          let menuItem = menu.children(`:eq(${0})`)
           menuItem.removeClass('mce-disabled')
           menuItem.attr(DATA_UPGRADE, true)
         }
 
         if (selectedSection.prev().is(SECTION_SELECTOR)) {
 
-          i++
-
           // menu item inside the dropdown
-          let menuItem = menu.children(`:eq(${i++})`)
-
-          menuItem.find('span.mce-text').text('Downgrade')
+          let menuItem = menu.children(`:eq(${1})`)
           menuItem.removeClass('mce-disabled')
           menuItem.attr(DATA_DOWNGRADE, true)
         }
