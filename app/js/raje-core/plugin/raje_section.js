@@ -21,6 +21,9 @@ const SPECIAL_SECTION_SELECTOR = 'section[role]'
 
 const MENU_SELECTOR = 'div[id^=mceu_][id$=-body][role=menu]'
 
+const DATA_UPGRADE = 'data-upgrade'
+const DATA_DOWNGRADE = 'data-downgrade'
+
 const HEADING = 'Heading'
 
 const HEADING_TRASFORMATION_FORBIDDEN = 'Error, you cannot transform the current header in this way!'
@@ -39,33 +42,33 @@ tinymce.PluginManager.add('raje_section', function (editor, url) {
     // Sections sub menu
     menu: [{
       text: `${HEADING} 1.`,
-      onclick: function () {
-        section.add(1)
+      onclick: function (e) {
+        section.addOrDownUpgrade(e, 1)
       }
     }, {
       text: `${HEADING} 1.1.`,
-      onclick: function () {
-        section.add(2)
+      onclick: function (e) {
+        section.addOrDownUpgrade(e, 2)
       }
     }, {
       text: `${HEADING} 1.1.1.`,
-      onclick: function () {
-        section.add(3)
+      onclick: function (e) {
+        section.addOrDownUpgrade(e, 3)
       }
     }, {
       text: `${HEADING} 1.1.1.1.`,
-      onclick: function () {
-        section.add(4)
+      onclick: function (e) {
+        section.addOrDownUpgrade(e, 4)
       }
     }, {
       text: `${HEADING} 1.1.1.1.1.`,
-      onclick: function () {
-        section.add(5)
+      onclick: function (e) {
+        section.addOrDownUpgrade(e, 5)
       }
     }, {
       text: `${HEADING} 1.1.1.1.1.1.`,
-      onclick: function () {
-        section.add(6)
+      onclick: function (e) {
+        section.addOrDownUpgrade(e, 6)
       }
     }, {
       text: 'Special',
@@ -354,6 +357,22 @@ section = {
   },
 
   /**
+   * 
+   */
+  addOrDownUpgrade: function (e, level) {
+
+    let selectedMenuItem = $(e.target).parent('.mce-menu-item')
+
+    if (selectedMenuItem.attr(DATA_UPGRADE))
+      return this.upgrade()
+
+    if (selectedMenuItem.attr(DATA_DOWNGRADE))
+      return this.downgrade()
+
+    return this.add(level)
+  },
+
+  /**
    * Function called when a new section needs to be attached, with buttons
    */
   addWithEnter: function () {
@@ -512,7 +531,7 @@ section = {
 
     let selectedElement = $(tinymce.activeEditor.selection.getNode())
 
-    if (selectedElement.is('h1,h2,h3,h4,h5,h6')) {
+    if (selectedElement.is(':header')) {
 
       // Get the references of selected and parent section
       let selectedSection = selectedElement.parent(SECTION_SELECTOR)
@@ -752,9 +771,6 @@ section = {
       // If current element is p
       if (selectedElement.is('p') || selectedElement.parent().is('p')) {
 
-        // Disable upgrade/downgrade
-        menu.children(':gt(10)').addClass('mce-disabled')
-
         // Check if caret is inside special section
         // In this case enable only first menuitem if caret is in abstract
         if (selectedElement.parents(SPECIAL_SECTION_SELECTOR).length) {
@@ -771,44 +787,100 @@ section = {
         // Remove disabling class on first {deepness} menu items
         menu.children(`:lt(${deepness})`).removeClass('mce-disabled')
 
-        let preHeaders = []
-        let parentSections = selectedElement.parents('section')
-
-        // Save index of all parent sections
-        for (let i = parentSections.length; i > 0; i--) {
-          let elem = $(parentSections[i - 1])
-          let index = elem.parent().children(SECTION_SELECTOR).index(elem) + 1
-          preHeaders.push(index)
-        }
-
-        // Update text of all menu item
-        for (let i = 0; i <= preHeaders.length; i++) {
-
-          let text = `${HEADING} `
-
-          // Update text based on section structure
-          if (i != preHeaders.length) {
-            for (let x = 0; x <= i; x++)
-              text += `${preHeaders[x] + (x == i ? 1 : 0)}.`
-          }
-
-          // In this case raje changes text of next sub heading
-          else {
-            for (let x = 0; x < i; x++)
-              text += `${preHeaders[x]}.`
-
-            text += '1.'
-          }
-
-          menu.children(`:eq(${i})`).find('span.mce-text').text(text)
+        // Get the section list and update the dropdown with the right texts
+        let list = section.getAncestorSectionsList(selectedElement)
+        for (let i = 0; i <= list.length; i++) {
+          menu.children(`:eq(${i})`).find('span.mce-text').text(list[i])
         }
       }
 
-      // Disable 
-      else if (selectedElement.is('h1') && selectedElement.parents(SPECIAL_SECTION_SELECTOR)) {
+      // Enable only for upgrade/downgrade
+      else if (!selectedElement.parents(SPECIAL_SECTION_SELECTOR).length && selectedElement.is('h1,h2,h3')) {
+
+        // Get the selected section
+        let selectedSection = selectedElement.parents(SECTION_SELECTOR).first()
+
+        // Get the number of the heading (eg. H1 => 1, H2 => 2)
+        let index = parseInt(selectedElement.prop('tagName').toLowerCase().replace('h', ''))
+
+        // Get the deepness of the section (eg. 1 if is a main section, 2 if is a subsection)
+        let deepness = selectedElement.parents(SECTION_SELECTOR).length
+
+        // Get the list of texts that are bee
+        let list = section.getAncestorSectionsList(selectedElement)
+
+        // The text index in list
+        let i = deepness - index
+
+
+        // Check if the current section has a parent
+        // In this case the upgrade is permitted
+        if (selectedSection.parent(SECTION_SELECTOR).length) {
+
+
+          // menu item inside the dropdown
+          let menuItem = menu.children(`:eq(${index-deepness})`)
+
+          menuItem.find('span.mce-text').text('Upgrade')
+          menuItem.removeClass('mce-disabled')
+          menuItem.attr(DATA_UPGRADE, true)
+        }
+
+        if (selectedSection.prev().is(SECTION_SELECTOR)) {
+
+          i++
+
+          // menu item inside the dropdown
+          let menuItem = menu.children(`:eq(${i++})`)
+
+          menuItem.find('span.mce-text').text('Downgrade')
+          menuItem.removeClass('mce-disabled')
+          menuItem.attr(DATA_DOWNGRADE, true)
+        }
+      }
+
+      // Disable in any other cases
+      else
         menu.children(':gt(10)').addClass('mce-disabled')
-      }
     }
+  },
+
+  getAncestorSectionsList: function (selectedElement) {
+
+    let preHeaders = []
+    let list = []
+    let parentSections = selectedElement.parents('section')
+
+    // Save index of all parent sections
+    for (let i = parentSections.length; i > 0; i--) {
+      let elem = $(parentSections[i - 1])
+      let index = elem.parent().children(SECTION_SELECTOR).index(elem) + 1
+      preHeaders.push(index)
+    }
+
+    // Update text of all menu item
+    for (let i = 0; i <= preHeaders.length; i++) {
+
+      let text = `${HEADING} `
+
+      // Update text based on section structure
+      if (i != preHeaders.length) {
+        for (let x = 0; x <= i; x++)
+          text += `${preHeaders[x] + (x == i ? 1 : 0)}.`
+      }
+
+      // In this case raje changes text of next sub heading
+      else {
+        for (let x = 0; x < i; x++)
+          text += `${preHeaders[x]}.`
+
+        text += '1.'
+      }
+
+      list.push(text)
+    }
+
+    return list
   },
 
   /**
@@ -823,6 +895,10 @@ section = {
 
       for (let i = 0; i < cnt; i++)
         text += `1.`
+
+      // Remove data elements
+      $(this).removeAttr(DATA_UPGRADE)
+      $(this).removeAttr(DATA_DOWNGRADE)
 
       $(this).find('span.mce-text').text(text)
       $(this).addClass('mce-disabled')
