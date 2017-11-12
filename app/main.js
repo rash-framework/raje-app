@@ -354,7 +354,7 @@ ipcMain.on('saveAsArticle', (event, arg) => {
 
   try {
 
-    if (savePath != 'undefinied')
+    if (typeof savePath == 'undefinied')
       throw new Error()
 
     global.savePath = `${savePath}/`
