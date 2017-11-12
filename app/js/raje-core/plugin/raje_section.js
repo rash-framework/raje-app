@@ -24,7 +24,7 @@ const MENU_SELECTOR = 'div[id^=mceu_][id$=-body][role=menu]'
 const DATA_UPGRADE = 'data-upgrade'
 const DATA_DOWNGRADE = 'data-downgrade'
 
-const HEADING = 'Heading'
+const HEADING = 'Heading '
 
 const HEADING_TRASFORMATION_FORBIDDEN = 'Error, you cannot transform the current header in this way!'
 
@@ -41,32 +41,32 @@ tinymce.PluginManager.add('raje_section', function (editor, url) {
 
     // Sections sub menu
     menu: [{
-      text: `${HEADING} 1.`,
+      text: `${HEADING}1.`,
       onclick: function (e) {
         section.addOrDownUpgrade(e, 1)
       }
     }, {
-      text: `${HEADING} 1.1.`,
+      text: `${HEADING}1.1.`,
       onclick: function (e) {
         section.addOrDownUpgrade(e, 2)
       }
     }, {
-      text: `${HEADING} 1.1.1.`,
+      text: `${HEADING}1.1.1.`,
       onclick: function (e) {
         section.addOrDownUpgrade(e, 3)
       }
     }, {
-      text: `${HEADING} 1.1.1.1.`,
+      text: `${HEADING}1.1.1.1.`,
       onclick: function (e) {
         section.addOrDownUpgrade(e, 4)
       }
     }, {
-      text: `${HEADING} 1.1.1.1.1.`,
+      text: `${HEADING}1.1.1.1.1.`,
       onclick: function (e) {
         section.addOrDownUpgrade(e, 5)
       }
     }, {
-      text: `${HEADING} 1.1.1.1.1.1.`,
+      text: `${HEADING}1.1.1.1.1.1.`,
       onclick: function (e) {
         section.addOrDownUpgrade(e, 6)
       }
@@ -812,26 +812,35 @@ section = {
         // The text index in list
         let i = deepness - index
 
-        // Update text upgrade and downgrade
-        menu.children(`:eq(${0})`).find('span.mce-text').text('Upgrade')
-        menu.children(`:eq(${1})`).find('span.mce-text').text('Downgrade')
+        // Check if the current section has a previous section 
+        // In this case the upgrade is permitted
+        if (selectedSection.prev().is(SECTION_SELECTOR)) {
+
+          // menu item inside the dropdown
+          let menuItem = menu.children(`:eq(${index})`)
+
+          let tmp = list[index].replace(HEADING, '')
+          tmp = tmp.split('.')
+          tmp[index - 1] = parseInt(tmp[index - 1]) - 1
+
+          let text = HEADING + tmp.join('.')
+
+          menuItem.find('span.mce-text').text(text)
+          menuItem.removeClass('mce-disabled')
+          menuItem.attr(DATA_DOWNGRADE, true)
+        }
 
         // Check if the current section has a parent
         // In this case the upgrade is permitted
         if (selectedSection.parent(SECTION_SELECTOR).length) {
 
+          index = index - 2
+
           // menu item inside the dropdown
-          let menuItem = menu.children(`:eq(${0})`)
+          let menuItem = menu.children(`:eq(${index})`)
+          menuItem.find('span.mce-text').text(list[index])
           menuItem.removeClass('mce-disabled')
           menuItem.attr(DATA_UPGRADE, true)
-        }
-
-        if (selectedSection.prev().is(SECTION_SELECTOR)) {
-
-          // menu item inside the dropdown
-          let menuItem = menu.children(`:eq(${1})`)
-          menuItem.removeClass('mce-disabled')
-          menuItem.attr(DATA_DOWNGRADE, true)
         }
       }
 
@@ -841,6 +850,9 @@ section = {
     }
   },
 
+  /**
+   * 
+   */
   getAncestorSectionsList: function (selectedElement) {
 
     let preHeaders = []
@@ -857,7 +869,7 @@ section = {
     // Update text of all menu item
     for (let i = 0; i <= preHeaders.length; i++) {
 
-      let text = `${HEADING} `
+      let text = HEADING
 
       // Update text based on section structure
       if (i != preHeaders.length) {
@@ -887,7 +899,7 @@ section = {
     let cnt = 1
 
     menu.children(':lt(6)').each(function () {
-      let text = `${HEADING} `
+      let text = HEADING
 
       for (let i = 0; i < cnt; i++)
         text += `1.`
@@ -906,6 +918,9 @@ section = {
     menu.children(':gt(10)').removeClass('mce-disabled')
   },
 
+  /**
+   * 
+   */
   manageDelete: function () {
 
     let range = tinymce.activeEditor.selection.getRng()
