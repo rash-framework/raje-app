@@ -528,7 +528,7 @@ tinymce.PluginManager.add('raje_listing', function (editor, url) {
          */
         if (e.keyCode == 13) {
           e.preventDefault()
-          return listing.setContent(`\n${ZERO_SPACE}`)
+          return listing.setContent(`\n`)
         }
 
         /**
