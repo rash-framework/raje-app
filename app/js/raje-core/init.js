@@ -385,7 +385,7 @@ if (hasBackend) {
             counter++;
           }
         });
-        $(this).replaceWith("<h" + counter + ">" + $(this).html() + "</h" + counter + ">")
+        $(this).replaceWith("<h" + counter + " data-rash-original-wrapper=\"h1\" >" + $(this).html() + "</h" + counter + ">")
       }
     });
   }
