@@ -3,8 +3,24 @@ const CLIENT_SECRET = '9c141e019ea619d60400baab423447806812840e'
 
 const BrowserWindow = require('electron').BrowserWindow
 const apiRequests = require('superagent')
+const github = require('octonode')
+
+const RAJE_STORAGE = require('./raje_storage')
+
+let client
 
 module.exports = {
+
+  /**
+   * 
+   */
+  initClient: function () {
+
+    if (typeof global.github_data.access_token != 'undefinied')
+      client = github.client(global.github_data.access_token)
+
+    return client
+  },
 
   /**
    * 
@@ -30,10 +46,15 @@ module.exports = {
     authWindow.loadURL(authUrl);
     authWindow.show();
 
-    function handleCallback(url) {
+    function handleCallback(e, url) {
       var raw_code = /code=([^&]*)/.exec(url) || null;
       var code = (raw_code && raw_code.length > 1) ? raw_code[1] : null;
       var error = /\?error=(.+)$/.exec(url);
+
+      if (!code) {
+        e.preventDefault();
+        require('electron').shell.openExternal(url);
+      }
 
       if (code || error) {
         // Close the browser if code found or error
@@ -71,7 +92,7 @@ module.exports = {
     // Handle the response from GitHub - See Update from 4/12/2015
 
     authWindow.webContents.on('will-navigate', function (event, url) {
-      handleCallback(url);
+      handleCallback(event, url);
     });
 
     authWindow.webContents.on('did-get-redirect-request', function (event, oldUrl, newUrl) {
@@ -82,5 +103,61 @@ module.exports = {
     authWindow.on('close', function () {
       authWindow = null;
     }, false);
+  },
+
+  /**
+   * 
+   */
+  getPublicUserInfo: function (callback) {
+
+    if (!client)
+      client = this.initClient()
+
+    let ghme = client.me()
+
+    ghme.info(function (err, data, headers) {
+      if (err) return callback(err)
+
+      return callback(null, data)
+    });
+  },
+
+  /**
+   * 
+   */
+  manageLogin: function (callback) {
+
+    RAJE_STORAGE.getGithubData((err, data) => {
+      if (err) throw err
+
+      // If there is no github data stored
+      if (Object.keys(data).length === 0 && data.constructor === Object) {
+
+        // Get the access token
+        this.getAccessToken((err, access_token) => {
+          if (err) throw (err)
+
+          // Save the access token
+          global.github_data.access_token = access_token
+
+          // Get public user info
+          this.getPublicUserInfo((err, data) => {
+            if (err) return callback(err)
+
+            // Create the data object
+            let tmp = {
+              access_token: global.github_data.access_token,
+              avatar_url: data.avatar_url,
+              login: data.login
+            }
+
+            // Save the data on storage
+            RAJE_STORAGE.pushGithubData(tmp, err => {
+              if (err) throw (err)
+            })
+          })
+        })
+      }
+    })
   }
 }

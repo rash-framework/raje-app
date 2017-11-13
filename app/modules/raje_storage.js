@@ -120,6 +120,17 @@ module.exports = {
   },
 
   /**
+   * 
+   */
+  getGithubData: function (callback) {
+    storage.get(global.GITHUB_DATA, (err, data) => {
+      if (err) throw callback(err)
+
+      return callback(null, data)
+    })
+  },
+
+  /**
    * DEBUG only - clear all elements in storage
    */
   clearAll: function () {

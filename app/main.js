@@ -27,6 +27,7 @@ global.ASSETS_DIRECTORIES = [
 global.TEMPLATE = 'index.html'
 global.SPLASH = 'splash.html'
 
+global.github_data = {}
 global.screenSize
 
 const {
@@ -59,7 +60,7 @@ const windows = {
     windowManager.init()
 
     // DEBUG mode
-    // RAJE_STORAGE.clearAll()
+     RAJE_STORAGE.clearAll()
 
     // Get the url to the splash window
     let splashWindowUrl = url.format({
@@ -97,6 +98,13 @@ const windows = {
   openEditor: function (localRootPath) {
 
     global.hasChanged = false
+
+    // Retrieve and save Github data
+    global.getUserStoredData((err, data) => {
+      if (err) throw err
+
+      global.github_data = data
+    })
 
     /**
      * If localRootPath exists, the user is trying to one an existing article
@@ -578,13 +586,21 @@ global.sendNotification = function (message) {
  * 
  */
 global.loginGithub = function () {
-  RAJE_GITHUB.getAccessToken((err, access_token) => {
+
+  RAJE_GITHUB.manageLogin((err) => {
+    if (err) throw err
+  })
+}
+
+/**
+ * 
+ * @param {*} callback 
+ */
+global.getUserStoredData = function (callback) {
+
+  RAJE_STORAGE.getGithubData((err, data) => {
     if (err) throw (err)
 
-    RAJE_STORAGE.pushGithubData(access_token, err => {
-      if (err) throw (err)
-
-      console.log('The token is saved')
-    })
+    return callback(null, data)
   })
 }
