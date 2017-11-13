@@ -145,15 +145,18 @@ module.exports = {
             if (err) return callback(err)
 
             // Create the data object
-            let tmp = {
+            global.github_data = {
               access_token: global.github_data.access_token,
               avatar_url: data.avatar_url,
               login: data.login
             }
 
             // Save the data on storage
-            RAJE_STORAGE.pushGithubData(tmp, err => {
-              if (err) throw (err)
+            RAJE_STORAGE.pushGithubData(global.github_data, err => {
+              if (err) return callback(err)
+
+              // Notify the client
+              return callback(null, global.GITHUB_LOGIN_SUCCESS)
             })
           })
         })

@@ -21,16 +21,6 @@ module.exports = {
   },
 
   /**
-   * Create a JSON object with access_token
-   * The token is the id
-   */
-  createGithubData: function (access_token) {
-    return {
-      access_token: access_token
-    }
-  },
-
-  /**
    * Add a new entry inside the storage
    */
   pushRecentArticleEntry: function (newArticle) {
@@ -113,9 +103,11 @@ module.exports = {
   /**
    * 
    */
-  pushGithubData: function (access_token, callback) {
-    storage.set(global.GITHUB_DATA, this.createGithubData(access_token), err => {
+  pushGithubData: function (data, callback) {
+    storage.set(global.GITHUB_DATA, data, err => {
       if (err) throw callback(err)
+
+      callback(null)
     })
   },
 

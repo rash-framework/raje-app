@@ -31,7 +31,7 @@ module.exports = {
           this.writeRajeHiddenFile(path, err => {
             if (err) return callback(err)
 
-            return callback(null, 'Hooray! all changes has been saved!')
+            return callback(null, global.SAVE_SUCCESS)
           })
         })
       })
@@ -55,7 +55,7 @@ module.exports = {
         this.writeRajeHiddenFile(path, err => {
           if (err) return callback(err)
 
-          return callback(null, 'Hooray! all changes has been saved!')
+          return callback(null, global.SAVE_SUCCESS)
         })
       })
     })

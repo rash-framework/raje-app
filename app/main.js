@@ -27,6 +27,9 @@ global.ASSETS_DIRECTORIES = [
 global.TEMPLATE = 'index.html'
 global.SPLASH = 'splash.html'
 
+global.GITHUB_LOGIN_SUCCESS = 'Yeah! you successfully logged in with Github.'
+global.SAVE_SUCCESS = 'Hooray! all changes has been saved!'
+
 global.github_data = {}
 global.screenSize
 
@@ -60,7 +63,7 @@ const windows = {
     windowManager.init()
 
     // DEBUG mode
-     RAJE_STORAGE.clearAll()
+    // RAJE_STORAGE.clearAll()
 
     // Get the url to the splash window
     let splashWindowUrl = url.format({
@@ -587,8 +590,16 @@ global.sendNotification = function (message) {
  */
 global.loginGithub = function () {
 
-  RAJE_GITHUB.manageLogin((err) => {
+  RAJE_GITHUB.manageLogin((err, message) => {
     if (err) throw err
+
+    global.sendNotification({
+      text: message,
+      type: 'success',
+      timeout: 2000
+    })
+
+    windows.updateEditorMenu(RAJE_MENU.getEditorMenu())
   })
 }
 
