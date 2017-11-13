@@ -91,12 +91,12 @@ module.exports = {
 
     // Handle the response from GitHub - See Update from 4/12/2015
 
-    authWindow.webContents.on('will-navigate', function (event, url) {
-      handleCallback(event, url);
+    authWindow.webContents.on('will-navigate', function (e, url) {
+      handleCallback(e, url);
     });
 
-    authWindow.webContents.on('did-get-redirect-request', function (event, oldUrl, newUrl) {
-      handleCallback(newUrl);
+    authWindow.webContents.on('did-get-redirect-request', function (e, oldUrl, newUrl) {
+      handleCallback(e, newUrl);
     });
 
     // Reset the authWindow on close

@@ -28,6 +28,7 @@ global.TEMPLATE = 'index.html'
 global.SPLASH = 'splash.html'
 
 global.GITHUB_LOGIN_SUCCESS = 'Yeah! you successfully logged in with Github.'
+global.GITHUB_LOGOUT_SUCCESS = 'All right! you are no longer loggeed in with Github.'
 global.SAVE_SUCCESS = 'Hooray! all changes has been saved!'
 
 global.github_data = {}
@@ -591,6 +592,20 @@ global.sendNotification = function (message) {
 global.loginGithub = function () {
 
   RAJE_GITHUB.manageLogin((err, message) => {
+    if (err) throw err
+
+    global.sendNotification({
+      text: message,
+      type: 'success',
+      timeout: 2000
+    })
+
+    windows.updateEditorMenu(RAJE_MENU.getEditorMenu())
+  })
+}
+
+global.logoutGithub = function () {
+  RAJE_STORAGE.deleteGithubData((err, message) => {
     if (err) throw err
 
     global.sendNotification({

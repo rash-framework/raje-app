@@ -175,34 +175,36 @@ module.exports = {
    */
   getTabGithub: function () {
 
-    let submenu = []
+    if (Object.keys(global.github_data).length === 0 && global.github_data.constructor === Object)
+      return {
+        label: 'Github',
+        submenu: [{
+          label: 'Login',
+          click() {
+            global.loginGithub()
+          }
+        }]
+      }
 
-    if (Object.keys(global.github_data).length === 0 && global.github_data.constructor === Object) {
-      submenu.push({
-        label: 'Login',
-        click() {
-          global.loginGithub()
-        }
-      })
-    } else {
-      submenu.push({
-        label: `Logged as ${global.github_data.login}`,
-        enabled: false
-      })
-
-      submenu.push({
-        type: 'separator'
-      })
-
-      submenu.push({
-        label: 'Push'
-      })
-    }
-
-    return {
-      label: 'Github',
-      submenu: submenu
-    }
+    else
+      return {
+        label: 'Github',
+        submenu: [{
+            label: `Logged as ${global.github_data.login}`,
+            enabled: false
+          }, {
+            type: 'separator'
+          }, {
+            label: 'Push'
+          },
+          {
+            label: 'Logout',
+            click(){
+              global.logoutGithub()
+            }
+          }
+        ]
+      }
   },
 
   /**

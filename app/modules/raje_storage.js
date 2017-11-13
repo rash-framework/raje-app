@@ -123,6 +123,19 @@ module.exports = {
   },
 
   /**
+   * 
+   */
+  deleteGithubData: function (callback) {
+    storage.remove(global.GITHUB_DATA, err => {
+      if (err) throw callback(err)
+
+      global.github_data = {}
+
+      callback(null, global.GITHUB_LOGOUT_SUCCESS)
+    })
+  },
+
+  /**
    * DEBUG only - clear all elements in storage
    */
   clearAll: function () {
