@@ -336,17 +336,14 @@ if (hasBackend) {
    */
   function notify(text, type, timeout) {
 
-    // Display only one notification, blocking all others
-    if (tinymce.activeEditor.notificationManager.getNotifications().length == 0) {
+    if (tinymce.activeEditor.notificationManager.getNotifications().length)
+      top.tinymce.activeEditor.notificationManager.close()
 
-      let notify = {
-        text: text,
-        type: type ? type : 'info',
-        timeout: timeout ? timeout : 1000
-      }
-
-      tinymce.activeEditor.notificationManager.open(notify)
-    }
+    tinymce.activeEditor.notificationManager.open({
+      text: text,
+      type: type ? type : 'info',
+      timeout: 3000
+    })
   }
 
   /**
