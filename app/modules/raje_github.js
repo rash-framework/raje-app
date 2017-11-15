@@ -4,7 +4,9 @@ const CLIENT_SECRET = '9c141e019ea619d60400baab423447806812840e'
 const BrowserWindow = require('electron').BrowserWindow
 const apiRequests = require('superagent')
 const github = require('octonode')
-const NodeGit = require('nodegit')
+const nodegit = require('nodegit')
+const promisify = require("promisify-node")
+const fse = promisify(require("fs-extra"))
 
 const RAJE_STORAGE = require('./raje_storage')
 
@@ -149,7 +151,8 @@ module.exports = {
             global.github_data = {
               access_token: global.github_data.access_token,
               avatar_url: data.avatar_url,
-              login: data.login
+              login: data.login,
+              name: data.name,
             }
 
             // Save the data on storage
@@ -168,14 +171,59 @@ module.exports = {
 
   initRepo: function () {
 
-    if (global.savePath) {
-      NodeGit.Repository.init(global.savePath, 0).then(function (repo) {
-        // In this function we have a repo object that we can perform git operations
-        // on.
-        
-        // Note that with a new repository many functions will fail until there is
-        // an initial commit.
+    let repository
+
+    nodegit.Repository.init(global.savePath, 0)
+      .then((repo) => {
+        repository = repo
+
       })
-    }
+      .then(() => {
+        return repository.refreshIndex()
+
+      })
+      .then((idx) => {
+        index = idx
+
+      })
+      .then(() => {
+        return index.addAll()
+
+      })
+      .then(() => {
+        return index.write()
+
+      })
+      .then(() => {
+        return index.writeTree()
+
+      })
+      .then((oid) => {
+        let author = nodegit.Signature.create(global.github_data.name, global.github_data.login, Date.now(), 60)
+        return repository.createCommit("HEAD", author, author, "message", oid, []);
+
+      })
+      // Add a new remote
+      .then(() => {
+        return nodegit.Remote.create(repository, "origin",
+            `git@github.com:${global.github_data.login}/push-example.git`)
+
+          .then(function (remoteResult) {
+            remote = remoteResult;
+
+            // Create the push object for this remote
+            return remote.push(
+              ["refs/heads/master:refs/heads/master"], {
+                callbacks: {
+                  credentials: function (url, userName) {
+                    return nodegit.Cred.sshKeyFromAgent(userName);
+                  }
+                }
+              }
+            );
+          });
+      }).done(function () {
+        console.log("Done!");
+      });
   }
 }
