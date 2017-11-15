@@ -85,6 +85,11 @@ tinymce.PluginManager.add('raje_save', function (editor, url) {
         }
       })
 
+      // Replace tbody with its content #
+      article.find('tbody').each(function(){
+        $(this).replaceWith($(this).html())
+      })
+
       return new XMLSerializer().serializeToString(article[0])
     },
 
