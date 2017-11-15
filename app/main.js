@@ -630,3 +630,7 @@ global.getUserStoredData = function (callback) {
     return callback(null, data)
   })
 }
+
+global.push = function(){
+  RAJE_GITHUB.initRepo()
+}

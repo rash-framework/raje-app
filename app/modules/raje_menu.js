@@ -195,11 +195,14 @@ module.exports = {
           }, {
             type: 'separator'
           }, {
-            label: 'Push'
+            label: 'Push',
+            click() {
+              global.push()
+            }
           },
           {
             label: 'Logout',
-            click(){
+            click() {
               global.logoutGithub()
             }
           }

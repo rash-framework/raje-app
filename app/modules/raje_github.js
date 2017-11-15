@@ -4,6 +4,7 @@ const CLIENT_SECRET = '9c141e019ea619d60400baab423447806812840e'
 const BrowserWindow = require('electron').BrowserWindow
 const apiRequests = require('superagent')
 const github = require('octonode')
+const NodeGit = require('nodegit')
 
 const RAJE_STORAGE = require('./raje_storage')
 
@@ -162,5 +163,19 @@ module.exports = {
         })
       }
     })
+  },
+
+
+  initRepo: function () {
+
+    if (global.savePath) {
+      NodeGit.Repository.init(global.savePath, 0).then(function (repo) {
+        // In this function we have a repo object that we can perform git operations
+        // on.
+        
+        // Note that with a new repository many functions will fail until there is
+        // an initial commit.
+      })
+    }
   }
 }
