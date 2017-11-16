@@ -172,8 +172,10 @@ module.exports = {
   initRepo: function () {
 
     let repository
+    let remote
 
-    nodegit.Repository.init(global.savePath, 0)
+    nodegit.Repository
+      .init(global.savePath, 0)
       .then((repo) => {
         repository = repo
 
@@ -199,31 +201,29 @@ module.exports = {
 
       })
       .then((oid) => {
-        let author = nodegit.Signature.create(global.github_data.name, global.github_data.login, Date.now(), 60)
+        let author = nodegit.Signature.create(global.github_data.name, global.github_data.login, Math.round(Date.now() / 1000), 60)
         return repository.createCommit("HEAD", author, author, "message", oid, []);
 
       })
-      // Add a new remote
-      .then(() => {
-        return nodegit.Remote.create(repository, "origin",
-            `git@github.com:${global.github_data.login}/push-example.git`)
+      .then(function () {
+        return nodegit.Remote.create(repository, "origin", `https://github.com/gspinaci/push-example2.git`)
 
-          .then(function (remoteResult) {
-            remote = remoteResult;
+      }).then(function (remoteResult) {
+        remote = remoteResult
+        // Create the push object for this remote
+        return remote.push(["refs/heads/master:refs/heads/master"], {
+          callbacks: {
+            certificateCheck: function () {
+              return 1
+            },
+            credentials: function () {
+              return NodeGit.Cred.userpassPlaintextNew(global.github_data.access_token, "x-oauth-basic")
+            }
+          }
+        })
 
-            // Create the push object for this remote
-            return remote.push(
-              ["refs/heads/master:refs/heads/master"], {
-                callbacks: {
-                  credentials: function (url, userName) {
-                    return nodegit.Cred.sshKeyFromAgent(userName);
-                  }
-                }
-              }
-            );
-          });
       }).done(function () {
-        console.log("Done!");
-      });
+        console.log("Done!")
+      })
   }
 }
