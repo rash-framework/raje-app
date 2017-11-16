@@ -162,7 +162,7 @@
         <header>
           <img class="icon-image" src="raje-icon.png" alt="RAJE app icon">
           <h3 class="text-center">Welcome to RAJE
-            <small>v0.1.8</small>
+            <small id="txtVersion"></small>
           </h3>
         </header>
 
@@ -201,6 +201,7 @@
 
       // Save the window size in electron
       ipcRenderer.send('saveScreenSize', getWindowSize())
+      $('#txtVersion').text(`v${ipcRenderer.sendSync('getVersionSync')}`)
 
       let recentArticles = ipcRenderer.sendSync('getRecentArticles')
 

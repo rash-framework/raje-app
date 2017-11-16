@@ -48,7 +48,7 @@ module.exports = {
       if (err) return callback(err)
 
       // Copy/rewrite all images
-      this.copyAssetImages(err => {
+      this.copyAssetImages(path, err => {
         if (err) return callback(err)
 
         // Write .raje file
@@ -108,9 +108,9 @@ module.exports = {
   /**
    * Copy all temporary images
    */
-  copyAssetImages: function (callback) {
+  copyAssetImages: function (path, callback) {
 
-    let destinationFolderImage = `${global.savePath}/img`
+    let destinationFolderImage = `${path}/img`
 
     if (fs.existsSync(global.IMAGE_TEMP)) {
 
@@ -183,10 +183,10 @@ module.exports = {
   /**
    * Save the image in the temporary folder OR in the assets folder
    */
-  saveImageTemp: function (image, callback) {
+  saveImageTemp: function (path, image, callback) {
 
     // The folder where images have to be stored
-    let destinationPath = (global.isWrapper) ? global.IMAGE_TEMP : `${global.savePath}/img`
+    let destinationPath = (global.isWrapper) ? global.IMAGE_TEMP : `${path}/img`
 
     // If the directory doesn't exist, create it
     if (!fs.existsSync(destinationPath))
