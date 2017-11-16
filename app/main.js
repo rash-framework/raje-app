@@ -46,6 +46,8 @@ const url = require('url')
 const path = require('path')
 const windowManager = require('electron-window-manager')
 
+const PACKAGE = require('./package.json')
+
 const RAJE_FS = require('./modules/raje_fs.js')
 const RAJE_MENU = require('./modules/raje_menu.js')
 const RAJE_STORAGE = require('./modules/raje_storage.js')
@@ -519,6 +521,13 @@ ipcMain.on('closeSplash', (event, arg) => {
  */
 ipcMain.on('loginGithub', (event, arg) => {
   global.loginGithub()
+})
+
+/**
+ * 
+ */
+ipcMain.on('getVersionSync', (event, arg) => {
+  event.returnValue = PACKAGE.version
 })
 
 /**
