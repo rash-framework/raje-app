@@ -652,5 +652,5 @@ global.getUserStoredData = function (callback) {
 }
 
 global.push = function(){
-  RAJE_GITHUB.initRepo()
+  RAJE_GITHUB.initRepo(global.articleSettings.savePath)
 }

@@ -169,13 +169,13 @@ module.exports = {
   },
 
 
-  initRepo: function () {
+  initRepo: function (path) {
 
     let repository
     let remote
 
     nodegit.Repository
-      .init(global.savePath, 0)
+      .init(path, 0)
       .then((repo) => {
         repository = repo
 
