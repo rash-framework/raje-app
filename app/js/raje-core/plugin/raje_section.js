@@ -923,51 +923,68 @@ section = {
    */
   manageDelete: function () {
 
-    let range = tinymce.activeEditor.selection.getRng()
-    let startNode = $(range.startContainer).parent()
-    let endNode = $(range.endContainer).parent()
-    let commonAncestorContainer = $(range.commonAncestorContainer)
+    let selectedContent = tinymce.activeEditor.selection.getContent()
 
-    // Deepness is relative to the common ancestor container of the range startContainer and end
-    let deepness = endNode.parent('section').parentsUntil(commonAncestorContainer).length + 1
-    let currentElement = endNode
-    let toMoveElements = []
+    // If the selected content has HTML inside
+    if (selectedContent.indexOf('<') > -1) {
 
-    tinymce.activeEditor.undoManager.transact(function () {
+      selectedContent = $(selectedContent)
+      let hasSection = false
+      // Check if one of the selected element is a section
+      selectedContent.each(function () {
+        if ($(this).is(SECTION_SELECTOR))
+          return hasSection = true
+      })
 
-      // Get and detach all next_end
-      for (let i = 0; i <= deepness; i++) {
-        currentElement.nextAll('section,p,figure,pre,ul,ol').each(function () {
-          toMoveElements.push($(this))
+      // If the selected content has a section inside, then manage delete
+      if (hasSection) {
 
-          $(this).detach()
+        let range = tinymce.activeEditor.selection.getRng()
+        let startNode = $(range.startContainer).parent()
+        let endNode = $(range.endContainer).parent()
+        let commonAncestorContainer = $(range.commonAncestorContainer)
+
+        // Deepness is relative to the common ancestor container of the range startContainer and end
+        let deepness = endNode.parent('section').parentsUntil(commonAncestorContainer).length + 1
+        let currentElement = endNode
+        let toMoveElements = []
+
+        tinymce.activeEditor.undoManager.transact(function () {
+
+          // Get and detach all next_end
+          for (let i = 0; i <= deepness; i++) {
+            currentElement.nextAll('section,p,figure,pre,ul,ol,blockquote').each(function () {
+              toMoveElements.push($(this))
+
+              $(this).detach()
+            })
+            currentElement = currentElement.parent()
+          }
+
+          // Execute delete
+          tinymce.activeEditor.execCommand('delete')
+
+          // Detach all next_begin
+          startNode.nextAll().each(function () {
+            $(this).detach()
+          })
+
+          // Append all next_end to startnode parent
+          toMoveElements.forEach(function (element) {
+            startNode.parent('section').append(element)
+          })
+
+          tinymce.triggerSave()
+
+          // Refresh headings
+          headingDimension()
+
+          // Update references if needed
+          updateReferences()
+
+          updateIframeFromSavedContent()
         })
-        currentElement = currentElement.parent()
       }
-
-      // Execute delete
-      tinymce.activeEditor.execCommand('delete')
-
-      // Detach all next_begin
-      startNode.nextAll().each(function () {
-        $(this).detach()
-      })
-
-      // Append all next_end to startnode parent
-      toMoveElements.forEach(function (element) {
-        startNode.parent('section').append(element)
-      })
-
-      tinymce.triggerSave()
-
-      // Refresh headings
-      headingDimension()
-
-      // Update references if needed
-      updateReferences()
-
-      updateIframeFromSavedContent()
-    })
-    return false
+    }
   }
 }
