@@ -110,7 +110,7 @@ module.exports = {
    */
   copyAssetImages: function (path, callback) {
 
-    let destinationFolderImage = `${savePath}/img`
+    let destinationFolderImage = `${path}/img`
 
     if (fs.existsSync(global.IMAGE_TEMP)) {
 

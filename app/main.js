@@ -182,11 +182,11 @@ const windows = {
     /**
      * Copy the entire asset set inside the existing directory
      */
-    RAJE_FS.copyAssets(global.savePath, err => {
+    RAJE_FS.copyAssets(global.articleSettings.savePath, err => {
       if (err) throw err
 
       // Add the already created article here
-      RAJE_STORAGE.pushRecentArticleEntry(RAJE_STORAGE.createRecentArticleEntry(savePath, global.articleSettings.folderName))
+      RAJE_STORAGE.pushRecentArticleEntry(RAJE_STORAGE.createRecentArticleEntry(global.articleSettings.savePath, global.articleSettings.folderName))
 
       // Add the init_rajemce script
       RAJE_FS.addRajeCoreInArticle(editorWindowUrl, err => {
