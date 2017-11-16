@@ -31,6 +31,7 @@ global.GITHUB_LOGIN_SUCCESS = 'Yeah! you are successfully logged in with Github.
 global.GITHUB_LOGOUT_SUCCESS = 'All right! you are no longer loggeed in with Github.'
 global.SAVE_SUCCESS = 'Hooray! all changes has been saved!'
 
+global.articleSettings = {}
 global.github_data = {}
 global.screenSize
 
@@ -101,7 +102,7 @@ const windows = {
    */
   openEditor: function (localRootPath) {
 
-    global.hasChanged = false
+    global.articleSettings.hasChanged = false
 
     // Retrieve and save Github data
     global.getUserStoredData((err, data) => {
@@ -126,8 +127,8 @@ const windows = {
   newArticle: function () {
 
     // Remember that the document isn't saved yet
-    global.isNew = true
-    global.isWrapper = true
+    global.articleSettings.isNew = true
+    global.articleSettings.isWrapper = true
 
     let editorWindowUrl = url.format({
       pathname: path.join(__dirname, TEMPLATE),
@@ -158,11 +159,16 @@ const windows = {
       return `${splittedRootPath.join('/')}/`
     }
 
+    let getDirectoryName = function () {
+      return splittedRootPath[splittedRootPath.length - 1]
+    }
+
     // Store some important elements about the document
-    global.isNew = false
-    global.isWrapper = false
     global.TEMPLATE = getFileName()
-    global.savePath = getDirectoryPath()
+    global.articleSettings.isNew = false
+    global.articleSettings.isWrapper = false
+    global.articleSettings.savePath = getDirectoryPath()
+    global.articleSettings.folderName = getDirectoryName()
 
     // TODO check if the document has validated RASH content
 
@@ -180,7 +186,7 @@ const windows = {
       if (err) throw err
 
       // Add the already created article here
-      RAJE_STORAGE.pushRecentArticleEntry(RAJE_STORAGE.createRecentArticleEntry(savePath, getFileName()))
+      RAJE_STORAGE.pushRecentArticleEntry(RAJE_STORAGE.createRecentArticleEntry(savePath, global.articleSettings.folderName))
 
       // Add the init_rajemce script
       RAJE_FS.addRajeCoreInArticle(editorWindowUrl, err => {
@@ -211,7 +217,7 @@ const windows = {
     windowManager.get(EDITOR_WINDOW).object.on('close', event => {
 
       // If the document is in hasChanged mode (need to be saved)
-      if (global.hasChanged) {
+      if (global.articleSettings.hasChanged) {
 
         // Cancel the close event
         event.preventDefault()
@@ -229,13 +235,13 @@ const windows = {
             // The user wants to save the document
             case 0:
               // TODO save the document
-              global.hasChanged = false
+              global.articleSettings.hasChanged = false
               windowManager.get(EDITOR_WINDOW).object.close()
               break
 
               // The user doesn't want to save the document
             case 1:
-              global.hasChanged = false
+              global.articleSettings.hasChanged = false
               windowManager.get(EDITOR_WINDOW).object.close()
               break
           }
@@ -369,28 +375,33 @@ ipcMain.on('saveAsArticle', (event, arg) => {
     if (typeof savePath == 'undefined')
       throw new Error()
 
-    global.savePath = `${savePath}/`
+    global.articleSettings.savePath = `${savePath}/`
 
-    RAJE_FS.saveAsArticle(global.savePath, arg.document, (err, message) => {
+    RAJE_FS.saveAsArticle(global.articleSettings.savePath, arg.document, (err, message) => {
 
-      if (err) return
+      // Manage permission error
+      if (err)
+        return global.sendNotification({
+          text: err.message,
+          type: 'error'
+        })
 
       // Store important variables to check the save state
-      global.isNew = false
+      global.articleSettings.isNew = false
+      global.articleSettings.folderName = global.articleSettings.savePath.split('/')[global.articleSettings.savePath.split('/').length - 2]
 
-      windows.updateEditorMenu(RAJE_MENU.getEditorMenu(!global.isNew))
+      windows.updateEditorMenu(RAJE_MENU.getEditorMenu(!global.articleSettings.isNew))
 
       // Save recent article entry
-      RAJE_STORAGE.pushRecentArticleEntry(RAJE_STORAGE.createRecentArticleEntry(global.savePath, arg.title))
+      RAJE_STORAGE.pushRecentArticleEntry(RAJE_STORAGE.createRecentArticleEntry(global.articleSettings.savePath, global.articleSettings.folderName))
 
       // Notify the client 
       global.sendNotification({
         text: message,
-        type: 'success',
-        timeout: 2000
+        type: 'success'
       })
 
-      global.hasChanged = false
+      global.articleSettings.hasChanged = false
       return global.updateClientContent()
     })
   }
@@ -405,8 +416,8 @@ ipcMain.on('saveAsArticle', (event, arg) => {
 ipcMain.on('saveArticle', (event, arg) => {
 
   // If the document has been saved before
-  if (!global.isNew && typeof global.savePath != "undefined") {
-    RAJE_FS.saveArticle(global.savePath, arg.document, (err, message) => {
+  if (!global.articleSettings.isNew && typeof global.articleSettings.savePath != "undefined") {
+    RAJE_FS.saveArticle(global.articleSettings.savePath, arg.document, (err, message) => {
       if (err) return
 
       // Notify the client
@@ -417,7 +428,7 @@ ipcMain.on('saveArticle', (event, arg) => {
       })
 
       // Update client content
-      global.hasChanged = false
+      global.articleSettings.hasChanged = false
       return global.updateClientContent()
     })
   }
@@ -456,7 +467,7 @@ ipcMain.on('selectImageSync', (event, arg) => {
  * 
  */
 ipcMain.on('updateDocumentState', (event, arg) => {
-  global.hasChanged = arg
+  global.articleSettings.hasChanged = arg
 })
 
 /**
@@ -531,7 +542,7 @@ global.executeSaveAs = function () {
 global.executeSave = function () {
 
   // If the article hasn't been saved yet, call saveAs
-  if (global.isNew)
+  if (global.articleSettings.isNew)
     windowManager.get(EDITOR_WINDOW).object.webContents.send('executeSaveAs')
 
   // Or call save
