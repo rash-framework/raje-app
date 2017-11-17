@@ -321,10 +321,9 @@ tinymce.PluginManager.add('raje_formula', function (editor, url) {
     let selectedElement = $(tinymce.activeEditor.selection.getNode())
 
     // Open formula editor clicking on math formulas
-    if (selectedElement.parents(FIGURE_SELECTOR).length && selectedElement.children('svg[role=math]').length) {
-
+    if (selectedElement.is(FIGURE_FORMULA_SELECTOR)) {
       openFormulaEditor({
-        formula_val: selectedElement.children('svg[role=math]').attr('data-math-original-input'),
+        formula_val: selectedElement.find('svg[role=math]').attr('data-math-original-input'),
         formula_id: selectedElement.parents(FIGURE_SELECTOR).attr('id')
       })
     }
@@ -354,6 +353,8 @@ tinymce.PluginManager.add('raje_formula', function (editor, url) {
 
         captions()
 
+        //selectRange($(newFormula).next('p')[0], 0)
+
         // Update Rendered RASH
         updateIframeFromSavedContent()
       })
@@ -378,8 +379,7 @@ tinymce.PluginManager.add('raje_formula', function (editor, url) {
      * 
      */
     create: function (formula_svg, id) {
-      //return `<figure id="${id}"><p><span role="math" contenteditable="false">\`\`${formula_input}\`\`</span></p></figure>`
-      return `<figure id="${id}"><p><span contenteditable="false">${formula_svg[0].outerHTML}</span></p></figure>`
+      return `<figure id="${id}" contenteditable="false"><p><span>${formula_svg[0].outerHTML}</span></p></figure><p><br/></p>`
     }
   }
 })
