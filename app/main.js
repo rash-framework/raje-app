@@ -46,7 +46,7 @@ const url = require('url')
 const path = require('path')
 const windowManager = require('electron-window-manager')
 
-const PACKAGE = require('../package.json')
+const PACKAGE = require('./package.json')
 
 const RAJE_FS = require('./modules/raje_fs.js')
 const RAJE_MENU = require('./modules/raje_menu.js')
