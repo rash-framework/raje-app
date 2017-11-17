@@ -1,6 +1,6 @@
 {
   "name": "raje",
-  "version": "0.1.9",
+  "version": "0.1.10",
   "scripts": {
     "dist": "electron-packager ./app --all --out=./dist --icon=./build/icon --overwrite",
     "dist-osx": "electron-packager ./app --platform=darwin --out=./dist --icon=./build/icon --overwrite"
