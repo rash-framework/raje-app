@@ -28,6 +28,7 @@
     "node-datetime": "^2.0.3",
     "octonode": "^0.7.13",
     "request": "^2.79.0",
-    "superagent": "^3.8.0"
+    "superagent": "^3.8.0",
+    "watchjs": "0.0.0"
   }
 }
