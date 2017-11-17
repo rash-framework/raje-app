@@ -66,7 +66,6 @@ module.exports = {
    */
   copyAssets: function (path, callback) {
 
-
     let length = global.ASSETS_DIRECTORIES.length - 1
     let ret = function () {
 
@@ -258,6 +257,15 @@ module.exports = {
       fs.writeFile(path, $.html())
 
       return callback(null)
+    })
+  },
+
+  /**
+   * 
+   */
+  checkIfExists: function (path, callback) {
+    fs.exists(path, exists => {
+      return callback(exists)
     })
   }
 }

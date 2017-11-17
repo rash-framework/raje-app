@@ -106,13 +106,6 @@ const windows = {
 
     global.articleSettings.hasChanged = false
 
-    // Retrieve and save Github data
-    global.getUserStoredData((err, data) => {
-      if (err) throw err
-
-      global.github_data = data
-    })
-
     /**
      * If localRootPath exists, the user is trying to one an existing article
      */
@@ -181,19 +174,24 @@ const windows = {
       slashes: true
     })
 
-    /**
-     * Copy the entire asset set inside the existing directory
-     */
-    RAJE_FS.copyAssets(global.articleSettings.savePath, err => {
-      if (err) throw err
+    // Check if the folder exists
+    RAJE_FS.checkIfExists(global.articleSettings.savePath, exists => {
+      if (exists)
+        // Copy the entire asset set inside the existing directory
+        RAJE_FS.copyAssets(global.articleSettings.savePath, err => {
+          if (err) throw err
 
-      // Add the already created article here
-      RAJE_STORAGE.pushRecentArticleEntry(RAJE_STORAGE.createRecentArticleEntry(global.articleSettings.savePath, global.articleSettings.folderName))
+          // Add the already created article here
+          RAJE_STORAGE.pushRecentArticleEntry(RAJE_STORAGE.createRecentArticleEntry(global.articleSettings.savePath, global.articleSettings.folderName))
 
-      // Add the init_rajemce script
-      RAJE_FS.addRajeCoreInArticle(editorWindowUrl, err => {
-        this.showEditor(editorWindowUrl)
-      })
+          // Add the init_rajemce script
+          RAJE_FS.addRajeCoreInArticle(editorWindowUrl, err => {
+            this.showEditor(editorWindowUrl)
+          })
+        })
+
+      else
+        windows.openSplash()
     })
   },
 
@@ -210,8 +208,16 @@ const windows = {
       icon: path.join(__dirname, 'build/icon.png')
     })
 
-    // Update the app menu
-    windows.updateEditorMenu(RAJE_MENU.getEditorMenu())
+    // Retrieve and save Github data
+    global.getUserStoredData((err, data) => {
+      if (err) throw err
+
+      global.github_data = data
+
+      // Update the app menu
+      windows.updateEditorMenu(RAJE_MENU.getEditorMenu())
+    })
+
 
     /**
      * Catch the close event
@@ -392,7 +398,7 @@ ipcMain.on('saveAsArticle', (event, arg) => {
       global.articleSettings.isNew = false
       global.articleSettings.folderName = global.articleSettings.savePath.split('/')[global.articleSettings.savePath.split('/').length - 2]
 
-      windows.updateEditorMenu(RAJE_MENU.getEditorMenu(!global.articleSettings.isNew))
+      windows.updateEditorMenu(RAJE_MENU.getEditorMenu())
 
       // Save recent article entry
       RAJE_STORAGE.pushRecentArticleEntry(RAJE_STORAGE.createRecentArticleEntry(global.articleSettings.savePath, global.articleSettings.folderName))
@@ -649,4 +655,8 @@ global.getUserStoredData = function (callback) {
 
     return callback(null, data)
   })
+}
+
+global.push = function () {
+  RAJE_GITHUB.initRepo(global.articleSettings.savePath)
 }
