@@ -208,7 +208,7 @@ const windows = {
       if (err) throw err
 
       global.github_data = data
-      
+
       // Update the app menu
       windows.updateEditorMenu(RAJE_MENU.getEditorMenu())
     })
@@ -364,77 +364,14 @@ ipcMain.on('hasBackendSync', (event, arg) => {
  * Called from the renderer process
  */
 ipcMain.on('saveAsArticle', (event, arg) => {
-  // Show save dialog here
-  let savePath = dialog.showSaveDialog({
-    title: 'Save as',
-    defaultPath: arg.title,
-    properties: [
-      'openDirectory'
-    ]
-  })
-
-  try {
-
-    if (typeof savePath == 'undefined')
-      throw new Error()
-
-    global.articleSettings.savePath = `${savePath}/`
-
-    RAJE_FS.saveAsArticle(global.articleSettings.savePath, arg.document, (err, message) => {
-
-      // Manage permission error
-      if (err)
-        return global.sendNotification({
-          text: err.message,
-          type: 'error'
-        })
-
-      // Store important variables to check the save state
-      global.articleSettings.isNew = false
-      global.articleSettings.folderName = global.articleSettings.savePath.split('/')[global.articleSettings.savePath.split('/').length - 2]
-
-      windows.updateEditorMenu(RAJE_MENU.getEditorMenu())
-
-      // Save recent article entry
-      RAJE_STORAGE.pushRecentArticleEntry(RAJE_STORAGE.createRecentArticleEntry(global.articleSettings.savePath, global.articleSettings.folderName))
-
-      // Notify the client 
-      global.sendNotification({
-        text: message,
-        type: 'success'
-      })
-
-      global.articleSettings.hasChanged = false
-      return global.updateClientContent()
-    })
-  }
-
-  // If savePath doesn't exists
-  catch (exception) {}
+  global.saveAs()
 })
 
 /**
  * 
  */
 ipcMain.on('saveArticle', (event, arg) => {
-
-  // If the document has been saved before
-  if (!global.articleSettings.isNew && typeof global.articleSettings.savePath != "undefined") {
-    RAJE_FS.saveArticle(global.articleSettings.savePath, arg.document, (err, message) => {
-      if (err) return
-
-      // Notify the client
-      global.sendNotification({
-        text: message,
-        type: 'success',
-        timeout: 2000
-      })
-
-      // Update client content
-      global.articleSettings.hasChanged = false
-      return global.updateClientContent()
-    })
-  }
+  global.save()
 })
 
 /**
@@ -563,6 +500,84 @@ global.executeSave = function () {
 /**
  * 
  */
+global.saveAs = function () {
+
+  // Show save dialog here
+  let savePath = dialog.showSaveDialog({
+    title: 'Save as',
+    defaultPath: arg.title,
+    properties: [
+      'openDirectory'
+    ]
+  })
+
+  try {
+
+    if (typeof savePath == 'undefined')
+      throw new Error()
+
+    global.articleSettings.savePath = `${savePath}/`
+
+    RAJE_FS.saveAsArticle(global.articleSettings.savePath, arg.document, (err, message) => {
+
+      // Manage permission error
+      if (err)
+        return global.sendNotification({
+          text: err.message,
+          type: 'error'
+        })
+
+      // Store important variables to check the save state
+      global.articleSettings.isNew = false
+      global.articleSettings.folderName = global.articleSettings.savePath.split('/')[global.articleSettings.savePath.split('/').length - 2]
+
+      windows.updateEditorMenu(RAJE_MENU.getEditorMenu())
+
+      // Save recent article entry
+      RAJE_STORAGE.pushRecentArticleEntry(RAJE_STORAGE.createRecentArticleEntry(global.articleSettings.savePath, global.articleSettings.folderName))
+
+      // Notify the client 
+      global.sendNotification({
+        text: message,
+        type: 'success'
+      })
+
+      global.articleSettings.hasChanged = false
+      return global.updateClientContent()
+    })
+  }
+
+  // If savePath doesn't exists
+  catch (exception) {}
+}
+
+/**
+ * 
+ */
+global.save = function () {
+
+  // If the document has been saved before
+  if (!global.articleSettings.isNew && typeof global.articleSettings.savePath != "undefined") {
+    RAJE_FS.saveArticle(global.articleSettings.savePath, arg.document, (err, message) => {
+      if (err) return
+
+      // Notify the client
+      global.sendNotification({
+        text: message,
+        type: 'success',
+        timeout: 2000
+      })
+
+      // Update client content
+      global.articleSettings.hasChanged = false
+      return global.updateClientContent()
+    })
+  }
+}
+
+/**
+ * 
+ */
 global.updateClientContent = function () {
   windowManager.get(EDITOR_WINDOW).object.webContents.send('updateContent')
 }
@@ -625,6 +640,9 @@ global.loginGithub = function () {
   })
 }
 
+/**
+ * 
+ */
 global.logoutGithub = function () {
   RAJE_STORAGE.deleteGithubData((err, message) => {
     if (err) throw err
@@ -652,6 +670,22 @@ global.getUserStoredData = function (callback) {
   })
 }
 
+/**
+ * 
+ */
 global.push = function () {
-  RAJE_GITHUB.initRepo(global.articleSettings.savePath)
+
+  // Save if there are some unsaved changes
+  /*
+  if (global.articleSettings.hasChanged) {
+    if (global.articleSettings.savePath)
+      global.save()
+    else
+      global.saveAs()
+  }
+  */
+
+  RAJE_GITHUB.initRepo(global.articleSettings.savePath, (err, message) => {
+    if (err) throw (err)
+  })
 }

@@ -12,6 +12,10 @@ const RAJE_STORAGE = require('./raje_storage')
 
 let client
 
+const MESSAGE = {
+  REPO_INIT: 'Hooray! The repository has been initialised correctly!'
+}
+
 module.exports = {
 
   /**
@@ -168,8 +172,16 @@ module.exports = {
     })
   },
 
+  /**
+   * #########################################################################################
+   * ######################################## NodeGit ########################################
+   * #########################################################################################
+   */
 
-  initRepo: function (path) {
+  /**
+   * 
+   */
+  initRepo: function (path, callback) {
 
     let repository
     let remote
@@ -202,28 +214,13 @@ module.exports = {
       })
       .then((oid) => {
         let author = nodegit.Signature.create(global.github_data.name, global.github_data.login, Math.round(Date.now() / 1000), 60)
-        return repository.createCommit("HEAD", author, author, "message", oid, []);
+        return repository.createCommit("HEAD", author, author, 'Initialising RASH Article using RAJE-app', oid, []);
 
       })
-      .then(function () {
-        return nodegit.Remote.create(repository, "origin", `https://github.com/gspinaci/push-example2.git`)
+      .done((commit) => {
+        console.log(commit)
+        return callback(null, MESSAGE.REPO_INIT)
 
-      }).then(function (remoteResult) {
-        remote = remoteResult
-        // Create the push object for this remote
-        return remote.push(["refs/heads/master:refs/heads/master"], {
-          callbacks: {
-            certificateCheck: function () {
-              return 1
-            },
-            credentials: function () {
-              return NodeGit.Cred.userpassPlaintextNew(global.github_data.access_token, "x-oauth-basic")
-            }
-          }
-        })
-
-      }).done(function () {
-        console.log("Done!")
       })
   }
 }
