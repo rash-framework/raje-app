@@ -182,10 +182,10 @@ module.exports = {
   /**
    * Save the image in the temporary folder OR in the assets folder
    */
-  saveImageTemp: function (path, image, callback) {
+  saveImageTemp: function (image, path, callback) {
 
     // The folder where images have to be stored
-    let destinationPath = (global.isWrapper) ? global.IMAGE_TEMP : `${path}/img`
+    let destinationPath = (global.articleSettings.isWrapper) ? global.IMAGE_TEMP : `${path}img`
 
     // If the directory doesn't exist, create it
     if (!fs.existsSync(destinationPath))

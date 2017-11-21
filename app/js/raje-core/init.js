@@ -428,8 +428,6 @@ if (hasBackend) {
     return ipcRenderer.sendSync('selectImageSync')
   }
 
-
-
   /**
    * Send a message to the backend, notify the structural change
    * 

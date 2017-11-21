@@ -459,7 +459,11 @@ ipcMain.on('selectImageSync', (event, arg) => {
   })
 
   try {
-    RAJE_FS.saveImageTemp(imagePath[0], (err, result) => {
+
+    if (typeof imagePath == 'undefined')
+      throw new Error()
+
+    RAJE_FS.saveImageTemp(imagePath[0], global.articleSettings.savePath, (err, result) => {
 
       if (err) return event.returnValue = err
 
