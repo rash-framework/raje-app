@@ -243,6 +243,8 @@ if (hasBackend) {
     // Open and close menu headings Näive way
     $(`div[aria-label='heading']`).find('button').trigger('click')
     $(`div[aria-label='heading']`).find('button').trigger('click')
+
+    mathml2svgAllFormulas()
   })
 
 
@@ -260,6 +262,23 @@ if (hasBackend) {
 
     // Restore the bookmark 
     tinymce.activeEditor.selection.moveToBookmark(bookmark)
+  }
+
+  /**
+   * 
+   */
+  function updateIframeFromSavedContentWithoutUndo() {
+
+    tinymce.activeEditor.undoManager.ignore(function () {
+      // Save the bookmark 
+      let bookmark = tinymce.activeEditor.selection.getBookmark(2, true)
+
+      // Update iframe content
+      tinymce.activeEditor.setContent($('#raje_root').html())
+
+      // Restore the bookmark 
+      tinymce.activeEditor.selection.moveToBookmark(bookmark)
+    })
   }
 
   /**
@@ -456,6 +475,50 @@ if (hasBackend) {
    */
   function saveArticle(options) {
     return ipcRenderer.send('saveArticle', options)
+  }
+
+  /**
+   * 
+   */
+  function mathml2svgAllFormulas() {
+
+    let id = 'svgFormula'
+
+    // Append a temporary element
+    $('body').append(`<div style="display:none" class="rash-math" id='${id}'></div>`)
+
+    // For each mathml formula
+    $(formulabox_selector).each(function () {
+
+      let formula = $(this)
+      let mathmlFormula = formula[0].outerHTML
+
+      // Update its content with the mathml
+      $(`#${id}`).html(mathmlFormula)
+
+      MathJax.Hub.Queue(
+
+        // Process the svg transformation
+        ["Typeset", MathJax.Hub],
+
+        // Replace the formula in mathml with the svg output
+        function () {
+          formula.replaceWith($(`#${id}`).find('svg').html())
+        },
+
+        // Update iframe without addind a new undo level
+        function () {
+          updateIframeFromSavedContentWithoutUndo()
+        },
+
+        // Clean the formula
+        function () {
+          $(`#${id}`).html('')
+        })
+    })
+
+    // Remove the temporary
+    $('body').find(id).remove()
   }
 
   /**

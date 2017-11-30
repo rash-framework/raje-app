@@ -560,9 +560,12 @@ function rash() {
             }
         });
         MathJax.Hub.Config({
-            jax: ["input/AsciiMath", "output/SVG"],
+            jax: ["input/AsciiMath", "input/MathML", "output/SVG"],
             SVG: {
                 useGlobalCache: false
+            },
+            "AssistiveMML": {
+                disabled: true
             },
             asciimath2jax: {
                 // delimiters for AsciiMath formulas
