@@ -584,6 +584,7 @@ function rash() {
                 ignoreClass: ignore_math_class
             }
         });
+        MathJax.Hub.processSectionDelay = 0;
         // we changed the DOM, so we make MathJax typeset the document again.
         MathJax.Hub.Queue(["Typeset", MathJax.Hub]);
     }
