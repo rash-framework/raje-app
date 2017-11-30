@@ -23,7 +23,7 @@ var formulabox_selector_math = "p > math";
 var formulabox_selector_svg = "p > span > svg[role=math]"
 
 var formulabox_selector =
-    "figure > " + formulabox_selector_img + ", figure > " + formulabox_selector_span + ", figure > " + formulabox_selector_math + ", figure > " + formulabox_selector_svg
+  "figure > " + formulabox_selector_img + ", figure > " + formulabox_selector_span + ", figure > " + formulabox_selector_math + ", figure > " + formulabox_selector_svg
 var listingbox_selector_pre = "pre";
 var listingbox_selector = "figure > " + listingbox_selector_pre;
 
@@ -509,7 +509,7 @@ if (hasBackend) {
 
       let formula = $(this)
       let mathmlFormula = formula[0].outerHTML
-      
+
       // Update its content with the mathml
       $(`#${id}`).html(mathmlFormula)
 
@@ -531,6 +531,10 @@ if (hasBackend) {
         // Clean the formula
         function () {
           $(`#${id}`).html('')
+
+          // Clean the whole undo levels set
+          if (typeof tinymce.activeEditor.undoManager != 'undefined')
+            tinymce.activeEditor.undoManager.clear()
         })
     })
 
