@@ -11,6 +11,22 @@ const RAJE_SELECTOR = 'body#tinymce'
 const HEADER_SELECTOR = 'header.page-header.container.cgen'
 const FIRST_HEADING = `${RAJE_SELECTOR}>section:first>h1:first`
 
+
+var figurebox_selector_img = "p > img:not([role=math])";
+var figurebox_selector_svg = "p > svg";
+var figurebox_selector = "figure > " + figurebox_selector_img + ", figure > " + figurebox_selector_svg;
+var tablebox_selector_table = "table";
+var tablebox_selector = "figure > " + tablebox_selector_table;
+var formulabox_selector_img = "p > img[role=math]";
+var formulabox_selector_span = "p > span[role=math]";
+var formulabox_selector_math = "p > math";
+var formulabox_selector_svg = "p > span > svg[role=math]"
+
+var formulabox_selector =
+    "figure > " + formulabox_selector_img + ", figure > " + formulabox_selector_span + ", figure > " + formulabox_selector_math + ", figure > " + formulabox_selector_svg
+var listingbox_selector_pre = "pre";
+var listingbox_selector = "figure > " + listingbox_selector_pre;
+
 const TINYMCE_TOOLBAR_HEIGTH = 76
 
 let ipcRenderer, webFrame
@@ -38,6 +54,9 @@ if (hasBackend) {
 
     // 
     setNonEditableHeader()
+
+    //
+    mathml2svgAllFormulas()
 
     tinymce.init({
 
@@ -243,8 +262,6 @@ if (hasBackend) {
     // Open and close menu headings Näive way
     $(`div[aria-label='heading']`).find('button').trigger('click')
     $(`div[aria-label='heading']`).find('button').trigger('click')
-
-    mathml2svgAllFormulas()
   })
 
 
@@ -492,7 +509,7 @@ if (hasBackend) {
 
       let formula = $(this)
       let mathmlFormula = formula[0].outerHTML
-
+      
       // Update its content with the mathml
       $(`#${id}`).html(mathmlFormula)
 
