@@ -336,7 +336,7 @@ tinymce.PluginManager.add('raje_formula', function (editor, url) {
     add: function (formula_svg) {
 
       let selectedElement = $(tinymce.activeEditor.selection.getNode())
-      let newFormula = this.create(formula_svg, getSuccessiveElementId(`${FIGURE_FORMULA_SELECTOR},${INLINE_FORMULA_SELECTOR}`, FORMULA_SUFFIX))
+      let newFormula = this.create(formula_svg, getSuccessiveElementId(FIGURE_FORMULA_SELECTOR, FORMULA_SUFFIX))
 
       tinymce.activeEditor.undoManager.transact(function () {
 
@@ -449,7 +449,7 @@ tinymce.PluginManager.add('raje_inline_formula', function (editor, url) {
     add: function (formula_svg) {
 
       let selectedElement = $(tinymce.activeEditor.selection.getNode())
-      let newFormula = this.create(formula_svg, getSuccessiveElementId(`${FIGURE_FORMULA_SELECTOR},${INLINE_FORMULA_SELECTOR}`, FORMULA_SUFFIX))
+      let newFormula = this.create(formula_svg, getSuccessiveElementId(FIGURE_FORMULA_SELECTOR, FORMULA_SUFFIX))
 
       tinymce.activeEditor.undoManager.transact(function () {
 

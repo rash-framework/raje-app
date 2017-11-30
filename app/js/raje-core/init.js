@@ -499,47 +499,37 @@ if (hasBackend) {
    */
   function mathml2svgAllFormulas() {
 
-    let id = 'svgFormula'
+    // For each figure formula
+    $('figure[id^="formula_"]').each(function () {
 
-    // Append a temporary element
-    $('body').append(`<div style="display:none" class="rash-math" id='${id}'></div>`)
-
-    // For each mathml formula
-    $(formulabox_selector).each(function () {
-
-      let formula = $(this)
-      let mathmlFormula = formula[0].outerHTML
-
-      // Update its content with the mathml
-      $(`#${id}`).html(mathmlFormula)
+      // Get the id
+      let id = $(this).attr('id')
 
       MathJax.Hub.Queue(
 
-        // Process the svg transformation
-        ["Typeset", MathJax.Hub],
-
-        // Replace the formula in mathml with the svg output
+        // Process the formula by id
+        ["Typeset", MathJax.Hub, id],
         function () {
-          formula.replaceWith($(`#${id}`).find('svg').html())
-        },
 
-        // Update iframe without addind a new undo level
-        function () {
-          updateIframeFromSavedContentWithoutUndo()
-        },
+          // Get the element, svg and mathml content
+          let figureFormula = $(`#${id}`)
+          let svgContent = figureFormula.find('svg')
+          let mmlContent = figureFormula.find('script[type="math/mml"]').html()
 
-        // Clean the formula
-        function () {
-          $(`#${id}`).html('')
+          // Add the role
+          svgContent.attr('role','math')
+          svgContent.attr('data-mathml', mmlContent)
 
-          // Clean the whole undo levels set
-          if (typeof tinymce.activeEditor.undoManager != 'undefined')
-            tinymce.activeEditor.undoManager.clear()
-        })
+          // Update the figure content and its caption
+          figureFormula.html(`<p><span>${svgContent[0].outerHTML}</span></p>`)
+          captions()
+
+          // Update the content and clear the whole undo levels set
+          updateIframeFromSavedContent()
+          tinymce.activeEditor.undoManager.clear()
+        }
+      )
     })
-
-    // Remove the temporary
-    $('body').find(id).remove()
   }
 
   /**
