@@ -322,9 +322,12 @@ tinymce.PluginManager.add('raje_formula', function (editor, url) {
 
     // Open formula editor clicking on math formulas
     if (selectedElement.is(FIGURE_FORMULA_SELECTOR)) {
+
+      e.stopImmediatePropagation()
+
       openFormulaEditor({
         formula_val: selectedElement.find('svg[role=math]').attr('data-math-original-input'),
-        formula_id: selectedElement.parents(FIGURE_SELECTOR).attr('id')
+        formula_id: selectedElement.attr('id')
       })
     }
   })
@@ -379,7 +382,7 @@ tinymce.PluginManager.add('raje_formula', function (editor, url) {
      * 
      */
     create: function (formula_svg, id) {
-      return `<figure id="${id}" contenteditable="false"><p><span>${formula_svg[0].outerHTML}</span></p></figure><p><br/></p>`
+      return `<figure id="${id}" contenteditable="false"><p><span>${formula_svg[0].outerHTML}</span></p></figure>`
     }
   }
 })
