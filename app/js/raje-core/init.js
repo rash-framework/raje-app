@@ -11,6 +11,8 @@ const RAJE_SELECTOR = 'body#tinymce'
 const HEADER_SELECTOR = 'header.page-header.container.cgen'
 const FIRST_HEADING = `${RAJE_SELECTOR}>section:first>h1:first`
 
+const DATA_MATH_ORIGINAL_INPUT = 'data-math-original-input'
+
 
 var figurebox_selector_img = "p > img:not([role=math])";
 var figurebox_selector_svg = "p > svg";
@@ -504,6 +506,8 @@ if (hasBackend) {
 
       // Get the id
       let id = $(this).attr('id')
+      let asciiMath = $(this).attr(DATA_MATH_ORIGINAL_INPUT)
+      $(this).removeAttr(DATA_MATH_ORIGINAL_INPUT)
 
       MathJax.Hub.Queue(
 
@@ -517,8 +521,12 @@ if (hasBackend) {
           let mmlContent = figureFormula.find('script[type="math/mml"]').html()
 
           // Add the role
-          svgContent.attr('role','math')
+          svgContent.attr('role', 'math')
           svgContent.attr('data-mathml', mmlContent)
+
+          // Add the asciimath input if exists
+          if (typeof asciiMath != 'undefined')
+            svgContent.attr(DATA_MATH_ORIGINAL_INPUT, asciiMath)
 
           // Update the figure content and its caption
           figureFormula.html(`<p><span>${svgContent[0].outerHTML}</span></p>`)

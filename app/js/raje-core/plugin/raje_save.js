@@ -80,8 +80,11 @@ tinymce.PluginManager.add('raje_save', function (editor, url) {
       })
 
       article.find(`${FIGURE_FORMULA_SELECTOR},${INLINE_FORMULA_SELECTOR}`).each(function () {
-        if ($(this).find('svg[data-mathml]').length) {
-          $(this).children('p').html($(this).find('svg[data-mathml]').attr('data-mathml'))
+        let svg = $(this).find('svg[data-mathml]')
+        if (svg.length) {
+
+          $(this).attr(DATA_MATH_ORIGINAL_INPUT, svg.attr(DATA_MATH_ORIGINAL_INPUT))
+          $(this).children('p').html(svg.attr('data-mathml'))
         }
       })
 
