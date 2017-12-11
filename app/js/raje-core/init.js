@@ -11,6 +11,7 @@ const RAJE_SELECTOR = 'body#tinymce'
 const HEADER_SELECTOR = 'header.page-header.container.cgen'
 const FIRST_HEADING = `${RAJE_SELECTOR}>section:first>h1:first`
 
+const DATA_MATH_ORIGINAL_INPUT = 'data-math-original-input'
 const TINYMCE_TOOLBAR_HEIGTH = 76
 
 let ipcRenderer, webFrame
@@ -38,6 +39,9 @@ if (hasBackend) {
 
     // 
     setNonEditableHeader()
+
+    //
+    mathml2svgAllFormulas()
 
     tinymce.init({
 
@@ -144,6 +148,7 @@ if (hasBackend) {
           // If the current element isn't inside header, only in section this is permitted
           if (selectedElement.parents('section').length) {
 
+            /*
             if (selectedElement.is('span#_mce_caret[data-mce-bogus]') || selectedElement.parent().is('span#_mce_caret[data-mce-bogus]')) {
 
               // Remove span normally created with bold
@@ -154,6 +159,7 @@ if (hasBackend) {
               selectedElement.replaceWith(selectedElement.html())
               tinymce.activeEditor.selection.moveToBookmark(bm)
             }
+            */
           }
 
           updateDocumentState()
@@ -260,6 +266,23 @@ if (hasBackend) {
 
     // Restore the bookmark 
     tinymce.activeEditor.selection.moveToBookmark(bookmark)
+  }
+
+  /**
+   * 
+   */
+  function updateIframeFromSavedContentWithoutUndo() {
+
+    tinymce.activeEditor.undoManager.ignore(function () {
+      // Save the bookmark 
+      let bookmark = tinymce.activeEditor.selection.getBookmark(2, true)
+
+      // Update iframe content
+      tinymce.activeEditor.setContent($('#raje_root').html())
+
+      // Restore the bookmark 
+      tinymce.activeEditor.selection.moveToBookmark(bookmark)
+    })
   }
 
   /**
@@ -456,6 +479,52 @@ if (hasBackend) {
    */
   function saveArticle(options) {
     return ipcRenderer.send('saveArticle', options)
+  }
+
+  /**
+   * 
+   */
+  function mathml2svgAllFormulas() {
+
+    // For each figure formula
+    $('figure[id^="formula_"]').each(function () {
+
+      // Get the id
+      let id = $(this).attr('id')
+      let asciiMath = $(this).attr(DATA_MATH_ORIGINAL_INPUT)
+      $(this).removeAttr(DATA_MATH_ORIGINAL_INPUT)
+
+      MathJax.Hub.Queue(
+
+        // Process the formula by id
+        ["Typeset", MathJax.Hub, id],
+        function () {
+
+          // Get the element, svg and mathml content
+          let figureFormula = $(`#${id}`)
+          let svgContent = figureFormula.find('svg')
+          let mmlContent = figureFormula.find('script[type="math/mml"]').html()
+
+          // Add the role
+          svgContent.attr('role', 'math')
+          svgContent.attr('data-mathml', mmlContent)
+
+          // Add the asciimath input if exists
+          if (typeof asciiMath != 'undefined')
+            svgContent.attr(DATA_MATH_ORIGINAL_INPUT, asciiMath)
+
+          // Update the figure content and its caption
+          figureFormula.html(`<p><span>${svgContent[0].outerHTML}</span></p>`)
+          captions()
+
+          formula.updateStructure(figureFormula)
+
+          // Update the content and clear the whole undo levels set
+          updateIframeFromSavedContent()
+          tinymce.activeEditor.undoManager.clear()
+        }
+      )
+    })
   }
 
   /**

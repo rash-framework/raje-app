@@ -74,19 +74,22 @@ tinymce.PluginManager.add('raje_save', function (editor, url) {
         $(this).removeAttr('contenteditable')
       })
 
-      // Remove not allowed span elments inside the formula
-      article.find(FIGURE_FORMULA_SELECTOR).each(function () {
+      // Remove not allowed span elments inside the formula, inline_formula
+      article.find(`${FIGURE_FORMULA_SELECTOR},${INLINE_FORMULA_SELECTOR}`).each(function () {
         $(this).children('p').html($(this).find('span[contenteditable]').html())
       })
 
       article.find(`${FIGURE_FORMULA_SELECTOR},${INLINE_FORMULA_SELECTOR}`).each(function () {
-        if ($(this).find('svg[data-mathml]').length) {
-          $(this).children('p').html($(this).find('svg[data-mathml]').attr('data-mathml'))
+        let svg = $(this).find('svg[data-mathml]')
+        if (svg.length) {
+
+          $(this).attr(DATA_MATH_ORIGINAL_INPUT, svg.attr(DATA_MATH_ORIGINAL_INPUT))
+          $(this).children('p').html(svg.attr('data-mathml'))
         }
       })
 
       // Replace tbody with its content #
-      article.find('tbody').each(function(){
+      article.find('tbody').each(function () {
         $(this).replaceWith($(this).html())
       })
 

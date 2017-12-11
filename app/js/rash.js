@@ -295,7 +295,7 @@ var tablebox_selector = "figure > " + tablebox_selector_table;
 var formulabox_selector_img = "p > img[role=math]";
 var formulabox_selector_span = "p > span[role=math]";
 var formulabox_selector_math = "p > math";
-var formulabox_selector_svg = "p > span > svg[role=math]"
+var formulabox_selector_svg = "p svg[role=math]"
 
 var formulabox_selector =
     "figure > " + formulabox_selector_img + ", figure > " + formulabox_selector_span + ", figure > " + formulabox_selector_math + ", figure > " + formulabox_selector_svg
@@ -560,9 +560,12 @@ function rash() {
             }
         });
         MathJax.Hub.Config({
-            jax: ["input/AsciiMath", "output/SVG"],
+            jax: ["input/AsciiMath", "input/MathML", "output/SVG"],
             SVG: {
                 useGlobalCache: false
+            },
+            "AssistiveMML": {
+                disabled: true
             },
             asciimath2jax: {
                 // delimiters for AsciiMath formulas
@@ -581,6 +584,7 @@ function rash() {
                 ignoreClass: ignore_math_class
             }
         });
+        MathJax.Hub.processSectionDelay = 0;
         // we changed the DOM, so we make MathJax typeset the document again.
         MathJax.Hub.Queue(["Typeset", MathJax.Hub]);
     }
