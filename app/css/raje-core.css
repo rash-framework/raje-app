@@ -110,8 +110,8 @@ i.mce-i-icon-ul:before {
   font-family: FontAwesome;
 }
 
-span>svg:hover {
-  cursor: pointer
+figure[id] span[contenteditable=false]:hover {
+  cursor: pointer!important
 }
 
 @media (min-width:768px) {
