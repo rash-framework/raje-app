@@ -206,7 +206,7 @@ const windows = {
       height: global.screenSize.height,
       resizable: true,
       icon: path.join(__dirname, 'build/icon.png'),
-      showDevTools: true
+      //showDevTools: true
     })
 
     // Retrieve and save Github data
