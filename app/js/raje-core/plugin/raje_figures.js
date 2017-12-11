@@ -976,9 +976,13 @@ function captions() {
   $(formulabox_selector).each(function () {
     var cur_caption = $(this).parents("figure").find("p");
     var cur_number = $(this).findNumber(formulabox_selector);
-    cur_caption.find('span.cgen').remove();
-    cur_caption.html(cur_caption.html() + "<span class=\"cgen\" data-rash-original-content=\"\" > (" +
-      cur_number + ")</span>");
+
+    if (cur_caption.find('span.cgen').length) {
+      cur_caption.find('span.cgen').remove();
+      cur_caption.find('span[contenteditable]').append("<span class=\"cgen\" data-rash-original-content=\"\" > (" + cur_number + ")</span>")
+    } else
+      cur_caption.html(cur_caption.html() + "<span class=\"cgen\" data-rash-original-content=\"\" > (" +
+        cur_number + ")</span>");
   });
   $(listingbox_selector).each(function () {
     var cur_caption = $(this).parents("figure").find("figcaption");
