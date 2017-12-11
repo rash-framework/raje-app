@@ -351,15 +351,27 @@ tinymce.PluginManager.add('raje_formula', function (editor, url) {
     if (formula.cursorInFormula(selectedElement)) {
 
       // keyCode 8 is backspace
-      if (e.keyCode == 8)
+      if (e.keyCode == 8) {
+        e.stopImmediatePropagation()
         return handleFigureDelete(tinymce.activeEditor.selection)
+      }
 
-      if (e.keyCode == 46)
+      if (e.keyCode == 46) {
+        e.stopImmediatePropagation()
         return handleFigureCanc(tinymce.activeEditor.selection)
+      }
 
       // Handle enter key in figcaption
-      if (e.keyCode == 13)
+      if (e.keyCode == 13) {
+        e.stopImmediatePropagation()
         return handleFigureEnter(tinymce.activeEditor.selection)
+      }
+
+      // Block printable chars in p
+      if (selectedElement.is('p') && checkIfPrintableChar(e.keyCode)) {
+        e.stopImmediatePropagation()
+        return false
+      }
     }
   })
 
@@ -422,7 +434,7 @@ tinymce.PluginManager.add('raje_formula', function (editor, url) {
         updateIframeFromSavedContent()
 
         // Move the caret at the start of the next element
-        moveCaret(tinymce.activeEditor.dom.getNext(tinymce.activeEditor.dom.get(id),'*'), true)
+        moveCaret(tinymce.activeEditor.dom.getNext(tinymce.activeEditor.dom.get(id), '*'), true)
       })
 
     },
