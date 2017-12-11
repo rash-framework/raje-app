@@ -420,11 +420,13 @@ tinymce.PluginManager.add('raje_formula', function (editor, url) {
         tinymce.triggerSave()
         captions()
 
-        formula.updateStructure($(`#${id}`))
+        newFormula = $(`#${id}`)
+
+        formula.updateStructure(newFormula)
 
         // Add a new empty p after the formula
-        if (!formula.next().length)
-          formula.after('<p><br/></p>')
+        if (!newFormula.next().length)
+          newFormula.after('<p><br/></p>')
 
         // Update Rendered RASH
         updateIframeFromSavedContent()
