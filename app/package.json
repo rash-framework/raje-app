@@ -1,6 +1,6 @@
 {
   "name": "raje",
-  "version": "0.1.11",
+  "version": "0.1.12",
   "description": "RAJE: RAsh Javascript Editor",
   "main": "main.js",
   "scripts": {
