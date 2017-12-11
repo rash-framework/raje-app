@@ -420,11 +420,7 @@ tinymce.PluginManager.add('raje_formula', function (editor, url) {
         tinymce.triggerSave()
         captions()
 
-        // Add a not editable span
-        let formula = $(`#${id}`)
-        let paragraph = formula.children('p')
-        let paragraphContent = paragraph.html()
-        paragraph.html(`<span contenteditable="false">${paragraphContent}</span>`)
+        formula.updateStructure($(`#${id}`))
 
         // Add a new empty p after the formula
         if (!formula.next().length)
@@ -472,6 +468,17 @@ tinymce.PluginManager.add('raje_formula', function (editor, url) {
 
         // If the selected element is inside the formula figure
         selectedElement.parents(FIGURE_FORMULA_SELECTOR).length) == 1 ? true : false
+    },
+
+    /**
+     * 
+     */
+    updateStructure: function (formula) {
+
+      // Add a not editable span
+      let paragraph = formula.children('p')
+      let paragraphContent = paragraph.html()
+      paragraph.html(`<span contenteditable="false">${paragraphContent}</span>`)
     }
   }
 })

@@ -514,8 +514,10 @@ if (hasBackend) {
             svgContent.attr(DATA_MATH_ORIGINAL_INPUT, asciiMath)
 
           // Update the figure content and its caption
-          figureFormula.html(`<p contenteditable="false"><span>${svgContent[0].outerHTML}</span></p>`)
+          figureFormula.html(`<p><span>${svgContent[0].outerHTML}</span></p>`)
           captions()
+
+          formula.updateStructure(figureFormula)
 
           // Update the content and clear the whole undo levels set
           updateIframeFromSavedContent()
