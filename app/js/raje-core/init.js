@@ -165,6 +165,7 @@ if (hasBackend) {
           // If the current element isn't inside header, only in section this is permitted
           if (selectedElement.parents('section').length) {
 
+            /*
             if (selectedElement.is('span#_mce_caret[data-mce-bogus]') || selectedElement.parent().is('span#_mce_caret[data-mce-bogus]')) {
 
               // Remove span normally created with bold
@@ -175,6 +176,7 @@ if (hasBackend) {
               selectedElement.replaceWith(selectedElement.html())
               tinymce.activeEditor.selection.moveToBookmark(bm)
             }
+            */
           }
 
           updateDocumentState()
@@ -529,7 +531,7 @@ if (hasBackend) {
             svgContent.attr(DATA_MATH_ORIGINAL_INPUT, asciiMath)
 
           // Update the figure content and its caption
-          figureFormula.html(`<p><span>${svgContent[0].outerHTML}</span></p>`)
+          figureFormula.html(`<p contenteditable="false"><span>${svgContent[0].outerHTML}</span></p>`)
           captions()
 
           // Update the content and clear the whole undo levels set
