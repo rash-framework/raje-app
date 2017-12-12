@@ -195,6 +195,9 @@ tinymce.PluginManager.add('raje_table', function (editor, url) {
         // Update all captions with RASH function
         captions()
 
+        // Update all cross-ref
+        updateReferences()
+
         // Update Rendered RASH
         updateIframeFromSavedContent()
       })
@@ -310,6 +313,9 @@ tinymce.PluginManager.add('raje_image', function (editor, url) {
 
         // Update all captions with RASH function
         captions()
+
+        // Update all cross-ref
+        updateReferences()
 
         // Update Rendered RASH
         updateIframeFromSavedContent()
@@ -427,6 +433,9 @@ tinymce.PluginManager.add('raje_formula', function (editor, url) {
         // Add a new empty p after the formula
         if (!newFormula.next().length)
           newFormula.after('<p><br/></p>')
+
+        // Update all cross-ref
+        updateReferences()
 
         // Update Rendered RASH
         updateIframeFromSavedContent()
@@ -602,6 +611,9 @@ tinymce.PluginManager.add('raje_listing', function (editor, url) {
         // Move the caret
         selectRange(newListing.find('code')[0], 0)
 
+        // Update all cross-ref
+        updateReferences()
+
         // Update Rendered RASH
         updateIframeFromSavedContent()
       })
@@ -671,6 +683,9 @@ tinymce.PluginManager.add('raje_inline_formula', function (editor, url) {
         tinymce.triggerSave()
 
         captions()
+
+        // Update all cross-ref
+        updateReferences()
 
         // Update Rendered RASH
         updateIframeFromSavedContent()
