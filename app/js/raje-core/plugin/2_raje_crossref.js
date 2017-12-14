@@ -155,7 +155,7 @@ tinymce.PluginManager.add('raje_crossref', function (editor, url) {
     getAllReferenceableFigures: function () {
       let figures = []
 
-      $('figure:has(p:has(img)),figure:has(p:has(svg))').each(function () {
+      $(`${figurebox_selector},${FIGURE_IMAGE_SELECTOR}`).each(function () {
         figures.push({
           reference: $(this).attr('id'),
           text: $(this).find('figcaption').text()
