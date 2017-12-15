@@ -7,7 +7,7 @@ const BIBLIOENTRY_SUFFIX = 'biblioentry_'
 const ENDNOTE_SUFFIX = 'endnote_'
 
 const BIBLIOGRAPHY_SELECTOR = 'section[role=doc-bibliography]'
-const BIBLIOENTRY_SELECTOR = 'li[role=doc-biblioentry],li[id^=biblioentry_]'
+const BIBLIOENTRY_SELECTOR = 'li[role=doc-biblioentry]'
 
 const ENDNOTES_SELECTOR = 'section[role=doc-endnotes]'
 const ENDNOTE_SELECTOR = 'section[role=doc-endnote]'
@@ -145,25 +145,6 @@ tinymce.PluginManager.add('raje_section', function (editor, url) {
         // If the section isn't collapsed
         if (!tinymce.activeEditor.selection.isCollapsed()) {
 
-          // If the selection contains the entire bibliography section
-          if (selectionContent.containsBibliography(selection)) {
-
-            e.stopImmediatePropagation()
-
-            tinymce.activeEditor.undoManager.transact(function () {
-
-              // Execute normal delete
-              //tinymce.activeEditor.execCommand('delete')
-              $(BIBLIOGRAPHY_SELECTOR).remove()
-              updateReferences()
-
-              // Update iframe and restore selection
-              updateIframeFromSavedContent()
-            })
-
-            return false
-          }
-
           // If the selection contains at least a biblioentry
           if (selectionContent.containsBibliographies(selection)) {
 
@@ -173,10 +154,28 @@ tinymce.PluginManager.add('raje_section', function (editor, url) {
             tinymce.activeEditor.undoManager.transact(function () {
 
               tinymce.activeEditor.execCommand('delete')
-              section.removeBibliographies(selectedContent)
+              section.updateBibliographySection()
               updateReferences()
 
               // update iframe
+              updateIframeFromSavedContent()
+            })
+
+            return false
+          }
+
+          // If the selection contains the entire bibliography section
+          if (selectionContent.containsBibliography(selection)) {
+
+            e.stopImmediatePropagation()
+
+            tinymce.activeEditor.undoManager.transact(function () {
+
+              // Execute normal delete
+              $(BIBLIOGRAPHY_SELECTOR).remove()
+              updateReferences()
+
+              // Update iframe and restore selection
               updateIframeFromSavedContent()
             })
 
@@ -677,19 +676,6 @@ section = {
 
     // Remove all sections without p child
     $(`${BIBLIOENTRY_SELECTOR}:not(:has(p))`).each(function () {
-      $(this).remove()
-    })
-  },
-
-  /**
-   * 
-   */
-  removeBibliographies: function (content) {
-
-    // Update saved content
-    tinymce.triggerSave()
-
-    $(content).find(BIBLIOGRAPHY_SELECTOR).each(function(){
       $(this).remove()
     })
   },

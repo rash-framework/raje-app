@@ -565,18 +565,24 @@ if (hasBackend) {
     /**
      * 
      */
-    containsBibliographies: function (content) {
+    containsBibliographies: function (selection) {
 
-      let val = false
+      let rng = selection.getRng()
 
-      // Controls if at least a single elemeny is a bibliography
-      $(content).children().each(function () {
+      // Save the starting element
+      let start = rng.startContainer
+      let startNode = $(start.nodeType == 3 ? start.parentNode : start)
 
-        if ($(this).is(BIBLIOENTRY_SELECTOR))
-          return val = true
-      })
+      // Save the ending element
+      let end = rng.endContainer
+      let endNode = $(end.nodeType == 3 ? end.parentNode : end)
 
-      return val
+      let tmp = ($(rng.commonAncestorContainer).is(`${BIBLIOGRAPHY_SELECTOR} > ul`) ||
+          $(rng.commonAncestorContainer).is(BIBLIOGRAPHY_SELECTOR)) &&
+        (Boolean(startNode.parent(BIBLIOENTRY_SELECTOR).length) || startNode.is('h1')) &&
+        Boolean(endNode.parents(BIBLIOENTRY_SELECTOR).length)
+
+      return tmp
     }
   }
 
