@@ -426,6 +426,17 @@ if (hasBackend) {
   /**
    * 
    */
+  function checkIfSpecialChar(keycode) {
+
+    return (keycode > 47 && keycode < 58) || // number keys
+      (keycode > 95 && keycode < 112) || // numpad keys
+      (keycode > 185 && keycode < 193) || // ;=,-./` (in order)
+      (keycode > 218 && keycode < 223)
+  }
+
+  /**
+   * 
+   */
   function markTinyMCE() {
     $('div[id^=mceu_]').attr('data-rash-original-content', '')
   }
@@ -525,6 +536,48 @@ if (hasBackend) {
         }
       )
     })
+  }
+
+  /** */
+  selectionContent = {
+
+    /**
+     * 
+     */
+    containsBibliography: function (selection) {
+
+      let rng = selection.getRng()
+
+      // Save the starting element
+      let start = rng.startContainer
+      let startNode = $(start.nodeType == 3 ? start.parentNode : start)
+
+      // Save the ending element
+      let end = rng.endContainer
+      let endNode = $(end.nodeType == 3 ? end.parentNode : end)
+
+      // Controls if the selection is the bibliography
+      return $(rng.commonAncestorContainer).is(BIBLIOGRAPHY_SELECTOR) &&
+        (startNode.is('h1') && rng.startOffset == 0) &&
+        (endNode.is('p') && rng.endOffset == end.length)
+    },
+
+    /**
+     * 
+     */
+    containsBibliographies: function (content) {
+
+      let val = false
+
+      // Controls if at least a single elemeny is a bibliography
+      $(content).children().each(function () {
+
+        if ($(this).is(BIBLIOENTRY_SELECTOR))
+          return val = true
+      })
+
+      return val
+    }
   }
 
   /**
