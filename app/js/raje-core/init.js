@@ -556,16 +556,21 @@ if (hasBackend) {
       let end = rng.endContainer
       let endNode = $(end.nodeType == 3 ? end.parentNode : end)
 
-      // Controls if the selection is the bibliography
-      return $(rng.commonAncestorContainer).is(BIBLIOGRAPHY_SELECTOR) &&
-        (startNode.is('h1') && rng.startOffset == 0) &&
-        (endNode.is('p') && rng.endOffset == end.length)
+      // Controls if the selection has the bibliography inside
+      return ($(rng.commonAncestorContainer).find(BIBLIOGRAPHY_SELECTOR).length &&
+          (!startNode.is(`${BIBLIOGRAPHY_SELECTOR} > h1`) ||
+            !endNode.is(`${BIBLIOGRAPHY_SELECTOR} > h1`))) ||
+
+        // Or if the selection is the bibliography
+        ($(rng.commonAncestorContainer).is(BIBLIOGRAPHY_SELECTOR) &&
+          (startNode.is('h1') && rng.startOffset == 0) &&
+          (endNode.is('p') && rng.endOffset == end.length))
     },
 
     /**
      * 
      */
-    containsBibliographies: function (selection) {
+    isAtBeginningOfEmptyBiblioentry: function (selection) {
 
       let rng = selection.getRng()
 
@@ -577,13 +582,31 @@ if (hasBackend) {
       let end = rng.endContainer
       let endNode = $(end.nodeType == 3 ? end.parentNode : end)
 
-      let tmp = ($(rng.commonAncestorContainer).is(`${BIBLIOGRAPHY_SELECTOR} > ul`) ||
-          $(rng.commonAncestorContainer).is(BIBLIOGRAPHY_SELECTOR)) &&
+      return (rng.commonAncestorContainer.nodeType == 3 || $(rng.commonAncestorContainer).is(`${BIBLIOENTRY_SELECTOR} > p`)) &&
+        (startNode.is(endNode) && startNode.is(`${BIBLIOENTRY_SELECTOR} > p`)) &&
+        (rng.startOffset == rng.endOffset && rng.startOffset == 0)
+    },
+
+    /**
+     * 
+     */
+    containsBiblioentries: function (selection) {
+
+      let rng = selection.getRng()
+
+      // Save the starting element
+      let start = rng.startContainer
+      let startNode = $(start.nodeType == 3 ? start.parentNode : start)
+
+      // Save the ending element
+      let end = rng.endContainer
+      let endNode = $(end.nodeType == 3 ? end.parentNode : end)
+
+      // Check if the selection contains more than one biblioentry
+      return ($(rng.commonAncestorContainer).is(`${BIBLIOGRAPHY_SELECTOR} > ul`) || $(rng.commonAncestorContainer).is(BIBLIOGRAPHY_SELECTOR)) &&
         (Boolean(startNode.parent(BIBLIOENTRY_SELECTOR).length) || startNode.is('h1')) &&
         Boolean(endNode.parents(BIBLIOENTRY_SELECTOR).length)
-
-      return tmp
-    }
+    },
   }
 
   /**

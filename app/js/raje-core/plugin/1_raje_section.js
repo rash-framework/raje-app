@@ -126,7 +126,7 @@ tinymce.PluginManager.add('raje_section', function (editor, url) {
     let startNode = $(selection.getRng().startContainer)
     let endNode = $(selection.getRng().endContainer)
 
-    if ((section.cursorInSection(selectedElement) || section.cursorInSpecialSection(selectedElement))) {
+    if ((section.cursorInSection(selection) || section.cursorInSpecialSection(selection))) {
 
       // Block special chars in special elements
       if (checkIfSpecialChar(e.keyCode) &&
@@ -146,7 +146,7 @@ tinymce.PluginManager.add('raje_section', function (editor, url) {
         if (!tinymce.activeEditor.selection.isCollapsed()) {
 
           // If the selection contains at least a biblioentry
-          if (selectionContent.containsBibliographies(selection)) {
+          if (selectionContent.containsBiblioentries(selection)) {
 
             e.stopImmediatePropagation()
 
@@ -183,7 +183,7 @@ tinymce.PluginManager.add('raje_section', function (editor, url) {
           }
 
           // Restructure the entire body if the section isn't collapsed and not inside a special section
-          if (!section.cursorInSpecialSection(selectedElement)) {
+          if (!section.cursorInSpecialSection(selection)) {
             e.stopImmediatePropagation()
             section.manageDelete()
           }
@@ -193,23 +193,42 @@ tinymce.PluginManager.add('raje_section', function (editor, url) {
         if (tinymce.activeEditor.selection.isCollapsed()) {
 
           // If the selection is inside a special section
-          if (section.cursorInSpecialSection(selectedElement)) {
+          if (section.cursorInSpecialSection(selection)) {
 
             // Remove special section if the cursor is at the beginning
             if ((startNode.parents('h1').length || startNode.is('h1')) && tinymce.activeEditor.selection.getRng().startOffset == 0) {
 
               e.stopImmediatePropagation()
-              return section.deleteSpecialSection(selectedElement)
+              section.deleteSpecialSection(selectedElement)
+              return false
+            }
+
+            // if the cursor is at the beginning of a empty p inside its biblioentry, remove it and update the references
+            if (selectionContent.isAtBeginningOfEmptyBiblioentry(selection)) {
+
+              e.stopImmediatePropagation()
+
+              tinymce.activeEditor.undoManager.transact(function () {
+
+                // Execute normal delete
+                tinymce.activeEditor.execCommand('delete')
+                tinymce.triggerSave()
+                updateReferences()
+
+                // Update iframe and restore selection
+                updateIframeFromSavedContent()
+              })
+
+              return false
             }
           }
-
-          // Prevent remove from header
-          if (
-            selectedElement.is(NON_EDITABLE_HEADER_SELECTOR) ||
-            (selectedElement.attr('data-mce-caret') == 'after' && selectedElement.parent().is(RAJE_SELECTOR)) ||
-            (selectedElement.attr('data-mce-caret') && selectedElement.parent().is(RAJE_SELECTOR)) == 'before')
-            return false
         }
+
+        // Prevent remove from header
+        if (selectedElement.is(NON_EDITABLE_HEADER_SELECTOR) ||
+          (selectedElement.attr('data-mce-caret') == 'after' && selectedElement.parent().is(RAJE_SELECTOR)) ||
+          (selectedElement.attr('data-mce-caret') && selectedElement.parent().is(RAJE_SELECTOR)) == 'before')
+          return false
       }
     }
 
@@ -973,16 +992,18 @@ section = {
   /**
    * 
    */
-  cursorInSection: function (selectedElement) {
+  cursorInSection: function (selection) {
 
-    return selectedElement.is(SECTION_SELECTOR) || Boolean(selectedElement.parents(SECTION_SELECTOR).length)
+    return $(selection.getNode()).is(SECTION_SELECTOR) || Boolean($(selection.getNode()).parents(SECTION_SELECTOR).length)
   },
 
   /**
    * 
    */
-  cursorInSpecialSection: function (selectedElement) {
+  cursorInSpecialSection: function (selection) {
 
-    return selectedElement.is(SPECIAL_SECTION_SELECTOR) || Boolean(selectedElement.parents(SPECIAL_SECTION_SELECTOR).length)
+    return $(selection.getNode()).is(SPECIAL_SECTION_SELECTOR) ||
+      Boolean($(selection.getRng().startContainer).parents(SPECIAL_SECTION_SELECTOR).length) ||
+      Boolean($(selection.getRng().endContainer).parents(SPECIAL_SECTION_SELECTOR).length)
   }
 }
