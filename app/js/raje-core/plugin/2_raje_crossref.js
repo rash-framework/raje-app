@@ -361,10 +361,10 @@ function references() {
 
 function updateReferences() {
 
-  if ($('span.cgen[data-rash-original-content]').length) {
+  if ($('span.cgen[data-rash-original-content],sup.cgen.fn').length) {
 
     // Restore all saved content
-    $('span.cgen[data-rash-original-content]').each(function () {
+    $('span.cgen[data-rash-original-content],sup.cgen.fn').each(function () {
 
       // Save original content and reference
       let original_content = $(this).attr('data-rash-original-content')

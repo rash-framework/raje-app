@@ -590,6 +590,27 @@ if (hasBackend) {
     /**
      * 
      */
+    isAtBeginningOfEmptyEndnote: function (selection) {
+
+      let rng = selection.getRng()
+
+      // Save the starting element
+      let start = rng.startContainer
+      let startNode = $(start.nodeType == 3 ? start.parentNode : start)
+
+      // Save the ending element
+      let end = rng.endContainer
+      let endNode = $(end.nodeType == 3 ? end.parentNode : end)
+
+      return $(rng.commonAncestorContainer).parent().is(ENDNOTE_SELECTOR) &&
+        (startNode.is(endNode) && startNode.is(`${ENDNOTE_SELECTOR} > p`)) &&
+        (rng.startOffset == rng.endOffset && rng.startOffset == 0) ||
+        (/\r|\n/.exec(start.innerText) != null)
+    },
+
+    /**
+     * 
+     */
     containsBiblioentries: function (selection) {
 
       let rng = selection.getRng()

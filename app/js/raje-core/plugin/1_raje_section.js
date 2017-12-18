@@ -221,6 +221,33 @@ tinymce.PluginManager.add('raje_section', function (editor, url) {
 
               return false
             }
+
+            // 
+            if (selectionContent.isAtBeginningOfEmptyEndnote(selection)) {
+
+              e.stopImmediatePropagation()
+
+              tinymce.activeEditor.undoManager.transact(function () {
+
+                let endnote = selectedElement.parents(ENDNOTE_SELECTOR)
+
+                // If the current endnote is the last one remove the entire footnotes section
+                if (!endnote.prev(ENDNOTE_SELECTOR).length && !endnote.next(ENDNOTE_SELECTOR).length)
+                  $(ENDNOTES_SELECTOR).remove()
+
+                else {
+                  tinymce.activeEditor.execCommand('delete')
+                  tinymce.triggerSave()
+                }
+
+                updateReferences()
+
+                // Update iframe and restore selection
+                updateIframeFromSavedContent()
+              })
+
+              return false
+            }
           }
         }
 
