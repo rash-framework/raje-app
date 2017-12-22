@@ -1,0 +1,54 @@
+@import url("https://fonts.googleapis.com/css?family=Roboto|Satisfy")
+
+$primary_color: #494DA1
+$secondary_color: #FFCE54
+$grey_text: #F5F7FA
+
+#above_folding
+  width: 100%
+  background-color: $primary_color
+
+  .navbar
+    min-height: 100px
+
+    .navbar-brand
+      font-size: 32px !important
+      font-family: "Satisfy", cursive
+
+  .jumbotron
+    background-color: inherit
+    z-index: 10
+    margin: 0
+
+    a
+      color: rgba($secondary_color, 0.8)
+
+      &:hover
+        color: rgba($secondary_color, 1)
+        text-decoration: none
+        cursor: pointer
+
+    .wrapper
+      padding-top: 50px
+
+      .container
+        margin-top: 50px
+
+        .lead
+          padding-top: 10px
+          color: rgba($grey_text, 0.7)
+
+        .call_to_action
+          padding: 15px 25px
+          background-color: white
+          color: $primary_color
+          font-weight: bold
+          border-radius: 3px
+          display: inline-block
+
+      .blockquote
+        margin-top: 50px
+
+        .blockquote-footer
+          font-size: 20px
+          color: $grey_text

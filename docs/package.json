@@ -1,0 +1,26 @@
+{
+  "name": "raje-app.github.io",
+  "version": "1.0.0",
+  "description": "Website for the RASH Framework",
+  "main": "index.js",
+  "dependencies": {
+    "gulp": "^3.9.1",
+    "gulp-sass": "^3.1.0",
+    "gulp-sourcemaps": "^2.6.2",
+    "gulp-watch": "^4.3.11"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rash-framework/raje-app.github.io.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/rash-framework/raje-app.github.io/issues"
+  },
+  "homepage": "https://github.com/rash-framework/raje-app.github.io#readme"
+}
