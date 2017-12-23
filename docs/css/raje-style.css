@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css?family=Roboto|Satisfy");
+@import url("https://fonts.googleapis.com/css?family=Roboto|Roboto+Slab|Satisfy");
 #above_folding {
   width: 100%;
   background-color: #494DA1; }
@@ -36,3 +36,11 @@
         #above_folding .jumbotron .wrapper .blockquote .blockquote-footer {
           font-size: 20px;
           color: #F5F7FA; }
+
+#discover .container {
+  padding-bottom: 100px; }
+  #discover .container .display-4 {
+    margin-top: 100px;
+    font-family: "Roboto Slab", serif; }
+  #discover .container .lead {
+    margin: 20px 0; }

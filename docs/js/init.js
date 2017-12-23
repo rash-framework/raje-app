@@ -1,12 +1,16 @@
 var above_folder = $('#above_folding')
+var discover = $('#discover')
+var technical_overview = $('#technical_overview')
 var title_wrapper = above_folder.find('.wrapper')
-var call_to_action = above_folder.find('.call_to_action')
+var to_discover = above_folder.find('#to_discover')
 
 /**
  * 
  */
 function setAboveFolderHeigth() {
-  above_folder.css("min-height", window.innerHeight)
+  above_folder.css('min-height', window.innerHeight)
+  discover.css('min-height', window.innerHeight)
+  technical_overview.css('min-height', window.innerHeight)
 }
 
 /**
@@ -41,7 +45,8 @@ $(document).ready(function () {
   setAboveFolderHeigth()
   centerTitleWrapper()
 
-  call_to_action.on('click', function () {
+  to_discover.on('click', function (e) {
+    e.preventDefault()
     window.scroll({
       top: window.innerHeight,
       left: 0,
