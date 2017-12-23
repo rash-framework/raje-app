@@ -1,7 +1,10 @@
 @import url("https://fonts.googleapis.com/css?family=Roboto|Roboto+Slab|Satisfy");
 #above_folding {
   width: 100%;
-  background-color: #494DA1; }
+  background: #de5f5f;
+  background: -moz-linear-gradient(-45deg, #DE5F5F 0%, #54B9DB 100%);
+  background: -webkit-linear-gradient(-45deg, #DE5F5F 0%, #54B9DB 100%);
+  background: linear-gradient(135deg, #DE5F5F 0%, #54B9DB 100%); }
   #above_folding .navbar {
     min-height: 100px; }
     #above_folding .navbar .navbar-brand {
@@ -12,10 +15,8 @@
     z-index: 10;
     margin: 0; }
     #above_folding .jumbotron a {
-      color: rgba(255, 206, 84, 0.8); }
+      color: #F5DA75; }
       #above_folding .jumbotron a:hover {
-        color: #ffce54;
-        text-decoration: none;
         cursor: pointer; }
     #above_folding .jumbotron .wrapper {
       padding-top: 50px; }
@@ -23,14 +24,16 @@
         margin-top: 50px; }
         #above_folding .jumbotron .wrapper .container .lead {
           padding-top: 10px;
-          color: rgba(245, 247, 250, 0.7); }
+          color: #F5F7FA; }
         #above_folding .jumbotron .wrapper .container .call_to_action {
           padding: 15px 25px;
           background-color: white;
-          color: #494DA1;
+          color: #AA6E7D;
           font-weight: bold;
           border-radius: 3px;
           display: inline-block; }
+          #above_folding .jumbotron .wrapper .container .call_to_action:hover {
+            text-decoration: none; }
       #above_folding .jumbotron .wrapper .blockquote {
         margin-top: 50px; }
         #above_folding .jumbotron .wrapper .blockquote .blockquote-footer {
@@ -41,6 +44,9 @@
   padding-bottom: 100px; }
   #discover .container .display-4 {
     margin-top: 100px;
-    font-family: "Roboto Slab", serif; }
+    font-family: "Roboto Slab", serif;
+    color: #DE5F5F; }
   #discover .container .lead {
     margin: 20px 0; }
+  #discover .container a {
+    color: #54B9DB; }

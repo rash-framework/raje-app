@@ -1,12 +1,17 @@
 @import url("https://fonts.googleapis.com/css?family=Roboto|Roboto+Slab|Satisfy")
 
-$primary_color: #494DA1
-$secondary_color: #FFCE54
+$starting_color_gradient: #DE5F5F
+$ending_color_gradient: #54B9DB
+$primary_color: #AA6E7D
+$secondary_color: #F5DA75
 $grey_text: #F5F7FA
 
 #above_folding
   width: 100%
-  background-color: $primary_color
+  background: #de5f5f
+  background: -moz-linear-gradient(-45deg, $starting_color_gradient 0%, $ending_color_gradient 100%)
+  background: -webkit-linear-gradient(-45deg, $starting_color_gradient 0%, $ending_color_gradient 100%)
+  background: linear-gradient(135deg, $starting_color_gradient 0%, $ending_color_gradient 100%)
 
   .navbar
     min-height: 100px
@@ -21,11 +26,9 @@ $grey_text: #F5F7FA
     margin: 0
 
     a
-      color: rgba($secondary_color, 0.8)
+      color: $secondary_color
 
       &:hover
-        color: rgba($secondary_color, 1)
-        text-decoration: none
         cursor: pointer
 
     .wrapper
@@ -36,7 +39,7 @@ $grey_text: #F5F7FA
 
         .lead
           padding-top: 10px
-          color: rgba($grey_text, 0.7)
+          color: $grey_text
 
         .call_to_action
           padding: 15px 25px
@@ -45,6 +48,9 @@ $grey_text: #F5F7FA
           font-weight: bold
           border-radius: 3px
           display: inline-block
+
+          &:hover
+            text-decoration: none
 
       .blockquote
         margin-top: 50px
@@ -60,6 +66,10 @@ $grey_text: #F5F7FA
     .display-4
       margin-top: 100px
       font-family: "Roboto Slab", serif
+      color: $starting_color_gradient
 
     .lead
       margin: 20px 0
+
+    a
+      color: $ending_color_gradient
