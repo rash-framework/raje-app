@@ -5,6 +5,10 @@ $ending_color_gradient: #54B9DB
 $primary_color: #AA6E7D
 $secondary_color: #F5DA75
 $grey_text: #F5F7FA
+$footer_color: #434A54
+
+.link_colour
+  color: $secondary_color !important
 
 #above_folding
   width: 100%
@@ -58,18 +62,54 @@ $grey_text: #F5F7FA
         .blockquote-footer
           font-size: 20px
           color: $grey_text
+          opacity: 0.85
+
+          p
+            max-width: 90%
+            margin-left: auto
+            margin-right: auto
+            margin-top: 10px
 
 #discover
   .container
+    padding-top: 50px
     padding-bottom: 100px
 
     .display-4
-      margin-top: 100px
+      margin: 50px 0
       font-family: "Roboto Slab", serif
-      color: $starting_color_gradient
 
     .lead
       margin: 20px 0
 
-    a
-      color: $ending_color_gradient
+      strong
+        color: $starting_color_gradient
+
+      a
+        color: $ending_color_gradient
+
+#footer
+  background-color: $footer_color
+  padding: 100px 0
+
+  a
+    color: $secondary_color
+
+body
+  section:not(#above_folding)
+    padding: 100px 0
+
+html
+  font-size: 0.7rem
+
+@media (min-width: 768px)
+  html
+    font-size: 0.8rem
+
+@media (min-width: 992px)
+  html
+    font-size: 0.9rem
+
+@media (min-width: 1200px)
+  html
+    font-size: 1rem

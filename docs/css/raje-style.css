@@ -1,4 +1,7 @@
 @import url("https://fonts.googleapis.com/css?family=Roboto|Roboto+Slab|Satisfy");
+.link_colour {
+  color: #F5DA75 !important; }
+
 #above_folding {
   width: 100%;
   background: #de5f5f;
@@ -38,15 +41,47 @@
         margin-top: 50px; }
         #above_folding .jumbotron .wrapper .blockquote .blockquote-footer {
           font-size: 20px;
-          color: #F5F7FA; }
+          color: #F5F7FA;
+          opacity: 0.85; }
+          #above_folding .jumbotron .wrapper .blockquote .blockquote-footer p {
+            max-width: 90%;
+            margin-left: auto;
+            margin-right: auto;
+            margin-top: 10px; }
 
 #discover .container {
+  padding-top: 50px;
   padding-bottom: 100px; }
   #discover .container .display-4 {
-    margin-top: 100px;
-    font-family: "Roboto Slab", serif;
-    color: #DE5F5F; }
+    margin: 50px 0;
+    font-family: "Roboto Slab", serif; }
   #discover .container .lead {
     margin: 20px 0; }
-  #discover .container a {
-    color: #54B9DB; }
+    #discover .container .lead strong {
+      color: #DE5F5F; }
+    #discover .container .lead a {
+      color: #54B9DB; }
+
+#footer {
+  background-color: #434A54;
+  padding: 100px 0; }
+  #footer a {
+    color: #F5DA75; }
+
+body section:not(#above_folding) {
+  padding: 100px 0; }
+
+html {
+  font-size: 0.7rem; }
+
+@media (min-width: 768px) {
+  html {
+    font-size: 0.8rem; } }
+
+@media (min-width: 992px) {
+  html {
+    font-size: 0.9rem; } }
+
+@media (min-width: 1200px) {
+  html {
+    font-size: 1rem; } }

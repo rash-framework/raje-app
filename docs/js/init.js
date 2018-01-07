@@ -9,8 +9,8 @@ var to_discover = above_folder.find('#to_discover')
  */
 function setAboveFolderHeigth() {
   above_folder.css('min-height', window.innerHeight)
-  discover.css('min-height', window.innerHeight)
-  technical_overview.css('min-height', window.innerHeight)
+  //discover.css('min-height', window.innerHeight)
+  //technical_overview.css('min-height', window.innerHeight)
 }
 
 /**
