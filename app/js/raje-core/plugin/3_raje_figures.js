@@ -7,23 +7,6 @@
  *  raje_formula
  *  raje_listing
  */
-const DISABLE_SELECTOR_FIGURES = 'figure *, h1, h2, h3, h4, h5, h6,' + BIBLIOGRAPHY_SELECTOR
-
-const FIGURE_SELECTOR = 'figure[id]'
-
-const FIGURE_TABLE_SELECTOR = `${FIGURE_SELECTOR}:has(table)`
-const TABLE_SUFFIX = 'table_'
-
-const FIGURE_IMAGE_SELECTOR = `${FIGURE_SELECTOR}:has(img:not([role=math]))`
-const IMAGE_SUFFIX = 'img_'
-
-const FIGURE_FORMULA_SELECTOR = `${FIGURE_SELECTOR}:has(svg[role=math])`
-const INLINE_FORMULA_SELECTOR = `span:has(svg[role=math])`
-const FORMULA_SUFFIX = 'formula_'
-
-const FIGURE_LISTING_SELECTOR = `${FIGURE_SELECTOR}:has(pre:has(code))`
-const LISTING_SUFFIX = 'listing_'
-
 let remove_listing = 0
 
 /**
