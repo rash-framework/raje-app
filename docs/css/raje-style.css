@@ -69,7 +69,14 @@
     color: #F5DA75; }
 
 body section:not(#above_folding) {
-  padding: 100px 0; }
+  padding-top: 100px;
+  color: #555; }
+
+body footer {
+  margin-top: 100px; }
+  body footer h1.display-4 {
+    margin-bottom: 50px;
+    color: #333; }
 
 html {
   font-size: 0.7rem; }
