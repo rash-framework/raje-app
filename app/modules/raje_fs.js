@@ -1,8 +1,11 @@
 const fs = require('fs-extra')
 const cheerio = require('cheerio')
+const Purifier = require('html-purify')
 
 const RAJE_HIDDEN_FILE = '.raje'
 const RAJE_CORE = 'js/raje-core/core.js'
+
+const purifier = new Purifier()
 
 module.exports = {
 
@@ -11,6 +14,9 @@ module.exports = {
    * it will create the new folder or "replace" the existing one
    */
   saveAsArticle: function (path, document, callback) {
+
+    // Purify HTML
+    document = purifier.purify(document)
 
     // If the directory already exists, first remove it
     if (fs.existsSync(path))
@@ -42,6 +48,9 @@ module.exports = {
    * This method only updates the index.html file and copy/rewrite the images
    */
   saveArticle: function (path, document, callback) {
+
+    // Purify HTML
+    document = purifier.purify(document)
 
     // Overwrite the index.html with the document
     fs.writeFile(`${path}${global.TEMPLATE}`, document, err => {

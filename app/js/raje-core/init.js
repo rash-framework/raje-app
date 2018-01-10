@@ -79,8 +79,7 @@ if (hasBackend) {
         })
 
         editor.on('keyDown', function (e) {
-
-          /*
+          
           // Prevent shift+enter
           if (e.keyCode == 13 && e.shiftKey)
             e.preventDefault()
@@ -94,7 +93,7 @@ if (hasBackend) {
 
               pasteBookmark = tinymce.activeEditor.selection.getBookmark()
             }
-          }*/
+          }
         })
 
         /**
@@ -234,11 +233,9 @@ if (hasBackend) {
         path: 'node_modules/tinymce-formula/'
       },
 
-      cleanup_on_startup: false,
-      trim_span_elements: false,
       verify_html: false,
       cleanup: false,
-      convert_urls: false
+      entity_encoding: 'raw'
     })
   })
 
