@@ -57,8 +57,8 @@ var req = function (ids, callback) {
   var len = ids.length;
   var instances = new Array(len);
   for (var i = 0; i < len; ++i)
-    instances.push(dem(ids[i]));
-  callback.apply(null, callback);
+    instances[i] = dem(ids[i]);
+  callback.apply(null, instances);
 };
 
 var ephox = {};
@@ -76,13 +76,46 @@ ephox.bolt = {
 var define = def;
 var require = req;
 var demand = dem;
-// this helps with minificiation when using a lot of global references
+// this helps with minification when using a lot of global references
 var defineGlobal = function (id, ref) {
   define(id, [], function () { return ref; });
 };
 /*jsc
-["tinymce.plugins.contextmenu.Plugin","tinymce.core.dom.DOMUtils","tinymce.core.Env","tinymce.core.PluginManager","tinymce.core.ui.Menu","tinymce.core.util.Tools","global!tinymce.util.Tools.resolve"]
+["tinymce.plugins.contextmenu.Plugin","ephox.katamari.api.Cell","tinymce.core.PluginManager","tinymce.plugins.contextmenu.api.Api","tinymce.plugins.contextmenu.core.Bind","global!tinymce.util.Tools.resolve","tinymce.plugins.contextmenu.api.Settings","tinymce.plugins.contextmenu.core.Coords","tinymce.plugins.contextmenu.ui.ContextMenu","tinymce.core.Env","tinymce.core.dom.DOMUtils","tinymce.core.ui.Factory","tinymce.core.util.Tools"]
 jsc*/
+define(
+  'ephox.katamari.api.Cell',
+
+  [
+  ],
+
+  function () {
+    var Cell = function (initial) {
+      var value = initial;
+
+      var get = function () {
+        return value;
+      };
+
+      var set = function (v) {
+        value = v;
+      };
+
+      var clone = function () {
+        return Cell(get());
+      };
+
+      return {
+        get: get,
+        set: set,
+        clone: clone
+      };
+    };
+
+    return Cell;
+  }
+);
+
 defineGlobal("global!tinymce.util.Tools.resolve", tinymce.util.Tools.resolve);
 /**
  * ResolveGlobal.js
@@ -95,15 +128,76 @@ defineGlobal("global!tinymce.util.Tools.resolve", tinymce.util.Tools.resolve);
  */
 
 define(
-  'tinymce.core.dom.DOMUtils',
+  'tinymce.core.PluginManager',
   [
     'global!tinymce.util.Tools.resolve'
   ],
   function (resolve) {
-    return resolve('tinymce.dom.DOMUtils');
+    return resolve('tinymce.PluginManager');
   }
 );
 
+/**
+ * Api.js
+ *
+ * Released under LGPL License.
+ * Copyright (c) 1999-2017 Ephox Corp. All rights reserved
+ *
+ * License: http://www.tinymce.com/license
+ * Contributing: http://www.tinymce.com/contributing
+ */
+
+define(
+  'tinymce.plugins.contextmenu.api.Api',
+  [
+  ],
+  function () {
+    var get = function (visibleState) {
+      var isContextMenuVisible = function () {
+        return visibleState.get();
+      };
+
+      return {
+        isContextMenuVisible: isContextMenuVisible
+      };
+    };
+
+    return {
+      get: get
+    };
+  }
+);
+
+
+/**
+ * Settings.js
+ *
+ * Released under LGPL License.
+ * Copyright (c) 1999-2017 Ephox Corp. All rights reserved
+ *
+ * License: http://www.tinymce.com/license
+ * Contributing: http://www.tinymce.com/contributing
+ */
+
+define(
+  'tinymce.plugins.contextmenu.api.Settings',
+  [
+  ],
+  function () {
+    var shouldNeverUseNative = function (editor) {
+      return editor.settings.contextmenu_never_use_native;
+    };
+
+    var getContextMenu = function (editor) {
+      return editor.getParam('contextmenu', 'link openlink image inserttable | cell row column deletetable');
+    };
+
+    return {
+      shouldNeverUseNative: shouldNeverUseNative,
+      getContextMenu: getContextMenu
+    };
+  }
+);
 /**
  * ResolveGlobal.js
  *
@@ -135,15 +229,82 @@ define(
  */
 
 define(
-  'tinymce.core.PluginManager',
+  'tinymce.core.dom.DOMUtils',
   [
     'global!tinymce.util.Tools.resolve'
   ],
   function (resolve) {
-    return resolve('tinymce.PluginManager');
+    return resolve('tinymce.dom.DOMUtils');
   }
 );
 
+/**
+ * Coords.js
+ *
+ * Released under LGPL License.
+ * Copyright (c) 1999-2017 Ephox Corp. All rights reserved
+ *
+ * License: http://www.tinymce.com/license
+ * Contributing: http://www.tinymce.com/contributing
+ */
+
+define(
+  'tinymce.plugins.contextmenu.core.Coords',
+  [
+    'tinymce.core.Env',
+    'tinymce.core.dom.DOMUtils'
+  ],
+  function (Env, DOMUtils) {
+    var nu = function (x, y) {
+      return { x: x, y: y };
+    };
+
+    var transpose = function (pos, dx, dy) {
+      return nu(pos.x + dx, pos.y + dy);
+    };
+
+    var fromPageXY = function (e) {
+      return nu(e.pageX, e.pageY);
+    };
+
+    var fromClientXY = function (e) {
+      return nu(e.clientX, e.clientY);
+    };
+
+    var transposeUiContainer = function (element, pos) {
+      if (element && DOMUtils.DOM.getStyle(element, 'position', true) !== 'static') {
+        var containerPos = DOMUtils.DOM.getPos(element);
+        var dx = containerPos.x - element.scrollLeft;
+        var dy = containerPos.y - element.scrollTop;
+        return transpose(pos, -dx, -dy);
+      } else {
+        return transpose(pos, 0, 0);
+      }
+    };
+
+    var transposeContentAreaContainer = function (element, pos) {
+      var containerPos = DOMUtils.DOM.getPos(element);
+      return transpose(pos, containerPos.x, containerPos.y);
+    };
+
+    var getUiContainer = function (editor) {
+      return Env.container;
+    };
+
+    var getPos = function (editor, e) {
+      if (editor.inline) {
+        return transposeUiContainer(getUiContainer(editor), fromPageXY(e));
+      } else {
+        var iframePos = transposeContentAreaContainer(editor.getContentAreaContainer(), fromClientXY(e));
+        return transposeUiContainer(getUiContainer(editor), iframePos);
+      }
+    };
+
+    return {
+      getPos: getPos
+    };
+  }
+);
 /**
  * ResolveGlobal.js
  *
@@ -155,12 +316,12 @@ define(
  */
 
 define(
-  'tinymce.core.ui.Menu',
+  'tinymce.core.ui.Factory',
   [
     'global!tinymce.util.Tools.resolve'
   ],
   function (resolve) {
-    return resolve('tinymce.ui.Menu');
+    return resolve('tinymce.ui.Factory');
   }
 );
 
@@ -185,6 +346,123 @@ define(
 );
 
 /**
+ * ContextMenu.js
+ *
+ * Released under LGPL License.
+ * Copyright (c) 1999-2017 Ephox Corp. All rights reserved
+ *
+ * License: http://www.tinymce.com/license
+ * Contributing: http://www.tinymce.com/contributing
+ */
+
+define(
+  'tinymce.plugins.contextmenu.ui.ContextMenu',
+  [
+    'tinymce.core.ui.Factory',
+    'tinymce.core.util.Tools',
+    'tinymce.plugins.contextmenu.api.Settings'
+  ],
+  function (Factory, Tools, Settings) {
+    var renderMenu = function (editor, visibleState) {
+      var menu, contextmenu, items = [];
+
+      contextmenu = Settings.getContextMenu(editor);
+      Tools.each(contextmenu.split(/[ ,]/), function (name) {
+        var item = editor.menuItems[name];
+
+        if (name === '|') {
+          item = { text: name };
+        }
+
+        if (item) {
+          item.shortcut = ''; // Hide shortcuts
+          items.push(item);
+        }
+      });
+
+      for (var i = 0; i < items.length; i++) {
+        if (items[i].text === '|') {
+          if (i === 0 || i === items.length - 1) {
+            items.splice(i, 1);
+          }
+        }
+      }
+
+      menu = Factory.create('menu', {
+        items: items,
+        context: 'contextmenu',
+        classes: 'contextmenu'
+      }).renderTo();
+
+      menu.on('hide', function (e) {
+        if (e.control === this) {
+          visibleState.set(false);
+        }
+      });
+
+      editor.on('remove', function () {
+        menu.remove();
+        menu = null;
+      });
+
+      return menu;
+    };
+
+    var show = function (editor, pos, visibleState, menu) {
+      if (menu.get() === null) {
+        menu.set(renderMenu(editor, visibleState));
+      } else {
+        menu.get().show();
+      }
+
+      menu.get().moveTo(pos.x, pos.y);
+      visibleState.set(true);
+    };
+
+    return {
+      show: show
+    };
+  }
+);
+/**
+ * Bind.js
+ *
+ * Released under LGPL License.
+ * Copyright (c) 1999-2017 Ephox Corp. All rights reserved
+ *
+ * License: http://www.tinymce.com/license
+ * Contributing: http://www.tinymce.com/contributing
+ */
+
+define(
+  'tinymce.plugins.contextmenu.core.Bind',
+  [
+    'tinymce.plugins.contextmenu.api.Settings',
+    'tinymce.plugins.contextmenu.core.Coords',
+    'tinymce.plugins.contextmenu.ui.ContextMenu'
+  ],
+  function (Settings, Coords, ContextMenu) {
+    var isNativeOverrideKeyEvent = function (editor, e) {
+      return e.ctrlKey && !Settings.shouldNeverUseNative(editor);
+    };
+
+    var setup = function (editor, visibleState, menu) {
+      editor.on('contextmenu', function (e) {
+        if (isNativeOverrideKeyEvent(editor, e)) {
+          return;
+        }
+
+        e.preventDefault();
+        ContextMenu.show(editor, Coords.getPos(editor, e), visibleState, menu);
+      });
+    };
+
+    return {
+      setup: setup
+    };
+  }
+);
+/**
  * Plugin.js
  *
  * Released under LGPL License.
@@ -194,128 +472,23 @@ define(
  * Contributing: http://www.tinymce.com/contributing
  */
 
-/**
- * This class contains all core logic for the contextmenu plugin.
- *
- * @class tinymce.contextmenu.Plugin
- * @private
- */
 define(
   'tinymce.plugins.contextmenu.Plugin',
   [
-    'tinymce.core.dom.DOMUtils',
-    'tinymce.core.Env',
+    'ephox.katamari.api.Cell',
     'tinymce.core.PluginManager',
-    'tinymce.core.ui.Menu',
-    'tinymce.core.util.Tools'
+    'tinymce.plugins.contextmenu.api.Api',
+    'tinymce.plugins.contextmenu.core.Bind'
   ],
-  function (DOMUtils, Env, PluginManager, Menu, Tools) {
-    var DOM = DOMUtils.DOM;
-
+  function (Cell, PluginManager, Api, Bind) {
     PluginManager.add('contextmenu', function (editor) {
-      var menu, visibleState, contextmenuNeverUseNative = editor.settings.contextmenu_never_use_native;
+      var menu = Cell(null), visibleState = Cell(false);
 
-      var isNativeOverrideKeyEvent = function (e) {
-        return e.ctrlKey && !contextmenuNeverUseNative;
-      };
+      Bind.setup(editor, visibleState, menu);
 
-      var isMacWebKit = function () {
-        return Env.mac && Env.webkit;
-      };
-
-      var isContextMenuVisible = function () {
-        return visibleState === true;
-      };
-
-      /**
-       * This takes care of a os x native issue where it expands the selection
-       * to the word at the caret position to do "lookups". Since we are overriding
-       * the context menu we also need to override this expanding so the behavior becomes
-       * normalized. Firefox on os x doesn't expand to the word when using the context menu.
-       */
-      editor.on('mousedown', function (e) {
-        if (isMacWebKit() && e.button === 2 && !isNativeOverrideKeyEvent(e)) {
-          if (editor.selection.isCollapsed()) {
-            editor.once('contextmenu', function (e) {
-              editor.selection.placeCaretAt(e.clientX, e.clientY);
-            });
-          }
-        }
-      });
-
-      editor.on('contextmenu', function (e) {
-        var contextmenu;
-
-        if (isNativeOverrideKeyEvent(e)) {
-          return;
-        }
-
-        e.preventDefault();
-        contextmenu = editor.settings.contextmenu || 'link openlink image inserttable | cell row column deletetable';
-
-        // Render menu
-        if (!menu) {
-          var items = [];
-
-          Tools.each(contextmenu.split(/[ ,]/), function (name) {
-            var item = editor.menuItems[name];
-
-            if (name == '|') {
-              item = { text: name };
-            }
-
-            if (item) {
-              item.shortcut = ''; // Hide shortcuts
-              items.push(item);
-            }
-          });
-
-          for (var i = 0; i < items.length; i++) {
-            if (items[i].text == '|') {
-              if (i === 0 || i == items.length - 1) {
-                items.splice(i, 1);
-              }
-            }
-          }
-
-          menu = new Menu({
-            items: items,
-            context: 'contextmenu',
-            classes: 'contextmenu'
-          }).renderTo();
-
-          menu.on('hide', function (e) {
-            if (e.control === this) {
-              visibleState = false;
-            }
-          });
-
-          editor.on('remove', function () {
-            menu.remove();
-            menu = null;
-          });
-
-        } else {
-          menu.show();
-        }
-
-        // Position menu
-        var pos = { x: e.pageX, y: e.pageY };
-
-        if (!editor.inline) {
-          pos = DOM.getPos(editor.getContentAreaContainer());
-          pos.x += e.clientX;
-          pos.y += e.clientY;
-        }
-
-        menu.moveTo(pos.x, pos.y);
-        visibleState = true;
-      });
-
-      return {
-        isContextMenuVisible: isContextMenuVisible
-      };
+      return Api.get(visibleState);
     });
+
     return function () { };
   }
 );

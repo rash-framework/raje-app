@@ -80,6 +80,7 @@ if (hasBackend) {
 
         editor.on('keyDown', function (e) {
 
+          /*
           // Prevent shift+enter
           if (e.keyCode == 13 && e.shiftKey)
             e.preventDefault()
@@ -93,7 +94,7 @@ if (hasBackend) {
 
               pasteBookmark = tinymce.activeEditor.selection.getBookmark()
             }
-          }
+          }*/
         })
 
         /**
@@ -139,6 +140,7 @@ if (hasBackend) {
         // Prevent span 
         editor.on('nodeChange', function (e) {
 
+
           let selectedElement = $(tinymce.activeEditor.selection.getNode())
 
           // Move caret to first heading if is after or before not editable header
@@ -161,7 +163,6 @@ if (hasBackend) {
             }
             */
           }
-
           updateDocumentState()
         })
 
@@ -659,4 +660,44 @@ if (hasBackend) {
   ipcRenderer.on('updateContent', (event, data) => {
     tinymce.triggerSave()
   })
+
+  cursor = {
+
+    /**
+     * 
+     */
+    isInsideHeading: function (selection) {
+
+      let rng = selection.getRng()
+
+      // Save the starting element
+      let start = rng.startContainer
+      let startNode = $(start.nodeType == 3 ? start.parentNode : start)
+
+      // Save the ending element
+      let end = rng.endContainer
+      let endNode = $(end.nodeType == 3 ? end.parentNode : end)
+
+      // Check if the selection contains more than one biblioentry
+      return $(rng.commonAncestorContainer).is(':header') &&
+        $(rng.commonAncestorContainer).text().trim().length != rng.startOffset
+    },
+
+    isInsideTable: function (selection) {
+
+      let rng = selection.getRng()
+
+      // Save the starting element
+      let start = rng.startContainer
+      let startNode = $(start.nodeType == 3 ? start.parentNode : start)
+
+      // Save the ending element
+      let end = rng.endContainer
+      let endNode = $(end.nodeType == 3 ? end.parentNode : end)
+
+      // Check if the selection contains more than one biblioentry
+      return ($(rng.commonAncestorContainer).is(FIGURE_TABLE_SELECTOR) || $(rng.commonAncestorContainer).parents(FIGURE_TABLE_SELECTOR).length) &&
+        $(rng.commonAncestorContainer).text().trim().length != rng.startOffset
+    }
+  }
 }

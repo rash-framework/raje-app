@@ -115,13 +115,12 @@ tinymce.PluginManager.add('raje_inlineCode', function (editor, url) {
 
   editor.on('keyDown', function (e) {
 
+
     // Check if the selected element is a CODE that isn't inside a FIGURE or PRE
     let selectedElement = $(tinymce.activeEditor.selection.getNode())
     if (selectedElement.is('code') && !selectedElement.parents(FIGURE_SELECTOR).length && !selectedElement.parents('pre').length) {
 
-      /**
-       * Check if ENTER is pressed
-       */
+      // Check if ENTER is pressed
       if (e.keyCode == 13) {
 
         e.preventDefault()
@@ -129,14 +128,12 @@ tinymce.PluginManager.add('raje_inlineCode', function (editor, url) {
         inline.exit()
       }
 
-      /**
-       * Check if a PRINTABLE CHAR is pressed
-       */
+      //Check if a PRINTABLE CHAR is pressed
       if (checkIfPrintableChar(e.keyCode)) {
 
         // If the first char is ZERO_SPACE and the code has no char
         if (selectedElement.text().length == 2 && `&#${selectedElement.text().charCodeAt(0)};` == ZERO_SPACE) {
-          
+
           e.preventDefault()
           e.stopImmediatePropagation()
           inline.replaceText(e.key)
@@ -172,9 +169,7 @@ tinymce.PluginManager.add('raje_inlineQuote', function (editor, url) {
     let selectedElement = $(tinymce.activeEditor.selection.getNode())
     if (selectedElement.is('q')) {
 
-      /**
-       * Check if ENTER is pressed
-       */
+      // Check if ENTER is pressed
       if (e.keyCode == 13) {
 
         e.preventDefault()
@@ -182,9 +177,7 @@ tinymce.PluginManager.add('raje_inlineQuote', function (editor, url) {
         inline.exit()
       }
 
-      /**
-       * Check if a PRINTABLE CHAR is pressed
-       */
+      // Check if a PRINTABLE CHAR is pressed
       if (checkIfPrintableChar(e.keyCode)) {
 
         // If the first char is ZERO_SPACE and the code has no char

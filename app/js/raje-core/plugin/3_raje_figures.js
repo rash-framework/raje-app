@@ -122,6 +122,8 @@ tinymce.PluginManager.add('raje_table', function (editor, url) {
   // Because some behaviours aren't accepted, RAJE must check selection and accept backspace, canc and enter press
   editor.on('keyDown', function (e) {
 
+    // TODO if inside table
+
     // keyCode 8 is backspace, 46 is canc
     if (e.keyCode == 8)
       return handleFigureDelete(tinymce.activeEditor.selection)
@@ -133,7 +135,7 @@ tinymce.PluginManager.add('raje_table', function (editor, url) {
     if (e.keyCode == 13)
       return handleFigureEnter(tinymce.activeEditor.selection)
 
-    e.stopPropagation()
+    e.stopImmediatePropagation()
   })
 
   // Handle strange structural modification empty figures or with caption as first child
@@ -250,6 +252,7 @@ tinymce.PluginManager.add('raje_image', function (editor, url) {
   // Because some behaviours aren't accepted, RAJE must check selection and accept backspace, canc and enter press
   editor.on('keyDown', function (e) {
 
+
     // keyCode 8 is backspace
     if (e.keyCode == 8)
       return handleFigureDelete(tinymce.activeEditor.selection)
@@ -260,6 +263,7 @@ tinymce.PluginManager.add('raje_image', function (editor, url) {
     // Handle enter key in figcaption
     if (e.keyCode == 13)
       return handleFigureEnter(tinymce.activeEditor.selection)
+
   })
 
   image = {
@@ -500,28 +504,21 @@ tinymce.PluginManager.add('raje_listing', function (editor, url) {
   // Because some behaviours aren't accepted, RAJE must check selection and accept backspace, canc and enter press
   editor.on('keyDown', function (e) {
 
-    /**
-     * NOTE: this behvaiour is the same for codeblock
-     */
+    // NOTE: this behvaiour is the same for codeblock 
     let selectedElement = $(tinymce.activeEditor.selection.getNode())
     if (selectedElement.parents('pre:has(code)').length) {
 
-      /**
-       * Proper listing editor behaviour
-       */
+
       if (selectedElement.is('code')) {
 
-        /**
-         * ENTER
-         */
+
+        // ENTER
         if (e.keyCode == 13) {
           e.preventDefault()
           return listing.setContent(`\n`)
         }
 
-        /**
-         * TAB
-         */
+        //TAB
         if (e.keyCode == 9) {
           e.preventDefault()
           return listing.setContent(`\t`)
@@ -536,16 +533,16 @@ tinymce.PluginManager.add('raje_listing', function (editor, url) {
         return handleFigureDelete(tinymce.activeEditor.selection)
 
       /*
-      // keyCode 8 is backspace
-      if (e.keyCode == 8)
-        return handleFigureDelete(tinymce.activeEditor.selection)
+        // keyCode 8 is backspace
+        if (e.keyCode == 8)
+          return handleFigureDelete(tinymce.activeEditor.selection)
 
-      if (e.keyCode == 46)
-        return handleFigureCanc(tinymce.activeEditor.selection)
+        if (e.keyCode == 46)
+          return handleFigureCanc(tinymce.activeEditor.selection)
 
-      // Handle enter key in figcaption
-      if (e.keyCode == 13)
-        return handleFigureEnter(tinymce.activeEditor.selection)
+        // Handle enter key in figcaption
+        if (e.keyCode == 13)
+          return handleFigureEnter(tinymce.activeEditor.selection)
         */
     }
     /*
@@ -782,12 +779,11 @@ tinymce.PluginManager.add('raje_quoteblock', function (editor, url) {
 
   editor.on('keyDown', function (e) {
 
+
     let selectedElement = $(tinymce.activeEditor.selection.getNode())
     if (selectedElement.is('p') && selectedElement.parent().is('blockquote')) {
 
-      /**
-       * Enter
-       */
+      //ENTER
       if (e.keyCode == 13) {
         e.preventDefault()
 
