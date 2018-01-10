@@ -68,12 +68,10 @@ figure>p:not(mathml|math) {
     margin-bottom: 0px;
 }
 
-
-/*
 figure img:not([role=math]),
-figure svg {
+figure svg:not([role=math]) {
     border: 1px solid black;
-}*/
+}
 
 figure>pre {
     text-align: left;
