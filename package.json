@@ -5,7 +5,8 @@
     "dist": "electron-packager ./app --all --out=./dist --icon=./build/icon --overwrite",
     "dist-win": "electron-packager ./app --overwrite --asar=true --platform=win32 --icon=./build/icon --prune=true --out=./dist --version-string.CompanyName=CE --version-string.FileDescription=CE --version-string.ProductName='Electron Tutorial App'",
     "dist-osx": "electron-packager ./app --overwrite --platform=darwin --arch=x64 --icon=./build/icon --prune=true --out=./dist",
-    "dist-linux": "electron-packager ./app --overwrite --asar=true --platform=linux --arch=x64 --icon=./build/icon --prune=true --out=./dist"
+    "dist-linux": "electron-packager ./app RAJE --overwrite --asar=true --platform=linux --arch=x64 --icon=./build/icon --prune=true --out=./dist",
+    "installer-linux": "sudo electron-installer-debian --src dist/RAJE-linux-x64/ --arch amd64 --config debian.json"
   },
   "repository": "https://github.com/gspinaci/raje-software",
   "author": "Gianmarco Spinaci <spino9330@gmail.com>",

@@ -44,7 +44,7 @@ const {
 
 const url = require('url')
 const path = require('path')
-const windowManager = require('electron-window-manager')
+//const windowManager = require('electron-window-manager')
 
 const PACKAGE = require('./package.json')
 
@@ -56,6 +56,9 @@ const RAJE_GITHUB = require('./modules/raje_github.js')
 const EDITOR_WINDOW = 'editor'
 const SPLASH_WINDOW = 'splash'
 
+let splashWindow
+let editorWindow
+
 const windows = {
 
   /**
@@ -64,7 +67,7 @@ const windows = {
   openSplash: function () {
 
     // Init the window manager
-    windowManager.init()
+    //windowManager.init()
 
     // DEBUG mode
     // RAJE_STORAGE.clearAll()
@@ -76,8 +79,7 @@ const windows = {
       slashes: true
     })
 
-    // Open the splash window
-    windowManager.open(SPLASH_WINDOW, 'RAJE', splashWindowUrl, null, {
+    splashWindow = new BrowserWindow({
       height: 500,
       width: 800,
       resizable: false,
@@ -85,8 +87,12 @@ const windows = {
       movable: true
     })
 
+    splashWindow.loadURL(splashWindowUrl)
+
     // Set the menu 
     Menu.setApplicationMenu(Menu.buildFromTemplate(RAJE_MENU.getSplashMenu()))
+
+    splashWindow.show()
   },
 
   /**
@@ -94,7 +100,9 @@ const windows = {
    */
   closeSplash: function () {
 
-    windowManager.close(SPLASH_WINDOW)
+    splashWindow.close()
+
+    //windowManager.close(SPLASH_WINDOW)
   },
 
   /**
@@ -198,14 +206,17 @@ const windows = {
    */
   showEditor: function (editorWindowUrl) {
 
-    // Open the new window with the size given by the splash window
-    windowManager.open(EDITOR_WINDOW, 'RAJE', editorWindowUrl, null, {
+    editorWindow = new BrowserWindow({
       width: global.screenSize.width,
       height: global.screenSize.height,
-      resizable: true,
-      icon: path.join(__dirname, 'build/icon.png'),
-      //showDevTools: true
+      resizable: true
     })
+
+    editorWindow.loadURL(editorWindowUrl)
+    editorWindow.show()
+
+    // Open the new window with the size given by the splash window
+    //windowManager.open(EDITOR_WINDOW, 'RAJE', editorWindowUrl, null, )
 
     // Retrieve and save Github data
     global.getUserStoredData((err, data) => {
@@ -221,7 +232,7 @@ const windows = {
     /**
      * Catch the close event
      */
-    windowManager.get(EDITOR_WINDOW).object.on('close', event => {
+    editorWindow.on('close', event => {
 
       // If the document is in hasChanged mode (need to be saved)
       if (global.articleSettings.hasChanged) {
@@ -243,13 +254,13 @@ const windows = {
             case 0:
               // TODO save the document
               global.articleSettings.hasChanged = false
-              windowManager.get(EDITOR_WINDOW).object.close()
+              editorWindow.close()
               break
 
               // The user doesn't want to save the document
             case 1:
               global.articleSettings.hasChanged = false
-              windowManager.get(EDITOR_WINDOW).object.close()
+              editorWindow.close()
               break
           }
         })
@@ -259,7 +270,7 @@ const windows = {
     /**
      * When the editor is closed, remove rajemce from the article if is still there
      */
-    windowManager.get(EDITOR_WINDOW).object.on('closed', event => {
+    editorWindow.on('closed', event => {
 
       windows.openSplash()
 
@@ -550,7 +561,7 @@ ipcMain.on('getVersionSync', (event, arg) => {
  * Start the save as process
  */
 global.executeSaveAs = function () {
-  windowManager.get(EDITOR_WINDOW).object.webContents.send('executeSaveAs')
+  editorWindow.webContents.send('executeSaveAs')
 }
 
 /**
@@ -561,26 +572,26 @@ global.executeSave = function () {
 
   // If the article hasn't been saved yet, call saveAs
   if (global.articleSettings.isNew)
-    windowManager.get(EDITOR_WINDOW).object.webContents.send('executeSaveAs')
+    editorWindow.webContents.send('executeSaveAs')
 
   // Or call save
   else
-    windowManager.get(EDITOR_WINDOW).object.webContents.send('executeSave')
+    editorWindow.webContents.send('executeSave')
 }
 
 /**
  * 
  */
 global.updateClientContent = function () {
-  windowManager.get(EDITOR_WINDOW).object.webContents.send('updateContent')
+  editorWindow.webContents.send('updateContent')
 }
 
 /**
  * 
  */
 global.newArticle = function () {
-  windowManager.closeCurrent()
   windows.openEditor(null)
+  splashWindow.close()
 }
 
 /**
@@ -612,7 +623,7 @@ global.openArticle = function () {
  * 
  */
 global.sendNotification = function (message) {
-  windowManager.get(EDITOR_WINDOW).object.webContents.send('notify', message)
+  editorWindow.webContents.send('notify', message)
 }
 
 /**
