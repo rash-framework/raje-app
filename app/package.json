@@ -1,6 +1,6 @@
 {
   "name": "raje",
-  "version": "0.1.13",
+  "version": "0.1.14",
   "description": "RAJE: RAsh Javascript Editor",
   "main": "main.js",
   "scripts": {
@@ -10,7 +10,7 @@
   "author": "Gianmarco Spinaci <spino9330@gmail.com>",
   "license": "ISC",
   "devDependencies": {
-    "electron": "^1.4.1",
+    "electron": "^1.8.2-beta.3",
     "gulp": "^3.9.1",
     "gulp-concat": "^2.6.1",
     "gulp-watch": "^4.3.11"

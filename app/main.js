@@ -82,9 +82,7 @@ const windows = {
       width: 800,
       resizable: false,
       frame: false,
-      movable: true,
-      //fullscreenable: false,
-      icon: path.join(__dirname, 'build/icon.png')
+      movable: true
     })
 
     // Set the menu 
