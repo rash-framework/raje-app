@@ -3,7 +3,9 @@
   "version": "0.1.10",
   "scripts": {
     "dist": "electron-packager ./app --all --out=./dist --icon=./build/icon --overwrite",
-    "dist-osx": "electron-packager ./app --platform=darwin --out=./dist --icon=./build/icon --overwrite"
+    "dist-osx": "electron-packager ./app --platform=darwin --out=./dist --icon=./build/icon --overwrite",
+    "dist-linux": "electron-packager ./app --overwrite --asar=true --platform=linux --arch=x64 --icon=./build/icon --prune=true --out=./dist",
+    "deb64": "electron-installer-debian --src dist/app-linux-x64/ --dest dist/installers/ --arch amd64"
   },
   "repository": "https://github.com/gspinaci/raje-software",
   "author": "Gianmarco Spinaci <spino9330@gmail.com>",
@@ -13,6 +15,8 @@
     "app-category-type": "public.app-category.productivity"
   },
   "devDependencies": {
+    "electron-installer-debian": "^0.7.1",
+    "electron-installer-dmg": "^0.2.1",
     "electron-packager": "^8.5.1",
     "electron-prebuilt": "^1.4.13"
   }
