@@ -93,12 +93,7 @@ tinymce.PluginManager.add('raje_save', function (editor, url) {
         $(this).replaceWith($(this).html())
       })
 
-      article.find('*').each(function () {
-        let text = $(this).text()
-        //$(this).text(text.replace('s/\xe2\x80\x8b//g', ''))
-      })
-
-      return new XMLSerializer().serializeToString(article[0])
+      return `<!DOCTYPE html>${new XMLSerializer().serializeToString(article[0])}`
     },
 
     /**
