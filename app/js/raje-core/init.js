@@ -79,7 +79,7 @@ if (hasBackend) {
         })
 
         editor.on('keyDown', function (e) {
-          
+
           // Prevent shift+enter
           if (e.keyCode == 13 && e.shiftKey)
             e.preventDefault()
@@ -138,7 +138,6 @@ if (hasBackend) {
 
         // Prevent span 
         editor.on('nodeChange', function (e) {
-
 
           let selectedElement = $(tinymce.activeEditor.selection.getNode())
 
@@ -233,9 +232,11 @@ if (hasBackend) {
         path: 'node_modules/tinymce-formula/'
       },
 
+      cleanup_on_startup: false,
+      trim_span_elements: false,
       verify_html: false,
       cleanup: false,
-      entity_encoding: 'raw'
+      convert_urls: false
     })
   })
 

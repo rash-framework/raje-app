@@ -3,9 +3,9 @@
   "version": "0.1.10",
   "scripts": {
     "dist": "electron-packager ./app --all --out=./dist --icon=./build/icon --overwrite",
-    "dist-win": "electron-packager ./app --overwrite --asar=true --platform=win32 --icon=./build/icon --prune=true --out=./dist --version-string.CompanyName=CE --version-string.FileDescription=CE --version-string.ProductName='Electron Tutorial App'",
-    "dist-osx": "electron-packager ./app --overwrite --platform=darwin --arch=x64 --icon=./build/icon --prune=true --out=./dist",
-    "dist-linux": "electron-packager ./app RAJE --overwrite --asar=true --platform=linux --arch=x64 --icon=./build/icon --prune=true --out=./dist",
+    "dist-win": "electron-packager ./app RAJE --overwrite --platform=win32 --icon=./build/icon --prune=true --out=./dist --version-string.CompanyName=CE --version-string.FileDescription=CE --version-string.ProductName='Electron Tutorial App'",
+    "dist-osx": "electron-packager ./app RAJE --overwrite --platform=darwin --arch=x64 --icon=./build/icon --prune=true --out=./dist",
+    "dist-linux": "electron-packager ./app RAJE --overwrite --platform=linux --arch=x64 --icon=./build/icon --prune=true --out=./dist",
     "installer-linux": "sudo electron-installer-debian --src dist/RAJE-linux-x64/ --arch amd64 --config debian.json"
   },
   "repository": "https://github.com/gspinaci/raje-software",
@@ -16,7 +16,7 @@
     "app-category-type": "public.app-category.productivity"
   },
   "devDependencies": {
-    "electron": "^1.7.10",
+    "electron": "^1.8.2-beta.3",
     "electron-installer-debian": "^0.7.1",
     "electron-installer-dmg": "^0.2.1",
     "electron-packager": "^8.5.1"
