@@ -1,5 +1,6 @@
 const fs = require('fs-extra')
 const cheerio = require('cheerio')
+const entities = require('entities')
 
 const RAJE_HIDDEN_FILE = '.raje'
 const RAJE_CORE = 'js/raje-core/core.js'
@@ -232,7 +233,7 @@ module.exports = {
       $('script[src="js/jquery.min.js"]')
         .after(`<script src="js/raje-core/init_core.js" data-rash-original-content=""/>`)
 
-      fs.writeFile(path, $.html())
+      fs.writeFile(path, entities.decodeHTML($.html()))
 
       return callback(null)
     })
@@ -254,7 +255,7 @@ module.exports = {
 
       $('script[src="js/raje-core/init_core.js"]').remove()
 
-      fs.writeFile(path, $.html())
+      fs.writeFile(path, entities.decodeHTML($.html()))
 
       return callback(null)
     })
