@@ -2,6 +2,15 @@
 .link_colour {
   color: #F5DA75 !important; }
 
+.call_to_action {
+  padding: 15px 25px;
+  font-weight: bold;
+  border-radius: 3px;
+  display: inline-block;
+  text-transform: uppercase; }
+  .call_to_action:hover {
+    text-decoration: none; }
+
 #above_folding {
   width: 100%;
   background: #de5f5f;
@@ -25,18 +34,22 @@
       padding-top: 50px; }
       #above_folding .jumbotron .wrapper .container {
         margin-top: 50px; }
+        #above_folding .jumbotron .wrapper .container .call_to_action {
+          background-color: white;
+          color: #AA6E7D; }
+        #above_folding .jumbotron .wrapper .container a:nth-child(1) {
+          color: #A88492; }
+        #above_folding .jumbotron .wrapper .container a:nth-child(2) {
+          color: #A18998; }
+        #above_folding .jumbotron .wrapper .container a:nth-child(3) {
+          color: #9491A3; }
+        #above_folding .jumbotron .wrapper .container a:nth-child(4) {
+          color: #879BB0; }
+        #above_folding .jumbotron .wrapper .container a:nth-child(5) {
+          color: #849CB2; }
         #above_folding .jumbotron .wrapper .container .lead {
           padding-top: 10px;
           color: #F5F7FA; }
-        #above_folding .jumbotron .wrapper .container .call_to_action {
-          padding: 15px 25px;
-          background-color: white;
-          color: #AA6E7D;
-          font-weight: bold;
-          border-radius: 3px;
-          display: inline-block; }
-          #above_folding .jumbotron .wrapper .container .call_to_action:hover {
-            text-decoration: none; }
       #above_folding .jumbotron .wrapper .blockquote {
         margin-top: 50px; }
         #above_folding .jumbotron .wrapper .blockquote .blockquote-footer {
@@ -67,6 +80,11 @@
   padding: 100px 0; }
   #footer a {
     color: #F5DA75; }
+
+#download .call_to_action {
+  margin-top: 20px;
+  background-color: #54B9DB;
+  color: white; }
 
 body section:not(#above_folding) {
   padding-top: 100px;

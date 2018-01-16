@@ -10,6 +10,16 @@ $footer_color: #434A54
 .link_colour
   color: $secondary_color !important
 
+.call_to_action
+  padding: 15px 25px
+  font-weight: bold
+  border-radius: 3px
+  display: inline-block
+  text-transform: uppercase
+
+  &:hover
+    text-decoration: none
+
 #above_folding
   width: 100%
   background: #de5f5f
@@ -41,20 +51,28 @@ $footer_color: #434A54
       .container
         margin-top: 50px
 
+        .call_to_action
+          background-color: white
+          color: $primary_color
+
+        a:nth-child(1)
+          color: #A88492
+
+        a:nth-child(2)
+          color: #A18998
+
+        a:nth-child(3)
+          color: #9491A3
+
+        a:nth-child(4)
+          color: #879BB0
+
+        a:nth-child(5)
+          color: #849CB2
+
         .lead
           padding-top: 10px
           color: $grey_text
-
-        .call_to_action
-          padding: 15px 25px
-          background-color: white
-          color: $primary_color
-          font-weight: bold
-          border-radius: 3px
-          display: inline-block
-
-          &:hover
-            text-decoration: none
 
       .blockquote
         margin-top: 50px
@@ -94,6 +112,13 @@ $footer_color: #434A54
 
   a
     color: $secondary_color
+
+#download
+
+  .call_to_action
+    margin-top: 20px
+    background-color: $ending_color_gradient
+    color: white
 
 body
   section:not(#above_folding)
