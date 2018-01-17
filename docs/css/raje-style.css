@@ -63,18 +63,8 @@
             margin-right: auto;
             margin-top: 10px; }
 
-#discover .container {
-  padding-top: 50px;
-  padding-bottom: 100px; }
-  #discover .container .display-4 {
-    margin: 50px 0;
-    font-family: "Roboto Slab", serif; }
-  #discover .container .lead {
-    margin: 20px 0; }
-    #discover .container .lead strong {
-      color: #DE5F5F; }
-    #discover .container .lead a {
-      color: #54B9DB; }
+section:not(#above_folding) .display-4 {
+  margin: 40px 0; }
 
 #footer {
   background-color: #434A54;
