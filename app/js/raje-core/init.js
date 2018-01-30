@@ -63,6 +63,46 @@ if (hasBackend) {
       // Custom toolbar
       toolbar: 'undo redo bold italic link superscript subscript raje_inlineCode raje_inlineQuote raje_inline_formula raje_crossref raje_footnotes | raje_ol raje_ul raje_codeblock raje_quoteblock raje_table raje_image raje_listing raje_formula | raje_section raje_metadata raje_save',
 
+      // Set default target
+      default_link_target: "_blank",
+
+      // Prepend protocol if the link starts with www
+      link_assume_external_targets: true,
+
+      // Hide target list
+      target_list: false,
+
+      // Hide title
+      link_title: false,
+
+      // Remove "powered by tinymce"
+      branding: false,
+
+      // Prevent auto br on element insert
+      apply_source_formatting: false,
+
+      // Prevent non editable object resize
+      object_resizing: false,
+
+      // Update the table popover layout
+      table_toolbar: "tableinsertrowbefore tableinsertrowafter tabledeleterow | tableinsertcolbefore tableinsertcolafter tabledeletecol",
+
+      image_advtab: true,
+
+      paste_block_drop: true,
+
+      extended_valid_elements: "svg[*],defs[*],pattern[*],desc[*],metadata[*],g[*],mask[*],path[*],line[*],marker[*],rect[*],circle[*],ellipse[*],polygon[*],polyline[*],linearGradient[*],radialGradient[*],stop[*],image[*],view[*],text[*],textPath[*],title[*],tspan[*],glyph[*],symbol[*],switch[*],use[*]",
+
+      formula: {
+        path: 'node_modules/tinymce-formula/'
+      },
+
+      cleanup_on_startup: false,
+      trim_span_elements: false,
+      verify_html: false,
+      cleanup: false,
+      convert_urls: false,
+
       // Setup full screen on init
       setup: function (editor) {
 
@@ -192,51 +232,6 @@ if (hasBackend) {
           }
         })
       },
-
-      // Set default target
-      default_link_target: "_blank",
-
-      // Prepend protocol if the link starts with www
-      link_assume_external_targets: true,
-
-      // Hide target list
-      target_list: false,
-
-      // Hide title
-      link_title: false,
-
-      // Set formats
-      formats: {
-        underline: {}
-      },
-
-      // Remove "powered by tinymce"
-      branding: false,
-
-      // Prevent auto br on element insert
-      apply_source_formatting: false,
-
-      // Prevent non editable object resize
-      object_resizing: false,
-
-      // Update the table popover layout
-      table_toolbar: "tableinsertrowbefore tableinsertrowafter tabledeleterow | tableinsertcolbefore tableinsertcolafter tabledeletecol",
-
-      image_advtab: true,
-
-      paste_block_drop: true,
-
-      extended_valid_elements: "svg[*],defs[*],pattern[*],desc[*],metadata[*],g[*],mask[*],path[*],line[*],marker[*],rect[*],circle[*],ellipse[*],polygon[*],polyline[*],linearGradient[*],radialGradient[*],stop[*],image[*],view[*],text[*],textPath[*],title[*],tspan[*],glyph[*],symbol[*],switch[*],use[*]",
-
-      formula: {
-        path: 'node_modules/tinymce-formula/'
-      },
-
-      cleanup_on_startup: false,
-      trim_span_elements: false,
-      verify_html: false,
-      cleanup: false,
-      convert_urls: false
     })
   })
 

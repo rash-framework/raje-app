@@ -300,10 +300,12 @@ function references() {
             if (prev_el.find("sup").hasClass("fn")) {
               $(this).before("<sup class=\"cgen\" contenteditable=\"false\" data-rash-original-content=\"\">,</sup>");
             }
-            $(this).html("<sup class=\"fn cgen\" contenteditable=\"false\" data-rash-original-content=\"" + original_content + "\">" +
-              "<a name=\"fn_pointer_" + current_id.replace("#", "") +
+            /* START Removed <a> from <sup> */
+            $(this).html("<sup class=\"fn cgen\" contenteditable=\"false\" data-rash-original-content=\"" + original_content + "\"" +
+              "name=\"fn_pointer_" + current_id.replace("#", "") +
               "\" title=\"Footnote " + count + ": " +
-              $(current_id).text().replace(/\s+/g, " ").trim() + "\">" + count + "</a></sup>");
+              $(current_id).text().replace(/\s+/g, " ").trim() + "\">" + count + "</sup>");
+            /* END Removed <a> from <sup> */
           } else {
             $(this).html("<span class=\"error cgen\" contenteditable=\"false\" data-rash-original-content=\"" + original_content +
               "\">ERR: footnote '" + current_id.replace("#", "") + "' does not exist</span>");
