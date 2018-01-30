@@ -196,7 +196,7 @@ tinymce.PluginManager.add('raje_section', function (editor, url) {
               return false
             }
 
-            // 
+            // if the cursor is at the beginning of the first empty p inside a footnote, remove it and update the references
             if (selectionContent.isAtBeginningOfEmptyEndnote(selection)) {
 
               e.stopImmediatePropagation()

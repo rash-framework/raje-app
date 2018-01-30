@@ -601,10 +601,8 @@ if (hasBackend) {
       let end = rng.endContainer
       let endNode = $(end.nodeType == 3 ? end.parentNode : end)
 
-      return $(rng.commonAncestorContainer).parent().is(ENDNOTE_SELECTOR) &&
-        (startNode.is(endNode) && startNode.is(`${ENDNOTE_SELECTOR} > p`)) &&
-        (rng.startOffset == rng.endOffset && rng.startOffset == 0) ||
-        (/\r|\n/.exec(start.innerText) != null)
+      return ($(rng.commonAncestorContainer).parent().is(ENDNOTE_SELECTOR) && startNode.is(endNode) && startNode.is(`${ENDNOTE_SELECTOR} > p:first-child`)) &&
+        ((rng.startOffset == rng.endOffset && rng.startOffset == 0) || (/\r|\n/.exec(start.innerText) != null))
     },
 
     /**
