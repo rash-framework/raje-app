@@ -97,30 +97,33 @@ tinymce.PluginManager.add('raje_crossref', function (editor, url) {
 
         let level = ''
 
-        // Sections without role have :after
-        if (!$(this).attr('role')) {
+        if (!$(this).is(ENDNOTE_SELECTOR)) {
 
-          // Save its deepness
-          let parentSections = $(this).parentsUntil('div#raje_root')
+          // Sections without role have :after
+          if (!$(this).attr('role')) {
 
-          if (parentSections.length) {
+            // Save its deepness
+            let parentSections = $(this).parentsUntil('div#raje_root')
 
-            // Iterate its parents backwards (higer first)
-            for (let i = parentSections.length; i--; i > 0) {
-              let section = $(parentSections[i])
-              level += `${section.parent().children(SECTION_SELECTOR).index(section)+1}.`
+            if (parentSections.length) {
+
+              // Iterate its parents backwards (higer first)
+              for (let i = parentSections.length; i--; i > 0) {
+                let section = $(parentSections[i])
+                level += `${section.parent().children(SECTION_SELECTOR).index(section)+1}.`
+              }
             }
+
+            // Current index
+            level += `${$(this).parent().children(SECTION_SELECTOR).index($(this))+1}.`
           }
 
-          // Current index
-          level += `${$(this).parent().children(SECTION_SELECTOR).index($(this))+1}.`
+          sections.push({
+            reference: $(this).attr('id'),
+            text: $(this).find(':header').first().text(),
+            level: level
+          })
         }
-
-        sections.push({
-          reference: $(this).attr('id'),
-          text: $(this).find(':header').first().text(),
-          level: level
-        })
       })
 
       return sections
@@ -155,7 +158,7 @@ tinymce.PluginManager.add('raje_crossref', function (editor, url) {
     getAllReferenceableFigures: function () {
       let figures = []
 
-      $(`${figurebox_selector},${FIGURE_IMAGE_SELECTOR}`).each(function () {
+      $(FIGURE_IMAGE_SELECTOR).each(function () {
         figures.push({
           reference: $(this).attr('id'),
           text: $(this).find('figcaption').text()
@@ -169,7 +172,6 @@ tinymce.PluginManager.add('raje_crossref', function (editor, url) {
       let formulas = []
 
       $(formulabox_selector).each(function () {
-
         formulas.push({
           reference: $(this).parents(FIGURE_SELECTOR).attr('id'),
           text: `Formula ${$(this).parents(FIGURE_SELECTOR).find('span.cgen').text()}`
@@ -181,7 +183,6 @@ tinymce.PluginManager.add('raje_crossref', function (editor, url) {
 
     getAllReferenceableReferences: function () {
       let references = []
-
       $('section[role=doc-bibliography] li').each(function () {
         references.push({
           reference: $(this).attr('id'),
