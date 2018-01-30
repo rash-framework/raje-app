@@ -238,7 +238,7 @@ tinymce.PluginManager.add('raje_section', function (editor, url) {
       if (e.keyCode == 13) {
 
         // When enter is pressed inside an header, not at the end of it
-        if (selectionContent.isInsideHeading(selection)) {
+        if (cursor.isInsideHeading(selection)) {
           e.stopImmediatePropagation()
           section.addWithEnter()
           return false
