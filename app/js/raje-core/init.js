@@ -61,7 +61,7 @@ if (hasBackend) {
       menubar: false,
 
       // Custom toolbar
-      toolbar: 'undo redo bold italic link superscript subscript raje_inlineCode raje_inlineQuote raje_inline_formula raje_crossref raje_footnotes | raje_ol raje_ul raje_codeblock raje_quoteblock raje_table raje_image raje_listing raje_formula | raje_section raje_metadata raje_save searchreplace',
+      toolbar: 'undo redo bold italic link superscript subscript raje_inlineCode raje_inlineQuote raje_inline_formula raje_crossref raje_footnotes | raje_ol raje_ul raje_codeblock raje_quoteblock raje_table raje_image raje_listing raje_formula | searchreplace raje_section raje_metadata raje_save',
 
       // Set default target
       default_link_target: "_blank",
