@@ -55,13 +55,32 @@ if (hasBackend) {
       content_css: ['css/bootstrap.min.css', 'css/rash.css', 'css/raje-core.css'],
 
       // Set plugins
-      plugins: "searchreplace raje_inlineFigure fullscreen link codesample raje_externalLink raje_inlineCode raje_inlineQuote raje_section table image noneditable raje_image raje_quoteblock raje_codeblock raje_table raje_listing raje_inline_formula raje_formula raje_crossref raje_footnotes raje_metadata raje_lists raje_save",
+      plugins: "searchreplace raje_inlineFigure fullscreen link codesample raje_externalLink raje_inlineCode raje_inlineQuote raje_section table image noneditable raje_image raje_quoteblock raje_codeblock raje_table raje_listing raje_inline_formula raje_formula raje_crossref raje_footnotes raje_metadata raje_lists raje_save spellchecker",
 
       // Remove menubar
       menubar: false,
 
       // Custom toolbar
-      toolbar: 'undo redo bold italic link superscript subscript raje_inlineCode raje_inlineQuote raje_inline_formula raje_crossref raje_footnotes | raje_ol raje_ul raje_codeblock raje_quoteblock raje_table raje_image raje_listing raje_formula | searchreplace raje_section raje_metadata raje_save',
+      toolbar: 'undo redo bold italic link superscript subscript raje_inlineCode raje_inlineQuote raje_inline_formula raje_crossref raje_footnotes | raje_ol raje_ul raje_codeblock raje_quoteblock raje_table raje_image raje_listing raje_formula | searchreplace spellchecker | raje_section raje_metadata raje_save',
+
+      spellchecker_callback: function (method, text, success, failure) {
+        tinymce.util.JSONRequest.sendRPC({
+          url: "spellchecker.php",
+          method: "spellcheck",
+          params: {
+            lang: this.getLanguage(),
+            words: text.match(this.getWordCharPattern())
+          },
+          success: function (result) {
+            success(result);
+          },
+          error: function (error, xhr) {
+            failure("Spellcheck error: " + error);
+          }
+        });
+      },
+
+      spellchecker_languages: '',
 
       // Set default target
       default_link_target: "_blank",
