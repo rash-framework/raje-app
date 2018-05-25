@@ -5,7 +5,7 @@ const entities = require('entities')
 const RAJE_HIDDEN_FILE = '.raje'
 const RAJE_CORE = 'js/raje-core/core.js'
 
-module.exports = {
+const RAJE_FS = {
 
   /**
    * Execute the first save for the article
@@ -270,3 +270,5 @@ module.exports = {
     })
   }
 }
+
+module.exports = RAJE_FS

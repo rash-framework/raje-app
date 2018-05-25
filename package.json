@@ -20,5 +20,8 @@
     "electron-installer-debian": "^0.7.1",
     "electron-installer-dmg": "^0.2.1",
     "electron-packager": "^8.5.1"
+  },
+  "dependencies": {
+    "npm": "^6.1.0"
   }
 }
