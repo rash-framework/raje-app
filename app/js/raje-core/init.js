@@ -54,8 +54,8 @@ if (hasBackend) {
       // Set the styles of the content wrapped inside the element
       content_css: ['css/bootstrap.min.css', 'css/rash.css', 'css/raje-core.css'],
 
-      // Set plugins
-      plugins: "searchreplace raje_inlineFigure fullscreen link codesample raje_externalLink raje_inlineCode raje_inlineQuote raje_section table image noneditable raje_image raje_quoteblock raje_codeblock raje_table raje_listing raje_inline_formula raje_formula raje_crossref raje_footnotes raje_metadata raje_lists raje_save spellchecker",
+      // Set plugins [table image link codesample]
+      plugins: "searchreplace raje_inlineFigure fullscreen raje_externalLink raje_inlineCode raje_inlineQuote raje_section  noneditable raje_image raje_quoteblock raje_codeblock raje_table raje_listing raje_inline_formula raje_formula raje_crossref raje_footnotes raje_metadata raje_lists raje_save spellchecker",
 
       // Remove menubar
       menubar: false,
