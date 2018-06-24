@@ -1,7 +1,11 @@
 const fs = require('fs-extra')
 const cheerio = require('cheerio')
 const entities = require('entities')
+const path = require('path')
+const md5 = require('md5')
+const dircompare = require('dir-compare')
 
+const RAJE_CONST = require('./raje_const')
 const RAJE_HIDDEN_FILE = '.raje'
 const RAJE_CORE = 'js/raje-core/core.js'
 
@@ -11,99 +15,106 @@ const RAJE_FS = {
    * Execute the first save for the article
    * it will create the new folder or "replace" the existing one
    */
-  saveAsArticle: function (path, document, callback) {
+  saveAsArticle: (toDir, document) => {
 
-    // If the directory already exists, first remove it
-    if (fs.existsSync(path))
-      fs.removeSync(path)
+    return new Promise((resolve, reject) => {
 
-    // In any case create the new directory
-    fs.mkdir(path, (err, res) => {
+      // Remove the directory if it already exists
+      if (fs.existsSync(toDir))
+        fs.removeSync(toDir)
 
-      if (err) return callback(err)
+      // Create the directory
+      fs.mkdirp(toDir)
 
-      this.copyAssets(path, err => {
-        if (err) return callback(err)
+        // Copy all assets
+        .then(() => RAJE_FS._copyAssets(toDir)
 
-        // Create the template file
-        fs.writeFile(`${path}/${global.TEMPLATE}`, document, (err, res) => {
-          if (err) return callback(err)
+          // Write the template
+          .then(() => fs.writeFile(path.join(toDir, RAJE_CONST.files.template), document)
 
-          this.writeRajeHiddenFile(path, err => {
-            if (err) return callback(err)
-
-            return callback(null, global.SAVE_SUCCESS)
-          })
-        })
-      })
+            // Return the success message
+            .then(() => resolve(RAJE_CONST.strings.fs.save_success))
+          ))
     })
   },
 
   /**
    * This method only updates the index.html file and copy/rewrite the images
    */
-  saveArticle: function (path, document, callback) {
+  saveArticle: function (toDir, document) {
 
-    // Overwrite the index.html with the document
-    fs.writeFile(`${path}${global.TEMPLATE}`, document, err => {
-      if (err) return callback(err)
+    return new Promise((resolve, reject) =>
 
-      // Copy/rewrite all images
-      this.copyAssetImages(path, err => {
-        if (err) return callback(err)
+      // Write the template file
+      fs.writeFile(path.join(toDir, RAJE_CONST.files.template), document)
 
-        // Write .raje file
-        this.writeRajeHiddenFile(path, err => {
-          if (err) return callback(err)
+      // Copy the assets
+      .then(() => RAJE_FS._copyAssets(toDir)
 
-          return callback(null, global.SAVE_SUCCESS)
-        })
-      })
+        // Return the success message
+        .then(() => resolve(RAJE_CONST.strings.fs.save_success))))
+  },
+
+  /**
+   * 
+   */
+  _copyAssets: (toDir) => {
+
+    return new Promise((resolve, reject) => {
+
+      resolve(RAJE_CONST.dirs.assets.map(fromDir => {
+
+        // Set the path for the directory asset
+        let toDirAsset = path.join(toDir, path.parse(fromDir).name)
+
+        // If the directory doesn't exists, copy the content from the source
+        if (!fs.existsSync(toDirAsset))
+          fs.copy(fromDir, toDirAsset).catch(error => console.log(error))
+
+        else
+          RAJE_FS._compareAssets(toDirAsset, fromDir)
+          .then(diffSet => {
+            diffSet.map(file => fs.copy(file.path1, file.path2))
+          })
+          .catch(error => console.log(error))
+      }))
     })
   },
 
   /**
    * 
    */
-  copyAssets: function (path, callback) {
+  _compareAssets: (toDir, fromDir) => {
 
-    let length = global.ASSETS_DIRECTORIES.length - 1
-    let ret = function () {
-
-      length--
-
-      if (length == 0)
-        return callback(null)
+    // Set the constants
+    const keyword = 'distinct'
+    const options = {
+      compareContent: true
     }
 
-    // This copies the content of each directory in this array
-    global.ASSETS_DIRECTORIES.forEach(function (directoryPath) {
+    return new Promise((resolve, reject) => {
 
-      // Tries to copy the folder content only if the directory exists
-      if (fs.existsSync(directoryPath)) {
+      if (!fs.existsSync(toDir) || !fs.existsSync(fromDir))
+        reject('Error')
 
-        // Get the name of the directory
-        let directoryPathName = path + directoryPath.split('/')[directoryPath.split('/').length - 1]
+      // Compare the two folder 
+      dircompare.compare(toDir, fromDir, options)
+        .then(result => {
 
-        // If the current directory exists, remove it
-        if (fs.existsSync(directoryPathName))
-          fs.removeSync(directoryPathName)
+          // Create the set of different files
+          let diffSet = []
 
-        // It tries to create the directory and copy its content
-        fs.mkdir(directoryPathName, {
-          overwrite: true
-        }, err => {
-          if (err) return callback(err)
+          // Populate the set 
+          if (!result.same)
+            for (let file of result.diffSet)
+              if (file.state == 'distinct')
+                diffSet.push(file)
 
-          fs.copy(directoryPath, directoryPathName, err => {
-            if (err) return callback(err)
-
-            ret()
-          })
+          resolve(diffSet)
         })
-      }
     })
   },
+
 
   /**
    * Copy all temporary images
@@ -264,11 +275,11 @@ const RAJE_FS = {
   /**
    * 
    */
-  checkIfExists: function (path, callback) {
-    fs.exists(path, exists => {
-      return callback(exists)
+  checkIfExists: path =>
+    new Promise((resolve, reject) => {
+      fs.pathExists(path)
+        .then(exists => resolve(exists))
     })
-  }
 }
 
 module.exports = RAJE_FS

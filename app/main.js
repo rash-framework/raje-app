@@ -5,9 +5,9 @@
 
 const electron = require('electron')
 const app = electron.app
+const RAJE_CONST = require('./modules/raje_const')
 
 global.ROOT = __dirname
-global.IMAGE_TEMP = `${global.ROOT}/img`
 
 global.hasChanged
 global.isNew
@@ -17,19 +17,12 @@ global.savePath
 // images inside the tmp folder or in the RASH package
 global.isWrapper
 
-global.ASSETS_DIRECTORIES = [
-  `${global.ROOT}/js`,
-  `${global.ROOT}/css`,
-  `${global.ROOT}/fonts`,
-  IMAGE_TEMP
-]
-
-global.TEMPLATE = 'index.html'
-global.SPLASH = 'splash.html'
-
-global.GITHUB_LOGIN_SUCCESS = 'Yeah! you are successfully logged in with Github.'
-global.GITHUB_LOGOUT_SUCCESS = 'All right! you are no longer loggeed in with Github.'
-global.SAVE_SUCCESS = 'Hooray! all changes has been saved!'
+global.ASSETS_DIRECTORIES = RAJE_CONST.dirs.assets
+global.TEMPLATE = RAJE_CONST.files.template
+global.SPLASH = RAJE_CONST.files.splash
+global.GITHUB_LOGIN_SUCCESS = RAJE_CONST.strings.github.login_success
+global.GITHUB_LOGOUT_SUCCESS = RAJE_CONST.strings.github.logout_success
+global.SAVE_SUCCESS = RAJE_CONST.strings.fs.save_success
 
 global.articleSettings = {}
 global.github_data = {}
@@ -180,6 +173,19 @@ const windows = {
       slashes: true
     })
 
+    RAJE_FS.checkIfExists(global.articleSettings.savePath)
+      .then(exists => {
+        if (exists) {
+          RAJE_STORAGE.pushRecentArticleEntry(RAJE_STORAGE.createRecentArticleEntry(global.articleSettings.savePath, global.articleSettings.folderName))
+
+          // Add the init_rajemce script
+          RAJE_FS.addRajeCoreInArticle(editorWindowUrl, err => {
+            this.showEditor(editorWindowUrl)
+          })
+        }
+      })
+
+    /*
     // Check if the folder exists
     RAJE_FS.checkIfExists(global.articleSettings.savePath, exists => {
       if (exists)
@@ -198,7 +204,7 @@ const windows = {
 
       else
         windows.openSplash()
-    })
+      */
   },
 
   /**
@@ -395,7 +401,32 @@ ipcMain.on('saveAsArticle', (event, arg) => {
 
     global.articleSettings.savePath = `${savePath}/`
 
-    RAJE_FS.saveAsArticle(global.articleSettings.savePath, arg.document, (err, message) => {
+    RAJE_FS.saveAsArticle(global.articleSettings.savePath, arg.document)
+      .then(message => {
+        global.articleSettings.isNew = false
+        global.articleSettings.folderName = global.articleSettings.savePath.split('/')[global.articleSettings.savePath.split('/').length - 2]
+
+        windows.updateEditorMenu(RAJE_MENU.getEditorMenu())
+
+        // Save recent article entry
+        RAJE_STORAGE.pushRecentArticleEntry(RAJE_STORAGE.createRecentArticleEntry(global.articleSettings.savePath, global.articleSettings.folderName))
+
+        // Notify the client 
+        global.sendNotification({
+          text: message,
+          type: 'success'
+        })
+
+        global.articleSettings.hasChanged = false
+        return global.updateClientContent()
+      })
+      .catch(error => global.sendNotification({
+        text: error.message,
+        type: RAJE_CONST.strings.fs.error_type
+      }))
+
+    /*
+    RAJE_FS.saveAsArticle(global.articleSettings.savePath, arg.document), (err, message) => {
 
       // Manage permission error
       if (err)
@@ -421,8 +452,9 @@ ipcMain.on('saveAsArticle', (event, arg) => {
 
       global.articleSettings.hasChanged = false
       return global.updateClientContent()
-    })
+    })*/
   }
+
 
   // If savePath doesn't exists
   catch (exception) {}
@@ -435,20 +467,21 @@ ipcMain.on('saveArticle', (event, arg) => {
 
   // If the document has been saved before
   if (!global.articleSettings.isNew && typeof global.articleSettings.savePath != "undefined") {
-    RAJE_FS.saveArticle(global.articleSettings.savePath, arg.document, (err, message) => {
-      if (err) return
+    RAJE_FS.saveArticle(global.articleSettings.savePath, arg.document)
+      .then(message => {
+        
+        // Notify the client
+        global.sendNotification({
+          text: message,
+          type: 'success',
+          timeout: 2000
+        })
 
-      // Notify the client
-      global.sendNotification({
-        text: message,
-        type: 'success',
-        timeout: 2000
+        // Update client content
+        global.articleSettings.hasChanged = false
+        return global.updateClientContent()
       })
-
-      // Update client content
-      global.articleSettings.hasChanged = false
-      return global.updateClientContent()
-    })
+      .catch(error => console.log(error))
   }
 })
 
