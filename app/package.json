@@ -18,6 +18,7 @@
   "dependencies": {
     "async": "^2.1.4",
     "cheerio": "^1.0.0-rc.2",
+    "dir-compare": "^1.4.0",
     "electron-json-storage": "^3.2.0",
     "electron-spell-check-provider": "^1.0.0",
     "electron-window-manager": "^1.0.4",
@@ -30,6 +31,7 @@
     "node-datetime": "^2.0.3",
     "npm": "^6.1.0",
     "octonode": "^0.7.13",
+    "path": "^0.12.7",
     "request": "^2.79.0",
     "superagent": "^3.8.0",
     "watchjs": "0.0.0"

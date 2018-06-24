@@ -22,6 +22,7 @@
     "electron-packager": "^8.5.1"
   },
   "dependencies": {
+    "md5": "^2.2.1",
     "npm": "^6.1.0"
   }
 }
