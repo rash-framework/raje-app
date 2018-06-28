@@ -4,7 +4,8 @@ let raje_const = {
   index_path: path.normalize(`${__dirname}/..`),
   files: {
     template: 'index.html',
-    splash: 'splash.html'
+    splash: 'splash.html',
+    raje_hidden: '.raje'
   },
   dirs: {
     assets: [

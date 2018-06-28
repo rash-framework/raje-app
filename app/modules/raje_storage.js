@@ -4,13 +4,13 @@ const datetime = require('node-datetime')
 global.RECENT_ARTICLE_STORAGE = "RECENT_ARTICLE_STORAGE"
 global.GITHUB_DATA = 'GITHUB_DATA'
 
-module.exports = {
+const RAJE_STORAGE = {
 
   /**
    * Create a JSON object with path title and date.
    * The path is the identifier
    */
-  createRecentArticleEntry: function (path, title) {
+  createRecentArticleEntry: (path, title) => {
     var dt = datetime.create()
 
     return {
@@ -144,3 +144,5 @@ module.exports = {
     })
   }
 }
+
+module.exports = RAJE_STORAGE

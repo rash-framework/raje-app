@@ -4,9 +4,9 @@ const entities = require('entities')
 const path = require('path')
 const md5 = require('md5')
 const dircompare = require('dir-compare')
+const url = require('url')
 
 const RAJE_CONST = require('./raje_const')
-const RAJE_HIDDEN_FILE = '.raje'
 const RAJE_CORE = 'js/raje-core/core.js'
 
 const RAJE_FS = {
@@ -41,7 +41,7 @@ const RAJE_FS = {
   /**
    * This method only updates the index.html file and copy/rewrite the images
    */
-  saveArticle: function (toDir, document) {
+  saveArticle: (toDir, document) => {
 
     return new Promise((resolve, reject) =>
 
@@ -58,7 +58,7 @@ const RAJE_FS = {
   /**
    * 
    */
-  _copyAssets: (toDir) => {
+  _copyAssets: toDir => {
 
     return new Promise((resolve, reject) => {
 
@@ -144,51 +144,33 @@ const RAJE_FS = {
   },
 
   /**
-   * Write the hidden RAJE file, to 
+   * Write the hidden RAJE file
    */
-  writeRajeHiddenFile: function (path, callback) {
+  writeRajeHiddenFile: dir => {
 
-    // Check if the hidden .raje file exists
-    this.checkRajeHiddenFile(path, (err) => {
-
-      // If there is an error, the file doesn't exist
-      if (err)
-
-        // Write the hidden .raje file
-        return fs.writeFile(`${path}/${RAJE_HIDDEN_FILE}`, '', (err, res) => {
-
-          if (err) return callback(err)
-
-          return callback(null)
-        })
-
-      return callback(null)
+    // Create the content of the .raje file
+    const content = JSON.stringify({
+      body: ''
     })
 
+    return new Promise((resolve, reject) =>
+      RAJE_FS.checkRajeHiddenFile(path)
+      .then(exists => {
 
+        // Create the file if it doesn't exist
+        if (!exists)
+          fs.writeFile(path.join(dir, RAJE_CONST.files.raje_hidden), content)
+      })
+    )
   },
 
   /**
    * Search inside the folder if there is a .raje file
    */
-  checkRajeHiddenFile: function (path, callback) {
-
-    fs.readdir(path, (err, fileArray) => {
-      if (err) return callback(err)
-
-      // Control if inside the root folder there is the .raje file
-      let hiddenFileFound = false
-      fileArray.forEach(function (file) {
-        if (file == RAJE_HIDDEN_FILE)
-          hiddenFileFound = true
-      })
-
-      if (hiddenFileFound)
-        return callback(null)
-
-      else
-        return callback('Error, this is not a hidden .raje file')
-    })
+  checkRajeHiddenFile: dir => {
+    return new Promise(resolve =>
+      fs.pathExists(path.join(dir, RAJE_CONST.files.raje_hidden)).then(exists => resolve(exists))
+    )
   },
 
   /**
@@ -222,7 +204,7 @@ const RAJE_FS = {
   /**
    * Remove the temporary folder
    */
-  removeImageTempFolder: function () {
+  removeImageTempFolder: () => {
     if (fs.existsSync(global.IMAGE_TEMP))
       fs.removeSync(global.IMAGE_TEMP)
   },
@@ -230,56 +212,72 @@ const RAJE_FS = {
   /**
    * 
    */
-  addRajeCoreInArticle: function (path, callback) {
+  addRajeCoreInArticle: file => {
+    return new Promise((resolve, reject) => {
 
-    path = path.replace('file://', '')
+      // Remove the host from the url
+      file = url.parse(file).pathname
 
-    fs.readFile(path, 'utf8', (err, data) => {
-      if (err) return callback(err)
-
-      const $ = cheerio.load(data, {
+      // Module cheerio options
+      const cheerioOptions = {
         normalizeWhitespace: true
-      })
+      }
 
-      $('script[src="js/jquery.min.js"]')
-        .after(`<script src="js/raje-core/init_core.js" data-rash-original-content=""/>`)
+      fs.readFile(file, 'utf8')
+        .then(content => {
 
-      fs.writeFile(path, entities.decodeHTML($.html()))
+          // Add the script 
+          const $ = cheerio.load(content, cheerioOptions)
+          $('script[src="js/jquery.min.js"]').after(`<script src="js/raje-core/init_core.js" data-rash-original-content=""/>`)
 
-      return callback(null)
+          fs.writeFile(file, entities.decodeHTML($.html()))
+            .then(() => resolve())
+            .catch(error => reject(error))
+        })
+        .catch(error => reject(error))
     })
   },
 
   /**
    * 
    */
-  removeRajeCoreInArticle: function (path, callback) {
+  removeRajeCoreInArticle: file => {
+    return new Promise((resolve, reject) => {
 
-    path = path.replace('file://', '')
+      // Remove the host from the url
+      file = url.parse(file).pathname
 
-    fs.readFile(path, 'utf8', (err, data) => {
-      if (err) return callback(err)
-
-      const $ = cheerio.load(data, {
+      // Module cheerio options
+      const cheerioOptions = {
         normalizeWhitespace: true
-      })
+      }
 
-      $('script[src="js/raje-core/init_core.js"]').remove()
+      // Try to read the file
+      fs.readFile(file, 'utf8')
+        .then(content => {
 
-      fs.writeFile(path, entities.decodeHTML($.html()))
+          // Remove the script
+          const $ = cheerio.load(content, cheerioOptions)
+          $('script[src="js/raje-core/init_core.js"]').remove()
 
-      return callback(null)
+          // Write the new file
+          fs.writeFile(file, entities.decodeHTML($.html()))
+            .then(() => resolve())
+            .catch(error => reject(error))
+        })
+        .catch(error => reject(error))
     })
   },
 
   /**
    * 
    */
-  checkIfExists: path =>
-    new Promise((resolve, reject) => {
+  checkIfExists: path => {
+    return new Promise((resolve, reject) => {
       fs.pathExists(path)
         .then(exists => resolve(exists))
     })
+  }
 }
 
 module.exports = RAJE_FS

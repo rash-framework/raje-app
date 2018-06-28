@@ -17,8 +17,6 @@ global.savePath
 // images inside the tmp folder or in the RASH package
 global.isWrapper
 
-global.ASSETS_DIRECTORIES = RAJE_CONST.dirs.assets
-global.TEMPLATE = RAJE_CONST.files.template
 global.SPLASH = RAJE_CONST.files.splash
 global.GITHUB_LOGIN_SUCCESS = RAJE_CONST.strings.github.login_success
 global.GITHUB_LOGOUT_SUCCESS = RAJE_CONST.strings.github.logout_success
@@ -37,7 +35,6 @@ const {
 
 const url = require('url')
 const path = require('path')
-//const windowManager = require('electron-window-manager')
 
 const PACKAGE = require('./package.json')
 
@@ -57,10 +54,7 @@ const windows = {
   /**
    * Init the windowmanager and open the splash window
    */
-  openSplash: function () {
-
-    // Init the window manager
-    //windowManager.init()
+  openSplash: () => {
 
     // DEBUG mode
     // RAJE_STORAGE.clearAll()
@@ -91,50 +85,49 @@ const windows = {
   /**
    * Close the splash window
    */
-  closeSplash: function () {
+  closeSplash: () => {
 
     splashWindow.close()
-
-    //windowManager.close(SPLASH_WINDOW)
   },
 
   /**
    * Open the editable template  
    */
-  openEditor: function (localRootPath) {
+  openEditor: (localRootPath) => {
 
-    global.articleSettings.hasChanged = false
+    windows.newArticle()
+
+    //global.articleSettings.hasChanged = false
 
     /**
      * If localRootPath exists, the user is trying to one an existing article
      */
+    /*
     if (localRootPath)
-      this.alreadyExistingArticle(localRootPath)
+      windows.alreadyExistingArticle(localRootPath)
     else
-
-      this.newArticle()
+      windows.newArticle()
+      */
   },
 
   /**
    * 
    */
-  newArticle: function () {
+  newArticle: () => {
 
     // Remember that the document isn't saved yet
     global.articleSettings.isNew = true
     global.articleSettings.isWrapper = true
 
     let editorWindowUrl = url.format({
-      pathname: path.join(__dirname, TEMPLATE),
+      pathname: path.join(__dirname, RAJE_CONST.files.template),
       protocol: 'file:',
       slashes: true
     })
 
     // Add the init_rajemce script
-    RAJE_FS.addRajeCoreInArticle(editorWindowUrl, err => {
-
-      this.showEditor(editorWindowUrl)
-    })
+    RAJE_FS.addRajeCoreInArticle(editorWindowUrl)
+      .then(() => windows.showEditor(editorWindowUrl))
   },
 
   /**
@@ -179,9 +172,8 @@ const windows = {
           RAJE_STORAGE.pushRecentArticleEntry(RAJE_STORAGE.createRecentArticleEntry(global.articleSettings.savePath, global.articleSettings.folderName))
 
           // Add the init_rajemce script
-          RAJE_FS.addRajeCoreInArticle(editorWindowUrl, err => {
-            this.showEditor(editorWindowUrl)
-          })
+          RAJE_FS.addRajeCoreInArticle(editorWindowUrl)
+            .then(() => windows.showEditor(editorWindowUrl))
         }
       })
 
@@ -469,7 +461,7 @@ ipcMain.on('saveArticle', (event, arg) => {
   if (!global.articleSettings.isNew && typeof global.articleSettings.savePath != "undefined") {
     RAJE_FS.saveArticle(global.articleSettings.savePath, arg.document)
       .then(message => {
-        
+
         // Notify the client
         global.sendNotification({
           text: message,
