@@ -33,7 +33,7 @@ let editorWindow
 
 //#region Splash and Editor manage
 
-openSplash = () => {
+const openSplash = () => {
 
   // DEBUG mode
   // RAJE_STORAGE.clearAll()
@@ -61,216 +61,183 @@ openSplash = () => {
   splashWindow.show()
 }
 
-closeSplash = () => {
+const closeSplash = () => {
 
   splashWindow.close()
 }
 
-openEditor = localRootPath => {
+const openEditor = (localRootPath = null) => {
 
-  windows.newArticle()
+  global.articleSettings.hasChanged = false
 
-  //global.articleSettings.hasChanged = false
-
-  /**
-   * If localRootPath exists, the user is trying to one an existing article
-   */
-  /*
   if (localRootPath)
-    windows.alreadyExistingArticle(localRootPath)
+    alreadyExistingArticle(localRootPath)
   else
-    windows.newArticle()
-    */
+    openNewArticle()
 }
 
-//#endregion
+const openNewArticle = () => {
 
-const windows = {
+  // Remember that the document isn't saved yet
+  global.articleSettings.isNew = true
+  global.articleSettings.isWrapper = true
 
+  let editorWindowUrl = url.format({
+    pathname: path.join(__dirname, RAJE_CONST.files.template),
+    protocol: 'file:',
+    slashes: true
+  })
 
-  /**
-   * 
-   */
-  newArticle: () => {
+  // Add the init_rajemce script
+  RAJE_FS.addRajeCoreInArticle(editorWindowUrl)
+    .then(() => showEditor(editorWindowUrl))
+}
 
-    // Remember that the document isn't saved yet
-    global.articleSettings.isNew = true
-    global.articleSettings.isWrapper = true
+const alreadyExistingArticle = localRootPath => {
 
-    let editorWindowUrl = url.format({
-      pathname: path.join(__dirname, RAJE_CONST.files.template),
-      protocol: 'file:',
-      slashes: true
-    })
+  let splittedRootPath = localRootPath.split('/')
 
-    // Add the init_rajemce script
-    RAJE_FS.addRajeCoreInArticle(editorWindowUrl)
-      .then(() => windows.showEditor(editorWindowUrl))
-  },
+  let getFileName = function () {
+    return splittedRootPath[splittedRootPath.length - 1]
+  }
 
-  /**
-   * 
-   */
-  alreadyExistingArticle: function (localRootPath) {
+  let getDirectoryPath = function () {
+    splittedRootPath.pop()
+    return `${splittedRootPath.join('/')}/`
+  }
 
-    let splittedRootPath = localRootPath.split('/')
+  let getDirectoryName = function () {
+    return splittedRootPath[splittedRootPath.length - 1]
+  }
 
-    let getFileName = function () {
-      return splittedRootPath[splittedRootPath.length - 1]
-    }
+  // Store some important elements about the document
+  global.TEMPLATE = getFileName()
+  global.articleSettings.isNew = false
+  global.articleSettings.isWrapper = false
+  global.articleSettings.savePath = getDirectoryPath()
+  global.articleSettings.folderName = getDirectoryName()
 
-    let getDirectoryPath = function () {
-      splittedRootPath.pop()
-      return `${splittedRootPath.join('/')}/`
-    }
+  // TODO check if the document has validated RASH content
 
-    let getDirectoryName = function () {
-      return splittedRootPath[splittedRootPath.length - 1]
-    }
+  // Get the URL to open the editor
+  editorWindowUrl = url.format({
+    pathname: localRootPath,
+    protocol: 'file:',
+    slashes: true
+  })
 
-    // Store some important elements about the document
-    global.TEMPLATE = getFileName()
-    global.articleSettings.isNew = false
-    global.articleSettings.isWrapper = false
-    global.articleSettings.savePath = getDirectoryPath()
-    global.articleSettings.folderName = getDirectoryName()
+  RAJE_FS.checkIfExists(global.articleSettings.savePath)
+    .then(exists => {
+      if (exists) {
+        RAJE_STORAGE.pushRecentArticleEntry(RAJE_STORAGE.createRecentArticleEntry(global.articleSettings.savePath, global.articleSettings.folderName))
 
-    // TODO check if the document has validated RASH content
-
-    // Get the URL to open the editor
-    editorWindowUrl = url.format({
-      pathname: localRootPath,
-      protocol: 'file:',
-      slashes: true
-    })
-
-    RAJE_FS.checkIfExists(global.articleSettings.savePath)
-      .then(exists => {
-        if (exists) {
-          RAJE_STORAGE.pushRecentArticleEntry(RAJE_STORAGE.createRecentArticleEntry(global.articleSettings.savePath, global.articleSettings.folderName))
-
-          // Add the init_rajemce script
-          RAJE_FS.addRajeCoreInArticle(editorWindowUrl)
-            .then(() => windows.showEditor(editorWindowUrl))
-        }
-      })
-
-    /*
-    // Check if the folder exists
-    RAJE_FS.checkIfExists(global.articleSettings.savePath, exists => {
-      if (exists)
-        // Copy the entire asset set inside the existing directory
-        RAJE_FS.copyAssets(global.articleSettings.savePath, err => {
-          if (err) throw err
-
-          // Add the already created article here
-          RAJE_STORAGE.pushRecentArticleEntry(RAJE_STORAGE.createRecentArticleEntry(global.articleSettings.savePath, global.articleSettings.folderName))
-
-          // Add the init_rajemce script
-          RAJE_FS.addRajeCoreInArticle(editorWindowUrl, err => {
-            this.showEditor(editorWindowUrl)
-          })
-        })
-
-      else
-        windows.openSplash()
-      */
-  },
-
-  /**
-   * 
-   */
-  showEditor: function (editorWindowUrl) {
-
-    editorWindow = new BrowserWindow({
-      width: global.screenSize.width,
-      height: global.screenSize.height,
-      resizable: true
-    })
-
-    editorWindow.loadURL(editorWindowUrl)
-    editorWindow.show()
-
-    // Open the new window with the size given by the splash window
-    //windowManager.open(EDITOR_WINDOW, 'RAJE', editorWindowUrl, null, )
-
-    // Retrieve and save Github data
-    global.getUserStoredData((err, data) => {
-      if (err) throw err
-
-      global.github_data = data
-
-      // Update the app menu
-      windows.updateEditorMenu(RAJE_MENU.getEditorMenu())
-    })
-
-
-    /**
-     * Catch the close event
-     */
-    editorWindow.on('close', event => {
-
-      // If the document is in hasChanged mode (need to be saved)
-      if (global.articleSettings.hasChanged) {
-
-        // Cancel the close event
-        event.preventDefault()
-
-        // Show the dialog box "the document need to be saved"
-        dialog.showMessageBox({
-          type: 'warning',
-          buttons: ['Save changes', 'Discard changes', 'Continue editing'],
-          title: 'Unsaved changes',
-          message: 'The article has been changed, do you want to save the changes?',
-          cancelId: 2
-        }, (response) => {
-          switch (response) {
-
-            // The user wants to save the document
-            case 0:
-              // TODO save the document
-              global.articleSettings.hasChanged = false
-              editorWindow.close()
-              break
-
-              // The user doesn't want to save the document
-            case 1:
-              global.articleSettings.hasChanged = false
-              editorWindow.close()
-              break
-          }
-        })
+        // Add the init_rajemce script
+        RAJE_FS.addRajeCoreInArticle(editorWindowUrl)
+          .then(() => showEditor(editorWindowUrl))
       }
     })
 
-    /**
-     * When the editor is closed, remove rajemce from the article if is still there
-     */
-    editorWindow.on('closed', event => {
-
-      openSplash()
-
-      RAJE_FS.removeRajeCoreInArticle(editorWindowUrl, err => {
+  /*
+  // Check if the folder exists
+  RAJE_FS.checkIfExists(global.articleSettings.savePath, exists => {
+    if (exists)
+      // Copy the entire asset set inside the existing directory
+      RAJE_FS.copyAssets(global.articleSettings.savePath, err => {
         if (err) throw err
+
+        // Add the already created article here
+        RAJE_STORAGE.pushRecentArticleEntry(RAJE_STORAGE.createRecentArticleEntry(global.articleSettings.savePath, global.articleSettings.folderName))
+
+        // Add the init_rajemce script
+        RAJE_FS.addRajeCoreInArticle(editorWindowUrl, err => {
+          this.showEditor(editorWindowUrl)
+        })
       })
-    })
-  },
 
-  /**
-   * Return true to let know that the client has Electron behind
-   */
-  hasBackend: function () {
-    return true
-  },
-
-  /**
-   * 
-   */
-  updateEditorMenu: function (menu) {
-    // Set the menu 
-    Menu.setApplicationMenu(Menu.buildFromTemplate(menu))
-  }
+    else
+      openSplash()
+    */
 }
+
+const showEditor = editorWindowUrl => {
+
+  editorWindow = new BrowserWindow({
+    width: global.screenSize.width,
+    height: global.screenSize.height,
+    resizable: true
+  })
+
+  editorWindow.loadURL(editorWindowUrl)
+  editorWindow.show()
+
+  // Open the new window with the size given by the splash window
+  //windowManager.open(EDITOR_WINDOW, 'RAJE', editorWindowUrl, null, )
+
+  // Retrieve and save Github data
+  global.getUserStoredData()
+    .then(data => {
+      global.github_data = data
+
+      // Update the app menu
+      updateEditorMenu(RAJE_MENU.getEditorMenu())
+    })
+
+  /**
+   * Catch the close event
+   */
+  editorWindow.on('close', event => {
+
+    // If the document is in hasChanged mode (need to be saved)
+    if (global.articleSettings.hasChanged) {
+
+      // Cancel the close event
+      event.preventDefault()
+
+      // Show the dialog box "the document need to be saved"
+      dialog.showMessageBox({
+        type: 'warning',
+        buttons: ['Save changes', 'Discard changes', 'Continue editing'],
+        title: 'Unsaved changes',
+        message: 'The article has been changed, do you want to save the changes?',
+        cancelId: 2
+      }, (response) => {
+        switch (response) {
+
+          // The user wants to save the document
+          case 0:
+            // TODO save the document
+            global.articleSettings.hasChanged = false
+            editorWindow.close()
+            break
+
+            // The user doesn't want to save the document
+          case 1:
+            global.articleSettings.hasChanged = false
+            editorWindow.close()
+            break
+        }
+      })
+    }
+  })
+
+  /**
+   * When the editor is closed, remove rajemce from the article if is still there
+   */
+  editorWindow.on('closed', event => {
+
+    openSplash()
+
+    RAJE_FS.removeRajeCoreInArticle(editorWindowUrl, err => {
+      if (err) throw err
+    })
+  })
+}
+
+const hasBackend = () => true
+
+const updateEditorMenu = menu => Menu.setApplicationMenu(Menu.buildFromTemplate(menu))
+
+//#endregion
 
 //#region App events
 
@@ -335,7 +302,7 @@ ipcMain.on('openArticle', (event, arg) => {
  * Called from the renderer process
  */
 ipcMain.on('hasBackendSync', (event, arg) => {
-  event.returnValue = windows.hasBackend()
+  event.returnValue = hasBackend()
 })
 
 /**
@@ -363,14 +330,14 @@ ipcMain.on('saveAsArticle', (event, arg) => {
     if (typeof savePath == 'undefined')
       throw new Error()
 
-    global.articleSettings.savePath = `${savePath}/`
+    global.articleSettings.savePath = path.normalize(savePath)
 
     RAJE_FS.saveAsArticle(global.articleSettings.savePath, arg.document)
       .then(message => {
         global.articleSettings.isNew = false
-        global.articleSettings.folderName = global.articleSettings.savePath.split('/')[global.articleSettings.savePath.split('/').length - 2]
+        global.articleSettings.folderName = path.parse(global.articleSettings.savePath).name
 
-        windows.updateEditorMenu(RAJE_MENU.getEditorMenu())
+        updateEditorMenu(RAJE_MENU.getEditorMenu())
 
         // Save recent article entry
         RAJE_STORAGE.pushRecentArticleEntry(RAJE_STORAGE.createRecentArticleEntry(global.articleSettings.savePath, global.articleSettings.folderName))
@@ -403,7 +370,7 @@ ipcMain.on('saveAsArticle', (event, arg) => {
       global.articleSettings.isNew = false
       global.articleSettings.folderName = global.articleSettings.savePath.split('/')[global.articleSettings.savePath.split('/').length - 2]
 
-      windows.updateEditorMenu(RAJE_MENU.getEditorMenu())
+      updateEditorMenu(RAJE_MENU.getEditorMenu())
 
       // Save recent article entry
       RAJE_STORAGE.pushRecentArticleEntry(RAJE_STORAGE.createRecentArticleEntry(global.articleSettings.savePath, global.articleSettings.folderName))
@@ -514,8 +481,8 @@ ipcMain.on('openRecentArticleEntry', (event, arg) => {
 
   try {
     // Open the first element of what the dialog returns
-    windows.openEditor(arg.path)
-    windows.closeSplash()
+    openEditor(arg.path)
+    closeSplash()
   } catch (exception) {}
 })
 
@@ -530,7 +497,7 @@ ipcMain.on('saveScreenSize', (event, arg) => {
  * 
  */
 ipcMain.on('closeSplash', (event, arg) => {
-  windows.closeSplash()
+  closeSplash()
 })
 
 /**
@@ -609,8 +576,8 @@ global.openArticle = function () {
     localRootPath = localRootPath[0]
 
     // Open the first element of what the dialog returns
-    windows.openEditor(localRootPath)
-    windows.closeSplash()
+    openEditor(localRootPath)
+    closeSplash()
   } catch (exception) {}
 }
 
@@ -635,7 +602,7 @@ global.loginGithub = function () {
       timeout: 2000
     })
 
-    windows.updateEditorMenu(RAJE_MENU.getEditorMenu())
+    updateEditorMenu(RAJE_MENU.getEditorMenu())
   })
 }
 
@@ -649,7 +616,7 @@ global.logoutGithub = function () {
       timeout: 2000
     })
 
-    windows.updateEditorMenu(RAJE_MENU.getEditorMenu())
+    updateEditorMenu(RAJE_MENU.getEditorMenu())
   })
 }
 
@@ -657,14 +624,15 @@ global.logoutGithub = function () {
  * 
  * @param {*} callback 
  */
-global.getUserStoredData = function (callback) {
+global.getUserStoredData = () =>
+  new Promise((resolve, reject) =>
+    RAJE_STORAGE.getGithubData()
+    .then(data => resolve(data))
+    .catch(error => reject(error))
+  )
 
-  RAJE_STORAGE.getGithubData((err, data) => {
-    if (err) throw (err)
 
-    return callback(null, data)
-  })
-}
+
 
 global.push = function () {
   RAJE_GITHUB.initRepo(global.articleSettings.savePath)

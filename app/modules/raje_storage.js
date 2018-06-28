@@ -1,8 +1,14 @@
 const storage = require('electron-json-storage')
+const util = require('util')
 const datetime = require('node-datetime')
+const path = require('path')
+
+const RAJE_CONST = require('./raje_const')
 
 global.RECENT_ARTICLE_STORAGE = "RECENT_ARTICLE_STORAGE"
 global.GITHUB_DATA = 'GITHUB_DATA'
+
+const storage_get = util.promisify(storage.get)
 
 const RAJE_STORAGE = {
 
@@ -10,11 +16,11 @@ const RAJE_STORAGE = {
    * Create a JSON object with path title and date.
    * The path is the identifier
    */
-  createRecentArticleEntry: (path, title) => {
+  createRecentArticleEntry: (absolutePath, title) => {
     var dt = datetime.create()
 
     return {
-      path: path + global.TEMPLATE,
+      path: path.join(absolutePath,RAJE_CONST.files.template),
       title: title,
       date: `Created on ${dt.format('d/m/y')} at ${dt.format('H:M')}`
     }
@@ -114,13 +120,12 @@ const RAJE_STORAGE = {
   /**
    * 
    */
-  getGithubData: function (callback) {
-    storage.get(global.GITHUB_DATA, (err, data) => {
-      if (err) throw callback(err)
-
-      return callback(null, data)
-    })
-  },
+  getGithubData: () =>
+    new Promise((resolve, reject) =>
+      storage_get(global.GITHUB_DATA)
+      .then(data => resolve(data))
+      .catch(error => reject(error))
+    ),
 
   /**
    * 
