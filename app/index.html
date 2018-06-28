@@ -12,7 +12,8 @@
 
   <!-- JQuery -->
   <script src="js/jquery.min.js"></script>
-
+  <script src="js/jquery.xpath.min.js">
+  </script>
   <!-- Bootstrap.js -->
   <script src="js/bootstrap.min.js"></script>
 
@@ -25,6 +26,41 @@
   <meta about="mailto:jon.doe@example.com" property="schema:email" content="jon.doe@example.com">
   <link about="mailto:jon.doe@example.com" property="schema:affiliation" href="#affiliation">
   <meta about="#affiliation" typeof="schema:Organization" property="schema:name" content="John Doe Affiliation">
+
+    <!-- Semantic annotations (https://www.w3.org/TR/annotation-vocab/) -->
+
+    <script id="annotation_01" type="application/ld+json">
+      {
+        "id": "annotation_01",
+        "@context": "http://www.w3.org/ns/anno.jsonld",
+        "created": "2018-06-22T14:00:00",
+        "bodyValue": "Example of a single annotation",
+        "creator": "gspinaci",
+        "Motivation": "commenting",
+        "target": {
+          "selector": {
+            "startSelector": {
+              "@type": "XPathSelector",
+              "@value": "//section[1]/p[1]"
+            },
+            "endSelector": {
+              "@type": "XPathSelector",
+              "@value": "//section[1]/p[1]"
+            },
+            "start": {
+              "@type": "DataPositionSelector",
+              "@value": "0"
+            },
+            "end": {
+              "@type": "DataPositionSelector",
+              "@value": "3"
+            }
+          }
+        }
+      }
+    </script>
+    <!-- /END Semantic annotations -->
+
 </head>
 
 <body>

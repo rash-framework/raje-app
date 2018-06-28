@@ -299,7 +299,7 @@ const listingbox_selector_pre = 'pre'
 const listingbox_selector = `figure > ${listingbox_selector_pre}`
 
 const annotation_sidebar_selector = 'aside#annotations'
-const side_annotation_selector = `${annotation_sidebar_selector}>a.side_note`
+const side_annotation_selector = `${annotation_sidebar_selector}>span.side_note`
 const sidebody_annotation_selector = `${annotation_sidebar_selector}>div.side_note_body`
 
 const html_annotations_selector = 'span[data-rash-annotation-type=wrap]'
@@ -333,31 +333,25 @@ const rash = {
     let annotation_sidebar = $(`
       <aside id="annotations" data-rash-original-content="" style="height:${$('html').outerHeight(true)}px">
         <header>
-          <a id="toggleAnnotations" title="show/hide annotations" class="btn btn-default active">
+          <span id="toggleAnnotations" title="show/hide annotations" class="btn btn-default active">
             <span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span>
-          </a>
-          <a id="toggleSidebar" title="show/hide annotation sidebar" class="btn btn-default">
+          </span>
+          <span id="toggleSidebar" title="show/hide annotation sidebar" class="btn btn-default">
             <span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span>
-          </a>
+          </span>
         </header>
       </aside>
     `)
 
     annotation_sidebar.prependTo($('body'))
 
-    $('a#toggleAnnotations').on('click', function () {
-      $(annotation_sidebar_selector).removeClass('active')
-      $(sidebody_annotation_selector).each(function () {
-        $(this).removeClass('active')
-      })
-      rash.toggleAnnotations($(this))
+    $('#toggleAnnotations').on('click', function () {
+      rash.toggleAnnotations()
     })
 
-    $('a#toggleSidebar').on('click', function () {
-      $(annotation_sidebar_selector).toggleClass('active')
-      $(sidebody_annotation_selector).each(function () {
-        $(this).removeClass('active')
-      })
+    $('#toggleSidebar').on('click', function () {
+
+      rash.toggleSidebar()
     })
   },
 
@@ -761,9 +755,13 @@ const rash = {
 
   /* Toggle annotations */
 
-  toggleAnnotations: (element) => {
+  toggleAnnotations: () => {
 
-    element.toggleClass('active')
+    $(annotation_sidebar_selector).removeClass('active')
+
+    $(sidebody_annotation_selector).each(function () {
+      $(this).removeClass('active')
+    })
 
     $(html_annotations_selector).each(function () {
 
@@ -773,6 +771,31 @@ const rash = {
     $(side_annotation_selector).each(function () {
 
       $(this).toggleClass('hidden')
+    })
+  },
+
+  toggleSidebar: () => {
+
+    $(annotation_sidebar_selector).toggleClass('active')
+
+    $(sidebody_annotation_selector).each(function () {
+      $(this).removeClass('active')
+    })
+  },
+
+  showAnnotation: titleList => {
+
+    const getSelector = id => `div.cgen.side_note_body[data-rash-annotation-id="${id}"]`
+
+    $(annotation_sidebar_selector).toggleClass('active')
+
+    let selector = getSelector(titleList[0])
+
+    for (let i = 1; i < titleList.length; i++)
+      selector += `,${getSelector(titleList[i])}`
+
+    $(selector).each(function () {
+      $(this).toggleClass('active')
     })
   }
 
@@ -1063,7 +1086,7 @@ class Annotation {
     let annotation = nearAnnotation(this.top)
     if (typeof annotation != 'undefined') {
 
-      sideAnnotation = $(`a.side_note[data-rash-annotation-id="${annotation.semanticAnnotation.id}"]`)
+      sideAnnotation = $(`span.side_note[data-rash-annotation-id="${annotation.semanticAnnotation.id}"]`)
 
       sideAnnotation.attr('title', `${sideAnnotation.attr('title')},${this.semanticAnnotation.id}`)
       sideAnnotation.text(1 + parseInt(sideAnnotation.text()))
@@ -1076,7 +1099,7 @@ class Annotation {
 
       const height = $(element).height()
 
-      sideAnnotation = $(`<a style="top:${this.top}px" title="${this.semanticAnnotation.id}" data-rash-annotation-id="${this.semanticAnnotation.id}" class="btn btn-default cgen side_note">1</a>`)
+      sideAnnotation = $(`<span style="top:${this.top}px" title="${this.semanticAnnotation.id}" data-rash-annotation-id="${this.semanticAnnotation.id}" class="btn btn-default cgen side_note">1</span>`)
 
       $(annotation_sidebar_selector).append(sideAnnotation)
     }
@@ -1100,19 +1123,7 @@ class Annotation {
     })
 
     sideAnnotation.on('click', function () {
-
-      const getSelector = id => `div.cgen.side_note_body[data-rash-annotation-id="${id}"]`
-
-      $(annotation_sidebar_selector).toggleClass('active')
-
-      let selector = getSelector(referencedNotes[0])
-
-      for (let i = 1; i < referencedNotes.length; i++)
-        selector += `,${getSelector(referencedNotes[i])}`
-
-      $(selector).each(function () {
-        $(this).toggleClass('active')
-      })
+      rash.showAnnotation(referencedNotes)
     })
 
     // Create annotation body
@@ -1131,7 +1142,7 @@ class Annotation {
 
 $(() => rash.run())
 
-$(window).load(function () {
+$(document).ready(function () {
   rash.initAnnotationSidebar()
   rash.renderAnnotations()
 })

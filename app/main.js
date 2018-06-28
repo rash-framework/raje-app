@@ -7,21 +7,6 @@ const electron = require('electron')
 const app = electron.app
 const RAJE_CONST = require('./modules/raje_const')
 
-global.ROOT = __dirname
-
-global.hasChanged
-global.isNew
-global.savePath
-
-// This variable is used to know if the editor have to save
-// images inside the tmp folder or in the RASH package
-global.isWrapper
-
-global.SPLASH = RAJE_CONST.files.splash
-global.GITHUB_LOGIN_SUCCESS = RAJE_CONST.strings.github.login_success
-global.GITHUB_LOGOUT_SUCCESS = RAJE_CONST.strings.github.logout_success
-global.SAVE_SUCCESS = RAJE_CONST.strings.fs.save_success
-
 global.articleSettings = {}
 global.github_data = {}
 global.screenSize
@@ -43,72 +28,65 @@ const RAJE_MENU = require('./modules/raje_menu.js')
 const RAJE_STORAGE = require('./modules/raje_storage.js')
 const RAJE_GITHUB = require('./modules/raje_github.js')
 
-const EDITOR_WINDOW = 'editor'
-const SPLASH_WINDOW = 'splash'
-
 let splashWindow
 let editorWindow
 
+//#region Splash and Editor manage
+
+openSplash = () => {
+
+  // DEBUG mode
+  // RAJE_STORAGE.clearAll()
+
+  // Get the url to the splash window
+  splashWindowUrl = url.format({
+    pathname: path.join(__dirname, RAJE_CONST.files.splash),
+    protocol: 'file:',
+    slashes: true
+  })
+
+  splashWindow = new BrowserWindow({
+    height: 500,
+    width: 800,
+    resizable: false,
+    frame: false,
+    movable: true
+  })
+
+  splashWindow.loadURL(splashWindowUrl)
+
+  // Set the menu 
+  Menu.setApplicationMenu(Menu.buildFromTemplate(RAJE_MENU.getSplashMenu()))
+
+  splashWindow.show()
+}
+
+closeSplash = () => {
+
+  splashWindow.close()
+}
+
+openEditor = localRootPath => {
+
+  windows.newArticle()
+
+  //global.articleSettings.hasChanged = false
+
+  /**
+   * If localRootPath exists, the user is trying to one an existing article
+   */
+  /*
+  if (localRootPath)
+    windows.alreadyExistingArticle(localRootPath)
+  else
+    windows.newArticle()
+    */
+}
+
+//#endregion
+
 const windows = {
 
-  /**
-   * Init the windowmanager and open the splash window
-   */
-  openSplash: () => {
-
-    // DEBUG mode
-    // RAJE_STORAGE.clearAll()
-
-    // Get the url to the splash window
-    let splashWindowUrl = url.format({
-      pathname: path.join(__dirname, SPLASH),
-      protocol: 'file:',
-      slashes: true
-    })
-
-    splashWindow = new BrowserWindow({
-      height: 500,
-      width: 800,
-      resizable: false,
-      frame: false,
-      movable: true
-    })
-
-    splashWindow.loadURL(splashWindowUrl)
-
-    // Set the menu 
-    Menu.setApplicationMenu(Menu.buildFromTemplate(RAJE_MENU.getSplashMenu()))
-
-    splashWindow.show()
-  },
-
-  /**
-   * Close the splash window
-   */
-  closeSplash: () => {
-
-    splashWindow.close()
-  },
-
-  /**
-   * Open the editable template  
-   */
-  openEditor: (localRootPath) => {
-
-    windows.newArticle()
-
-    //global.articleSettings.hasChanged = false
-
-    /**
-     * If localRootPath exists, the user is trying to one an existing article
-     */
-    /*
-    if (localRootPath)
-      windows.alreadyExistingArticle(localRootPath)
-    else
-      windows.newArticle()
-      */
-  },
 
   /**
    * 
@@ -241,7 +219,7 @@ const windows = {
         // Show the dialog box "the document need to be saved"
         dialog.showMessageBox({
           type: 'warning',
-          buttons: ['Save changes [NOT IMPLEMENTED YET]', 'Discard changes', 'Continue editing'],
+          buttons: ['Save changes', 'Discard changes', 'Continue editing'],
           title: 'Unsaved changes',
           message: 'The article has been changed, do you want to save the changes?',
           cancelId: 2
@@ -270,7 +248,7 @@ const windows = {
      */
     editorWindow.on('closed', event => {
 
-      windows.openSplash()
+      openSplash()
 
       RAJE_FS.removeRajeCoreInArticle(editorWindowUrl, err => {
         if (err) throw err
@@ -294,16 +272,12 @@ const windows = {
   }
 }
 
-/**
- * ##########################################################################
- * ################################### APP EVENTS ###########################
- * ##########################################################################
- */
+//#region App events
 
 /**
  * Event called when the app is ready
  */
-app.on('ready', windows.openSplash)
+app.on('ready', openSplash)
 
 /**
  * This event is called on OSX when the user click on icon in the dock
@@ -312,7 +286,7 @@ app.on('activate', (event, hasVisibleWindows) => {
 
   // If there aren't any open windows
   if (!hasVisibleWindows)
-    windows.openSplash()
+    openSplash()
 })
 
 /**
@@ -330,11 +304,9 @@ app.on('window-all-closed', function () {
  */
 app.on('quit', RAJE_FS.removeImageTempFolder)
 
-/**
- * ##########################################################################
- * ################################### PROCEDURE CALL #######################
- * ##########################################################################
- */
+//#endregion
+
+//#region procedure call
 
 /**
  * This method is used to call the function that 
@@ -575,11 +547,9 @@ ipcMain.on('getVersionSync', (event, arg) => {
   event.returnValue = PACKAGE.version
 })
 
-/**
- * ##########################################################################
- * ################################### GLOBAL METHOD ########################
- * ##########################################################################
- */
+//#endregion
+
+//#region Global methods
 
 /**
  * Send a message to the renderer process
@@ -615,7 +585,7 @@ global.updateClientContent = function () {
  * 
  */
 global.newArticle = function () {
-  windows.openEditor(null)
+  openEditor(null)
   splashWindow.close()
 }
 
@@ -699,3 +669,5 @@ global.getUserStoredData = function (callback) {
 global.push = function () {
   RAJE_GITHUB.initRepo(global.articleSettings.savePath)
 }
+
+//#endregion

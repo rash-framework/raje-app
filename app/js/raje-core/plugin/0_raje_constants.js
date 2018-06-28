@@ -43,4 +43,7 @@ const LISTING_SUFFIX = 'listing_'
 
 const DISABLE_SELECTOR_INLINE = 'table, img, pre, code'
 
+const SIDEBAR_ANNOTATION = 'aside#annotations'
+
 const INLINE_ERRORS = 'Error, Inline elements can be ONLY created inside the same paragraph'
+

@@ -55,7 +55,7 @@ if (hasBackend) {
       content_css: ['css/bootstrap.min.css', 'css/rash.css', 'css/raje-core.css'],
 
       // Set plugins [table image link codesample]
-      plugins: "searchreplace raje_inlineFigure fullscreen raje_externalLink raje_inlineCode raje_inlineQuote raje_section  noneditable raje_image raje_quoteblock raje_codeblock raje_table raje_listing raje_inline_formula raje_formula raje_crossref raje_footnotes raje_metadata raje_lists raje_save spellchecker",
+      plugins: "searchreplace raje_inlineFigure fullscreen raje_externalLink raje_inlineCode raje_inlineQuote raje_section  noneditable raje_image raje_quoteblock raje_codeblock raje_table raje_listing raje_inline_formula raje_formula raje_crossref raje_footnotes raje_metadata raje_lists raje_save raje_annotations spellchecker",
 
       // Remove menubar
       menubar: false,
@@ -160,38 +160,41 @@ if (hasBackend) {
          */
         editor.on('click', function (e) {
 
-          // Capture the triple click event
-          if (e.detail == 3) {
+          // Don't capture the click of the sidebar annotation
+          if (!$(e.srcElement).parents(SIDEBAR_ANNOTATION).length)
 
-            e.preventDefault()
-            e.stopImmediatePropagation()
+            // Capture the triple click event
+            if (e.detail == 3) {
 
-            let wrapper = $(tinymce.activeEditor.selection.getRng().startContainer).parents('p,figcaption,:header').first()
-            let startContainer = wrapper[0]
-            let endContainer = wrapper[0]
-            let range = document.createRange()
+              e.preventDefault()
+              e.stopImmediatePropagation()
 
-            // Check if the wrapper has more text node inside
-            if (wrapper.contents().length > 1) {
+              let wrapper = $(tinymce.activeEditor.selection.getRng().startContainer).parents('p,figcaption,:header').first()
+              let startContainer = wrapper[0]
+              let endContainer = wrapper[0]
+              let range = document.createRange()
 
-              // If the first text node is a not editable strong, the selection must start with the second element
-              if (wrapper.contents().first().is('strong[contenteditable=false]'))
-                startContainer = wrapper.contents()[1]
+              // Check if the wrapper has more text node inside
+              if (wrapper.contents().length > 1) {
 
-              // In this case the endContainer will be the last text node
-              endContainer = wrapper.contents().last()[0]
+                // If the first text node is a not editable strong, the selection must start with the second element
+                if (wrapper.contents().first().is('strong[contenteditable=false]'))
+                  startContainer = wrapper.contents()[1]
+
+                // In this case the endContainer will be the last text node
+                endContainer = wrapper.contents().last()[0]
+              }
+
+              range.setStart(startContainer, 0)
+
+              if (wrapper.is('figcaption'))
+                range.setEnd(endContainer, endContainer.length)
+
+              else
+                range.setEnd(endContainer, 1)
+
+              tinymce.activeEditor.selection.setRng(range)
             }
-
-            range.setStart(startContainer, 0)
-
-            if (wrapper.is('figcaption'))
-              range.setEnd(endContainer, endContainer.length)
-
-            else
-              range.setEnd(endContainer, 1)
-
-            tinymce.activeEditor.selection.setRng(range)
-          }
 
         })
 
@@ -459,6 +462,7 @@ if (hasBackend) {
    */
   function setNonEditableHeader() {
     $(HEADER_SELECTOR).addClass('mceNonEditable')
+    $(SIDEBAR_ANNOTATION).addClass('mceNonEditable')
   }
 
   /**

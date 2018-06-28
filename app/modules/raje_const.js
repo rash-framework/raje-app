@@ -2,6 +2,10 @@ const path = require('path')
 
 let raje_const = {
   index_path: path.normalize(`${__dirname}/..`),
+  windows: {
+    editor: 'editor',
+    splash: 'splash'
+  },
   files: {
     template: 'index.html',
     splash: 'splash.html',
