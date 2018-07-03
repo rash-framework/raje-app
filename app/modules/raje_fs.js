@@ -216,7 +216,7 @@ const RAJE_FS = {
     return new Promise((resolve, reject) => {
 
       // Remove the host from the url
-      file = url.parse(file).pathname
+      file = RAJE_FS._removeProtocol(file)
 
       // Module cheerio options
       const cheerioOptions = {
@@ -245,7 +245,7 @@ const RAJE_FS = {
     return new Promise((resolve, reject) => {
 
       // Remove the host from the url
-      file = url.parse(file).pathname
+      file = RAJE_FS._removeProtocol(file)
 
       // Module cheerio options
       const cheerioOptions = {
@@ -277,7 +277,12 @@ const RAJE_FS = {
       fs.pathExists(path)
         .then(exists => resolve(exists))
     })
-  }
+  },
+
+  /**
+   * 
+   */
+  _removeProtocol: file => file.replace(url.parse(file).protocol, '')
 }
 
 module.exports = RAJE_FS
