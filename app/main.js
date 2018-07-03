@@ -5,7 +5,6 @@
 
 const electron = require('electron')
 const app = electron.app
-const RAJE_CONST = require('./modules/raje_const')
 
 global.articleSettings = {}
 global.github_data = {}
@@ -20,6 +19,7 @@ const {
 
 const url = require('url')
 const path = require('path')
+const windowManager = require('electron-window-manager')
 
 const PACKAGE = require('./package.json')
 
@@ -27,16 +27,23 @@ const RAJE_FS = require('./modules/raje_fs.js')
 const RAJE_MENU = require('./modules/raje_menu.js')
 const RAJE_STORAGE = require('./modules/raje_storage.js')
 const RAJE_GITHUB = require('./modules/raje_github.js')
+const RAJE_CONST = require('./modules/raje_const')
 
 let splashWindow
 let editorWindow
 
+
+// DEBUG mode
+// RAJE_STORAGE.clearAll()
+
+windowManager.init()
+
 //#region Splash and Editor manage
 
+/**
+ * 
+ */
 const openSplash = () => {
-
-  // DEBUG mode
-  // RAJE_STORAGE.clearAll()
 
   // Get the url to the splash window
   splashWindowUrl = url.format({
@@ -45,7 +52,7 @@ const openSplash = () => {
     slashes: true
   })
 
-  splashWindow = new BrowserWindow({
+  windowManager.open(RAJE_CONST.windows.splash, RAJE_CONST.windows.splash, splashWindowUrl, false, {
     height: 500,
     width: 800,
     resizable: false,
@@ -53,19 +60,22 @@ const openSplash = () => {
     movable: true
   })
 
-  splashWindow.loadURL(splashWindowUrl)
-
   // Set the menu 
   Menu.setApplicationMenu(Menu.buildFromTemplate(RAJE_MENU.getSplashMenu()))
-
-  splashWindow.show()
 }
 
+/**
+ * 
+ */
 const closeSplash = () => {
 
-  splashWindow.close()
+  windowManager.close(RAJE_CONST.windows.splash)
 }
 
+/**
+ * 
+ * @param {*} localRootPath 
+ */
 const openEditor = (localRootPath = null) => {
 
   global.articleSettings.hasChanged = false
@@ -95,36 +105,20 @@ const openNewArticle = () => {
 
 const alreadyExistingArticle = localRootPath => {
 
-  let splittedRootPath = localRootPath.split('/')
-
-  let getFileName = function () {
-    return splittedRootPath[splittedRootPath.length - 1]
-  }
-
-  let getDirectoryPath = function () {
-    splittedRootPath.pop()
-    return `${splittedRootPath.join('/')}/`
-  }
-
-  let getDirectoryName = function () {
-    return splittedRootPath[splittedRootPath.length - 1]
-  }
-
   // Store some important elements about the document
-  global.TEMPLATE = getFileName()
   global.articleSettings.isNew = false
   global.articleSettings.isWrapper = false
-  global.articleSettings.savePath = getDirectoryPath()
-  global.articleSettings.folderName = getDirectoryName()
+  global.articleSettings.savePath = path.parse(localRootPath).dir
+  global.articleSettings.folderName = path.parse(path.dirname(localRootPath)).name
 
   // TODO check if the document has validated RASH content
 
   // Get the URL to open the editor
-  editorWindowUrl = url.format({
+  editorWindowUrl = path.normalize(url.format({
     pathname: localRootPath,
     protocol: 'file:',
     slashes: true
-  })
+  }))
 
   RAJE_FS.checkIfExists(global.articleSettings.savePath)
     .then(exists => {
@@ -161,31 +155,14 @@ const alreadyExistingArticle = localRootPath => {
 
 const showEditor = editorWindowUrl => {
 
-  editorWindow = new BrowserWindow({
+  // Open the new window with the size given by the splash window
+  windowManager.open(RAJE_CONST.windows.editor, RAJE_CONST.windows.editor, editorWindowUrl, null, {
     width: global.screenSize.width,
     height: global.screenSize.height,
     resizable: true
   })
 
-  editorWindow.loadURL(editorWindowUrl)
-  editorWindow.show()
-
-  // Open the new window with the size given by the splash window
-  //windowManager.open(EDITOR_WINDOW, 'RAJE', editorWindowUrl, null, )
-
-  // Retrieve and save Github data
-  global.getUserStoredData()
-    .then(data => {
-      global.github_data = data
-
-      // Update the app menu
-      updateEditorMenu(RAJE_MENU.getEditorMenu())
-    })
-
-  /**
-   * Catch the close event
-   */
-  editorWindow.on('close', event => {
+  windowManager.get(RAJE_CONST.windows.editor).object.on('close', event => {
 
     // If the document is in hasChanged mode (need to be saved)
     if (global.articleSettings.hasChanged) {
@@ -207,23 +184,32 @@ const showEditor = editorWindowUrl => {
           case 0:
             // TODO save the document
             global.articleSettings.hasChanged = false
-            editorWindow.close()
+            windowManager.get(RAJE_CONST.windows.editor).close()
             break
 
             // The user doesn't want to save the document
           case 1:
             global.articleSettings.hasChanged = false
-            editorWindow.close()
+            windowManager.get(RAJE_CONST.windows.editor).close()
             break
         }
       })
     }
   })
 
+  // Retrieve and save Github data
+  global.getUserStoredData()
+    .then(data => {
+      global.github_data = data
+
+      // Update the app menu
+      updateEditorMenu(RAJE_MENU.getEditorMenu())
+    })
+
   /**
    * When the editor is closed, remove rajemce from the article if is still there
    */
-  editorWindow.on('closed', event => {
+  windowManager.get(RAJE_CONST.windows.editor).object.on('closed', event => {
 
     openSplash()
 
@@ -523,7 +509,7 @@ ipcMain.on('getVersionSync', (event, arg) => {
  * Start the save as process
  */
 global.executeSaveAs = function () {
-  editorWindow.webContents.send('executeSaveAs')
+  windowManager.get(RAJE_CONST.windows.editor).object.webContents.send('executeSaveAs')
 }
 
 /**
@@ -534,18 +520,18 @@ global.executeSave = function () {
 
   // If the article hasn't been saved yet, call saveAs
   if (global.articleSettings.isNew)
-    editorWindow.webContents.send('executeSaveAs')
+    windowManager.get(RAJE_CONST.windows.editor).object.webContents.send('executeSaveAs')
 
   // Or call save
   else
-    editorWindow.webContents.send('executeSave')
+    windowManager.get(RAJE_CONST.windows.editor).object.webContents.send('executeSave')
 }
 
 /**
  * 
  */
 global.updateClientContent = function () {
-  editorWindow.webContents.send('updateContent')
+  windowManager.get(RAJE_CONST.windows.editor).object.webContents.send('updateContent')
 }
 
 /**
@@ -553,7 +539,7 @@ global.updateClientContent = function () {
  */
 global.newArticle = function () {
   openEditor(null)
-  splashWindow.close()
+  closeSplash()
 }
 
 /**
@@ -585,7 +571,7 @@ global.openArticle = function () {
  * 
  */
 global.sendNotification = function (message) {
-  editorWindow.webContents.send('notify', message)
+  windowManager.get(RAJE_CONST.windows.editor).object.webContents.send('notify', message)
 }
 
 /**
