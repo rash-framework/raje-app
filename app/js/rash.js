@@ -446,7 +446,7 @@ const rash = {
       var cur_caption = $(this).parents('figure').find('figcaption')
       var cur_number = $(this).findNumber(figurebox_selector)
 
-      cur_caption.html(`<strong class="cgen" data-rash-original-content="">Figure ${cur_number}. </strong>${cur_caption.html()}`)
+      cur_caption.html(`<strong contenteditable="false" class="cgen" data-rash-original-content="">Figure ${cur_number}. </strong>${cur_caption.html()}`)
     })
 
     $(tablebox_selector).each(function () {
@@ -454,7 +454,7 @@ const rash = {
       var cur_caption = $(this).parents('figure').find('figcaption')
       var cur_number = $(this).findNumber(tablebox_selector)
 
-      cur_caption.html(`<strong class="cgen" data-rash-original-content="">Table ${cur_number}. </strong>${cur_caption.html()}`)
+      cur_caption.html(`<strong contenteditable="false" class="cgen" data-rash-original-content="">Table ${cur_number}. </strong>${cur_caption.html()}`)
     })
 
     $(formulabox_selector).each(function () {
@@ -462,7 +462,7 @@ const rash = {
       var cur_caption = $(this).parents('figure').find('p')
       var cur_number = $(this).findNumber(formulabox_selector)
 
-      cur_caption.html(`${cur_caption.html()}<span class="cgen" data-rash-original-content=""> (${cur_number})</span>`)
+      cur_caption.html(`${cur_caption.html()}<span contenteditable="false" class="cgen" data-rash-original-content=""> (${cur_number})</span>`)
     })
 
     $(listingbox_selector).each(function () {
@@ -470,7 +470,7 @@ const rash = {
       var cur_caption = $(this).parents('figure').find('figcaption')
       var cur_number = $(this).findNumber(listingbox_selector)
 
-      cur_caption.html(`<strong class="cgen" data-rash-original-content="">Listing ${cur_number}. </strong>${cur_caption.html()}`)
+      cur_caption.html(`<strong contenteditable="false" class="cgen" data-rash-original-content="">Listing ${cur_number}. </strong>${cur_caption.html()}`)
     })
   },
 
