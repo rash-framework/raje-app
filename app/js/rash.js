@@ -294,7 +294,9 @@ const tablebox_selector = `figure > ${tablebox_selector_table}`
 const formulabox_selector_img = 'p > img[role=math]'
 const formulabox_selector_span = 'p > span[role=math]'
 const formulabox_selector_math = 'p > math'
-const formulabox_selector = `figure > ${formulabox_selector_img}, figure > ${formulabox_selector_span}, figure > ${formulabox_selector_math}`
+var formulabox_selector_svg = "p svg[role=math]"
+
+var formulabox_selector = "figure > " + formulabox_selector_img + ", figure > " + formulabox_selector_span + ", figure > " + formulabox_selector_math + ", figure > " + formulabox_selector_svg
 const listingbox_selector_pre = 'pre'
 const listingbox_selector = `figure > ${listingbox_selector_pre}`
 
