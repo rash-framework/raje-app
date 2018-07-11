@@ -7,7 +7,6 @@ const dircompare = require('dir-compare')
 const url = require('url')
 
 const RAJE_CONST = require('./raje_const')
-const RAJE_CORE = 'js/raje-core/core.js'
 
 const RAJE_FS = {
 
@@ -43,7 +42,7 @@ const RAJE_FS = {
    */
   saveArticle: (toDir, document) => {
 
-    return new Promise((resolve, reject) =>
+    return new Promise(resolve =>
 
       // Write the template file
       fs.writeFile(path.join(toDir, RAJE_CONST.files.template), document)
@@ -60,7 +59,7 @@ const RAJE_FS = {
    */
   _copyAssets: toDir => {
 
-    return new Promise((resolve, reject) => {
+    return new Promise(resolve => {
 
       resolve(RAJE_CONST.dirs.assets.map(fromDir => {
 
@@ -69,12 +68,23 @@ const RAJE_FS = {
 
         // If the directory doesn't exists, copy the content from the source
         if (!fs.existsSync(toDirAsset))
-          fs.copy(fromDir, toDirAsset).catch(error => console.log(error))
+          return fs.copy(fromDir, toDirAsset).catch(error => console.log(error))
 
         else
-          RAJE_FS._compareAssets(toDirAsset, fromDir)
+          return RAJE_FS._compareAssets(toDirAsset, fromDir)
           .then(diffSet => {
-            diffSet.map(file => fs.copy(file.path1, file.path2))
+            diffSet.map(file => {
+
+              switch (file.state) {
+
+                case 'distinct':
+                  fs.copy(path.join(file.path1, file.name1), path.join(file.path2, file.name2))
+                  break
+
+                case 'left':
+                  fs.copy(path.join(file.path1, file.name1), path.join(toDirAsset, file.name1))
+              }
+            })
           })
           .catch(error => console.log(error))
       }))
@@ -87,18 +97,17 @@ const RAJE_FS = {
   _compareAssets: (toDir, fromDir) => {
 
     // Set the constants
-    const keyword = 'distinct'
+    const keywords = ['distinct', 'left']
     const options = {
       compareContent: true
     }
 
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
 
-      if (!fs.existsSync(toDir) || !fs.existsSync(fromDir))
-        reject('Error')
+      if (fs.existsSync(fromDir) && fs.existsSync(toDir))
 
-      // Compare the two folder 
-      dircompare.compare(toDir, fromDir, options)
+        // Compare all files 
+        dircompare.compare(fromDir, toDir, options)
         .then(result => {
 
           // Create the set of different files
@@ -107,7 +116,7 @@ const RAJE_FS = {
           // Populate the set 
           if (!result.same)
             for (let file of result.diffSet)
-              if (file.state == 'distinct')
+              if (keywords.includes(file.state))
                 diffSet.push(file)
 
           resolve(diffSet)
