@@ -127,7 +127,9 @@ if (hasBackend) {
 
         let pasteBookmark
 
-        // Set fullscreen 
+        /**
+         * 
+         */
         editor.on('init', function (e) {
 
           editor.execCommand('mceFullScreen')
@@ -137,6 +139,9 @@ if (hasBackend) {
           tinymce.activeEditor.selection.setCursorLocation(tinymce.activeEditor.dom.select(FIRST_HEADING)[0], 0)
         })
 
+        /**
+         * 
+         */
         editor.on('keyDown', function (e) {
 
           // Prevent shift+enter
@@ -152,6 +157,16 @@ if (hasBackend) {
 
               pasteBookmark = tinymce.activeEditor.selection.getBookmark()
             }
+          }
+        })
+
+        editor.on('MouseUp', function (e) {
+          if (!tinymce.activeEditor.selection.isCollapsed()) {
+
+            let selectedElement = $(tinymce.activeEditor.selection.getNode())
+
+            if (!selectedElement.is(NON_EDITABLE_HEADER_SELECTOR) && !selectedElement.is(SIDEBAR_ANNOTATION))
+              console.log(tinymce.activeEditor.selection.getContent())
           }
         })
 
