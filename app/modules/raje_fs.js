@@ -176,37 +176,36 @@ const RAJE_FS = {
   /**
    * Save the image in the temporary folder OR in the assets folder
    */
-  saveImageTemp: function (image, path, callback) {
+  saveImageTemp: (image, absolutePath) =>
 
-    // The folder where images have to be stored
-    let destinationPath = (global.articleSettings.isWrapper) ? global.IMAGE_TEMP : `${path}img`
+    new Promise((resolve, reject) => {
 
-    // If the directory doesn't exist, create it
-    if (!fs.existsSync(destinationPath))
-      fs.mkdirpSync(destinationPath)
+      // The folder where images have to be stored
+      let destinationPath = (global.articleSettings.isWrapper) ? RAJE_CONST.dirs.assets.slice(-1)[0] : path.join(absolutePath, RAJE_CONST.dirs.image)
 
-    // Copy (read and write) the image into the temporary image folder
-    fs.readFile(image, (err, data) => {
-      if (err) return callback(err)
+      // If the directory doesn't exist, create it
+      if (!fs.existsSync(destinationPath))
+        fs.mkdirpSync(destinationPath)
 
-      // Get the image name
-      let filename = image.split('/')[image.split('/').length - 1]
-      let destinationFilename = `${destinationPath}/${filename}`
+      fs.readFile(image)
+        .then(data => {
 
-      fs.writeFile(destinationFilename, data, err => {
-        if (err) return callback(err)
+          let filename = path.parse(image).base
+          let destinationFilename = path.join(destinationPath, filename)
 
-        return callback(null, `img/${filename}`)
-      })
-    })
-  },
+          fs.writeFile(destinationFilename, data)
+            .then(() => resolve(path.join(RAJE_CONST.dirs.image, filename)))
+            .catch(error => reject(error))
+        })
+        .catch(error => reject(error))
+    }),
 
   /**
    * Remove the temporary folder
    */
   removeImageTempFolder: () => {
-    if (fs.existsSync(global.IMAGE_TEMP))
-      fs.removeSync(global.IMAGE_TEMP)
+    if (fs.existsSync(RAJE_CONST.dirs.assets.slice(-1)[0]))
+      fs.removeSync(RAJE_CONST.dirs.assets.slice(-1)[0])
   },
 
   /**

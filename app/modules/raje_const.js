@@ -12,6 +12,7 @@ let raje_const = {
     raje_hidden: '.raje'
   },
   dirs: {
+    image: 'img',
     assets: [
       path.join(path.normalize(`${__dirname}/..`), '/js'),
       path.join(path.normalize(`${__dirname}/..`), '/css'),
