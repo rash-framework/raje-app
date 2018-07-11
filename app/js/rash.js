@@ -83,7 +83,7 @@ jQuery.fn.extend({
         rash_css.appendTo($('head'))
         $('#layoutselection').text('Web-based')
         $(this).hideCSS()
-        $(this).addHeaderHTML()
+        $('body').addHeaderHTML()
         $(this).orderCaptions(false)
       } else if (currentStyle == '#rash_lncs_layout') { /* Transform to Springer LNCS layout */
         $('link[rel="stylesheet"]').remove()
@@ -109,7 +109,7 @@ jQuery.fn.extend({
 
     /* Header title */
     var header = $('<header class="page-header container cgen" data-rash-original-content=""></header>')
-    header.prependTo($('body'))
+    $(this).prepend(header)
     var title_string = ''
     var title_split = $('head title').html().split(" -- ")
     if (title_split.length == 1) {
@@ -189,7 +189,7 @@ jQuery.fn.extend({
    * layout specification of the Lecture Notes in Computer Science by Springer. */
   addHeaderLNCS: function () {
     /* Initialise the page again */
-    $(this).addHeaderHTML()
+    $('body').addHeaderHTML()
 
     /* Authors */
     var authors = $('<address class="lead authors"></address>')
@@ -634,7 +634,7 @@ const rash = {
   /* Set header */
 
   setHeader: () =>
-    $(this).addHeaderHTML(),
+    $('body').addHeaderHTML(),
 
   /* /END Set header */
 
