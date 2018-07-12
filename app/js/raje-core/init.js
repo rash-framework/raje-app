@@ -43,6 +43,8 @@ if (hasBackend) {
     //
     mathml2svgAllFormulas()
 
+    addAnnotationPopup()
+
     tinymce.init({
 
       // Select the element to wrap
@@ -161,12 +163,21 @@ if (hasBackend) {
         })
 
         editor.on('MouseUp', function (e) {
+          //$('.annotatorPopup').hide()
           if (!tinymce.activeEditor.selection.isCollapsed()) {
 
             let selectedElement = $(tinymce.activeEditor.selection.getNode())
 
-            if (!selectedElement.is(NON_EDITABLE_HEADER_SELECTOR) && !selectedElement.is(SIDEBAR_ANNOTATION))
-              console.log(tinymce.activeEditor.selection.getContent())
+            if (!selectedElement.is(NON_EDITABLE_HEADER_SELECTOR) && !selectedElement.is(SIDEBAR_ANNOTATION)) {
+
+              /*
+              $('.annotatorPopup').show()
+              $('.annotatorPopup').css({
+                left: e.pageX - 50,
+                top: e.pageY - 20
+              })
+              */
+            }
           }
         })
 
@@ -729,4 +740,9 @@ if (hasBackend) {
         $(rng.commonAncestorContainer).text().trim().length != rng.startOffset
     }
   }
+}
+
+addAnnotationPopup = () => {
+  let element = `<div class="annotatorPopup"></div>`
+  $('body').append(element)
 }
