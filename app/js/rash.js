@@ -748,8 +748,7 @@ const rash = {
   renderAnnotations: () => {
 
     $(semantic_annotation_selector).each(function () {
-      let annotation = new Annotation(JSON.parse($(this).html()))
-      ANNOTATIONS.push(annotation)
+      ANNOTATIONS.push(new Annotation(JSON.parse($(this).html())))
     })
   },
 

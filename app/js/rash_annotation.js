@@ -250,7 +250,7 @@ class Annotation {
     })
 
     // Create the side annotation passing the distance of the height
-    this._createSideAnnotation(startMarker)
+    //this._createSideAnnotation(startMarker)
 
     // Remove the starting and ending markers
     $(startMarker).remove()
@@ -374,7 +374,7 @@ class Annotation {
 
     // Create the Xpath for all elements
     for (let element of parents)
-      xpath += `/${element[0].nodeName.toLowerCase()}[${element.prev(element[0].nodeName).length + 1}]`
+      xpath += `/${element[0].nodeName.toLowerCase()}[${element.prevAll(element[0].nodeName).length + 1}]`
 
 
     return xpath
