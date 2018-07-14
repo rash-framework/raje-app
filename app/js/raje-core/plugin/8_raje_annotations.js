@@ -19,42 +19,68 @@ tinymce.PluginManager.add('raje_annotations', function (editor, url) {
     }
   })
 
-  editor.on('MouseUp', function (e) {
-    //$('.annotatorPopup').hide()
+  editor.on('MouseUp', () => {
+
+    // If the selection is not collapsed
     if (!tinymce.activeEditor.selection.isCollapsed()) {
 
+      // Get the node selected
       let selectedElement = $(tinymce.activeEditor.selection.getNode())
 
+      // If is the text
       if (!selectedElement.is(NON_EDITABLE_HEADER_SELECTOR) && !selectedElement.is(SIDEBAR_ANNOTATION)) {
 
-        /*
-        $('.annotatorPopup').show()
-        $('.annotatorPopup').css({
-          left: e.pageX - 50,
-          top: e.pageY - 20
-        })
-        */
+        createAnnotation()
       }
     }
   })
 })
 
-const commenting = 'commenting'
+const createAnnotation = () => {
 
-const annotations = {
+  const selection = tinymce.activeEditor.selection
+  const range = selection.getRng()
+  const lastAnnotation = Annotation.getLastAnnotation()
 
-  _createBody: (id, bodyValue, creator) => {
-    return {
-      id: id,
-      "@contenxt": "http://www.w3.org/ns/anno.jsonld",
-      created: Date.now(),
-      bodyValue: bodyValue,
-      creator: creator,
-      Motivation: commenting
+  const startXPath = Annotation.getXPath($(selection.getStart()))
+  const startOffset = Annotation.getOffset(range.startContainer, range.startOffset, startXPath)
+
+  const endXPath = Annotation.getXPath($(selection.getEnd()))
+  const endOffset = Annotation.getOffset(range.endContainer, range.endOffset, endXPath)
+
+  const data = {
+    "id": lastAnnotation.id,
+    "@contenxt": "http://www.w3.org/ns/anno.jsonld",
+    "created": Date.now(),
+    "bodyValue": 'tmp',
+    "creator": 'spino9330',
+    "Motivation": commenting,
+    "target": {
+      "selector": {
+        "startSelector": {
+          "@type": "XPathSelector",
+          "@value": startXPath
+        },
+        "endSelector": {
+          "@type": "XPathSelector",
+          "@value": endXPath
+        },
+        "start": {
+          "@type": "DataPositionSelector",
+          "@value": startOffset
+        },
+        "end": {
+          "@type": "DataPositionSelector",
+          "@value": endOffset
+        }
+      }
     }
-  },
-
-  createScript: (data) => {
-    $('head').append(`<script id="${data.id}" type="application/ld+json">${JSON.stringify(annotations._createBody(data.id,data.bodyValue,data.creator))}</script>`)
   }
+
+  lastAnnotation.element.after(`<script id="${data.id}" type="application/ld+json">${JSON.stringify(data, null, 2) }</script>`)
+
+  rash.clearAnnotations()
+  rash.renderAnnotations()
+
+  updateIframeFromSavedContent()
 }
