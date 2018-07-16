@@ -78,10 +78,12 @@ const createAnnotation = () => {
     }
   }
 
-  lastAnnotation.element.after(`<script id="${data.id}" type="application/ld+json">${JSON.stringify(data, null, 2) }</script>`)
+  // The adding of the script is inside a undo level
+  tinymce.activeEditor.undoManager.transact(function () {
 
-  rash.clearAnnotations()
-  rash.renderAnnotations()
-
-  updateIframeFromSavedContent()
+    $('#raje_root').append(`<script id="${data.id}" type="application/ld+json">${JSON.stringify(data, null, 2) }</script>`)
+    rash.clearAnnotations()
+    rash.renderAnnotations()
+    updateIframeFromSavedContent()
+  })
 }
