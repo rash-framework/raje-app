@@ -141,7 +141,7 @@ class Annotation {
       // Insert a node where the range starts
       range.insertNode($(this._getMarker(selector.role))[0])
 
-      return false
+      written = true
     }
 
     /**
@@ -153,14 +153,15 @@ class Annotation {
     const _analyzeContent = element => {
 
       // Iterate over all the nodes contained in the element
-      element.contents().each(function () {
+      for (let node of element.childNodes) {
 
-        // Get the element in vanilla js
-        let node = this
+        // Exit from all loops if 
+        if (written)
+          break
 
-        // If the node is a html element, recursively go deep and analyze its nodes
+        // If the node is a html element with text, recursively go deep and analyze its nodes 
         if (node.nodeType !== 3)
-          return _analyzeContent($(node))
+          _analyzeContent(node)
 
         // If the node is a textualNode, do the normal behaviour
         else {
@@ -173,19 +174,20 @@ class Annotation {
 
           // Add the marker if it has to be added inside the current node
           if (selector.offset >= minOffset && selector.offset <= maxOffset)
-            return _createRangeMarker(node, selector, selector.offset - minOffset)
+            _createRangeMarker(node, selector, selector.offset - minOffset)
 
           // Update the leftOffset
           minOffset = maxOffset
         }
-      })
+      }
     }
 
     // Set variables that are used to iterate over the nodes
     let minOffset = 0
     let maxOffset = 0
+    let written = false
 
-    _analyzeContent(element)
+    _analyzeContent(element[0])
   }
 
   /**
@@ -355,18 +357,19 @@ class Annotation {
   static getXPath(node) {
 
     // The allowed starting elements
-    const blocked_elements = 'p, :header'
+    const not_blocked_elements = 'section, p, :header, table, tr, th, td, tbody, ol, ul, li'
 
     // Create the neede vars
     let xpath = '/'
     let parents = []
 
-    if (node.is(blocked_elements))
+    if (node.is(not_blocked_elements))
       parents.push(node)
 
     // Add the entire collection inside the array of parent elements
     node.parentsUntil('body').each(function () {
-      parents.push($(this))
+      if ($(this).is(not_blocked_elements))
+        parents.push($(this))
     })
 
     // Reverse the array in order to have the parents in the left
@@ -395,17 +398,29 @@ class Annotation {
 
       for (let node of element.childNodes) {
 
-        // If the 
-        if (node.nodeType == 1)
-          _analyzeContent(node)
+        if (found)
+          break
 
+        // If the 
+        if (node.nodeType == 1) {
+
+          // If the element is the svg formula
+          if ($(node).is('svg[data-math-original-input]'))
+            minOffset += $(node).attr('data-math-original-input').length
+
+          // Or do the normal behaviour
+          else
+            _analyzeContent(node)
+        }
+
+        // Act normally if the element is a text node
         else {
 
           node.nodeValue = node.nodeValue.replace(/\s+/g, ' ')
 
           if (container.isEqualNode(node)) {
             offset += minOffset
-            break
+            found = true
           }
 
           minOffset += node.length
@@ -414,6 +429,7 @@ class Annotation {
     }
 
     let minOffset = 0
+    let found = false
 
     _analyzeContent($(document).xpath(path)[0])
 

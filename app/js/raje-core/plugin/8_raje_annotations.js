@@ -1,3 +1,5 @@
+const not_annotable_elements = `${NON_EDITABLE_HEADER_SELECTOR},${SIDEBAR_ANNOTATION},${INLINE_FORMULA_SELECTOR}`
+
 tinymce.PluginManager.add('raje_annotations', function (editor, url) {
 
   editor.on('click', function (e) {
@@ -28,10 +30,9 @@ tinymce.PluginManager.add('raje_annotations', function (editor, url) {
       let selectedElement = $(tinymce.activeEditor.selection.getNode())
 
       // If is the text
-      if (!selectedElement.is(NON_EDITABLE_HEADER_SELECTOR) && !selectedElement.is(SIDEBAR_ANNOTATION)) {
-
+      if (!selectedElement.is(not_annotable_elements))
         createAnnotation()
-      }
+
     }
   })
 })
