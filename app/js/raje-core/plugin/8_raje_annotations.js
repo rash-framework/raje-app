@@ -23,17 +23,9 @@ tinymce.PluginManager.add('raje_annotations', function (editor, url) {
 
   editor.on('MouseUp', () => {
 
-    // If the selection is not collapsed
-    if (!tinymce.activeEditor.selection.isCollapsed()) {
-
-      // Get the node selected
-      let selectedElement = $(tinymce.activeEditor.selection.getNode())
-
-      // If is the text
-      if (!selectedElement.is(not_annotable_elements))
-        createAnnotation()
-
-    }
+    // If the selection is not collapsed and the element selected is an "annotable element"
+    if (!tinymce.activeEditor.selection.isCollapsed() && !$(tinymce.activeEditor.selection.getNode()).is(not_annotable_elements))
+      createAnnotation()
   })
 })
 
