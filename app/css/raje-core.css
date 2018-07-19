@@ -136,9 +136,8 @@ aside#annotations[contentEditable=false] {
   outline: none;
 }
 
-.annotatorPopup {
+#annotatorPopup {
   position: absolute;
-  display: none;
   top: 200px;
   left: 200px;
   background-color: #337ab7;
@@ -150,16 +149,39 @@ aside#annotations[contentEditable=false] {
   text-align: center;
 }
 
-.annotatorPopup:hover {
+#annotatorFormPopup {
+  z-index: 100;
+  position: absolute;
+  min-width: 265px;
+  background-color: rgba(251, 251, 251, 0.98);
+  border: 1px solid rgba(122, 122, 122, 0.6);
+  border-radius: 5px
+}
+
+#annotatorFormPopup>textarea {
+  background-color: #f3f3f3;
+  outline: 0;
+  border-radius: 0;
+}
+
+#annotatorFormPopup>.annotatorFormPopup_footer {
+  text-align: right;
+  padding: 3px;
+  border-top: 1px solid #d4d4d4;
+  background-color: #d4d4d4;
+  border-radius: 0 0 5px 5px;
+}
+
+#annotatorPopup:hover {
   background-color: #2e6da4;
   cursor: pointer;
 }
 
-.annotatorPopup:hover>.annotatorPopup-arrow{
+#annotatorPopup:hover>.annotatorPopup_arrow {
   border-top-color: #2e6da4;
 }
 
-.annotatorPopup>.annotatorPopup-arrow {
+#annotatorPopup>.annotatorPopup_arrow {
   position: absolute;
   width: 0;
   height: 0;

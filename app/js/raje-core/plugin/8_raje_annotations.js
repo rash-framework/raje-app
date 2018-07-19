@@ -1,9 +1,9 @@
 const not_annotable_elements = `${NON_EDITABLE_HEADER_SELECTOR},${SIDEBAR_ANNOTATION},${INLINE_FORMULA_SELECTOR}`
-const annotatorPopup = '.annotatorPopup'
+const annotatorPopupSelector = '#annotatorPopup'
+const annotatorFormPopupSelector = '#annotatorFormPopup'
+const creator = 'spino9330'
 
 tinymce.PluginManager.add('raje_annotations', function (editor, url) {
-
-  addAnnotationPopup()
 
   editor.on('click', e => {
 
@@ -22,6 +22,10 @@ tinymce.PluginManager.add('raje_annotations', function (editor, url) {
 
       updateIframeFromSavedContent()
     }
+
+    // Close annotatorFormPopup if the user click somewhere else
+    if ($(annotatorFormPopupSelector).is(':visible') && (!clickedElement.is(annotatorFormPopupSelector) || !clickedElement.parents(annotatorFormPopupSelector).length))
+      hideAnnotationFormPopup()
   })
 
   editor.on('MouseUp', e => {
@@ -38,7 +42,7 @@ tinymce.PluginManager.add('raje_annotations', function (editor, url) {
 /**
  * 
  */
-handleAnnotation = (e) => {
+handleAnnotation = e => {
 
   // Save the selection
   const selection = tinymce.activeEditor.selection
@@ -50,8 +54,9 @@ handleAnnotation = (e) => {
 /**
  * 
  */
-createAnnotation = (text, creator, selection) => {
+createAnnotation = (text, creator) => {
 
+  const selection = tinymce.activeEditor.selection
   const range = selection.getRng()
   const lastAnnotation = Annotation.getLastAnnotation()
 
@@ -103,38 +108,67 @@ createAnnotation = (text, creator, selection) => {
 /**
  * 
  */
-addAnnotationPopup = () => {
-  let element = $(`
-    <div class='annotatorPopup'>
-      <div class="annotatorPopup-arrow"></div>
-      <span class="glyphicon glyphicon-pencil" aria-hidden="true"></span></div>`)
-  $('body').append(element)
-}
-
-/**
- * 
- */
 showAnnotationPopup = (x, y) => {
 
-  $(annotatorPopup).show()
-  $(annotatorPopup).css({
+  let annotatorPopup = $(`
+    <div id='annotatorPopup'>
+      <div class="annotatorPopup_arrow"></div>
+      <span class="glyphicon glyphicon-pencil" aria-hidden="true"></span>
+    </div>`)
+
+  annotatorPopup.css({
     top: y + 12,
     left: x - 18.5
   })
+
+  annotatorPopup.on('click', function () {
+    showAnnotationFormPopup()
+  })
+
+  annotatorPopup.appendTo('body')
 }
 
 /**
  * 
  */
-showAnnotationFormPopup = (x, y) => {
+showAnnotationFormPopup = () => {
+
+  let annotatorFormPopup = $(`
+    <div id="annotatorFormPopup">
+      <textarea class="form-control" rows="3"></textarea>
+      <div class="annotatorFormPopup_footer">
+        <a id="annotatorFormPopup_save" class="btn btn-success btn-xs">Annotate</a>
+      </div>
+    </div>
+  `)
+
+  annotatorFormPopup.appendTo('body')
+
+  annotatorFormPopup.css({
+    top: $(annotatorPopupSelector).offset().top - annotatorFormPopup.height() / 2 - 20,
+    left: $(annotatorPopupSelector).offset().left
+  })
+
+  $(`${annotatorFormPopupSelector} a.btn-success`).on('click', function () {
+    let text = $(`${annotatorFormPopupSelector}>textarea`).text()
+    createAnnotation(text, creator)
+    hideAnnotationFormPopup()
+  })
 
   // Hide the last annotation popup
   hideAnnotationPopup()
+
+  $(`${annotatorFormPopupSelector}>textarea`).focus()
+
+}
+
+hideAnnotationFormPopup = () => {
+  $(annotatorFormPopupSelector).remove()
 }
 
 /**
  * 
  */
 hideAnnotationPopup = () => {
-  $(annotatorPopup).hide()
+  $(annotatorPopupSelector).remove()
 }
