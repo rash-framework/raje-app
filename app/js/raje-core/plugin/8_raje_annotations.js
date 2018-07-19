@@ -1,8 +1,11 @@
 const not_annotable_elements = `${NON_EDITABLE_HEADER_SELECTOR},${SIDEBAR_ANNOTATION},${INLINE_FORMULA_SELECTOR}`
+const annotatorPopup = '.annotatorPopup'
 
 tinymce.PluginManager.add('raje_annotations', function (editor, url) {
 
-  editor.on('click', function (e) {
+  addAnnotationPopup()
+
+  editor.on('click', e => {
 
     let clickedElement = $(e.srcElement)
 
@@ -21,17 +24,34 @@ tinymce.PluginManager.add('raje_annotations', function (editor, url) {
     }
   })
 
-  editor.on('MouseUp', () => {
+  editor.on('MouseUp', e => {
+
+    hideAnnotationPopup()
 
     // If the selection is not collapsed and the element selected is an "annotable element"
     if (!tinymce.activeEditor.selection.isCollapsed() && !$(tinymce.activeEditor.selection.getNode()).is(not_annotable_elements))
-      createAnnotation()
+      handleAnnotation(e)
   })
 })
 
-const createAnnotation = () => {
 
+/**
+ * 
+ */
+handleAnnotation = (e) => {
+
+  // Save the selection
   const selection = tinymce.activeEditor.selection
+
+  // Show the popup
+  showAnnotationPopup(e.pageX, e.pageY)
+}
+
+/**
+ * 
+ */
+createAnnotation = (text, creator, selection) => {
+
   const range = selection.getRng()
   const lastAnnotation = Annotation.getLastAnnotation()
 
@@ -78,4 +98,43 @@ const createAnnotation = () => {
     rash.renderAnnotations()
     updateIframeFromSavedContent()
   })
+}
+
+/**
+ * 
+ */
+addAnnotationPopup = () => {
+  let element = $(`
+    <div class='annotatorPopup'>
+      <div class="annotatorPopup-arrow"></div>
+      <span class="glyphicon glyphicon-pencil" aria-hidden="true"></span></div>`)
+  $('body').append(element)
+}
+
+/**
+ * 
+ */
+showAnnotationPopup = (x, y) => {
+
+  $(annotatorPopup).show()
+  $(annotatorPopup).css({
+    top: y + 12,
+    left: x - 18.5
+  })
+}
+
+/**
+ * 
+ */
+showAnnotationFormPopup = (x, y) => {
+
+  // Hide the last annotation popup
+  hideAnnotationPopup()
+}
+
+/**
+ * 
+ */
+hideAnnotationPopup = () => {
+  $(annotatorPopup).hide()
 }

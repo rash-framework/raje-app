@@ -43,8 +43,6 @@ if (hasBackend) {
     //
     mathml2svgAllFormulas()
 
-    addAnnotationPopup()
-
     tinymce.init({
 
       // Select the element to wrap
@@ -721,9 +719,4 @@ if (hasBackend) {
         $(rng.commonAncestorContainer).text().trim().length != rng.startOffset
     }
   }
-}
-
-addAnnotationPopup = () => {
-  let element = `<div class="annotatorPopup"></div>`
-  $('body').append(element)
 }

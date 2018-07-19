@@ -139,8 +139,36 @@ aside#annotations[contentEditable=false] {
 .annotatorPopup {
   position: absolute;
   display: none;
-  padding: 10px 20px;
-  background-color: lightgrey;
+  top: 200px;
+  left: 200px;
+  background-color: #337ab7;
+  color: #ffffff;
   z-index: 100;
-  color: white;
+  border-radius: 5px;
+  max-width: 200px;
+  padding: 8px 10px 6px 10px;
+  text-align: center;
+}
+
+.annotatorPopup:hover {
+  background-color: #2e6da4;
+  cursor: pointer;
+}
+
+.annotatorPopup:hover>.annotatorPopup-arrow{
+  border-top-color: #2e6da4;
+}
+
+.annotatorPopup>.annotatorPopup-arrow {
+  position: absolute;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  bottom: 0;
+  left: 50%;
+  margin-left: -5px;
+  margin-bottom: -5px;
+  border-width: 5px 5px 0;
+  border-top-color: #337ab7;
 }

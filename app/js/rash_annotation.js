@@ -77,12 +77,17 @@ class Annotation {
 
     // Check if the annotation wraps entirely a html element
     if (this.startElement.is(this.endElement) && (this.startSelector.offset == 0 && this.endElement.text().length == this.endSelector.offset))
-      return this._wrapElement(this.startElement)
+      this._wrapElement(this.startElement)
 
-    this._createMarker(this.startElement, this.startSelector)
-    this._createMarker(this.endElement, this.endSelector)
+    // Else do it normally
+    else {
+      this._createMarker(this.startElement, this.startSelector)
+      this._createMarker(this.endElement, this.endSelector)
 
-    this._fragmentateAnnotation()
+      this._fragmentateAnnotation()
+    }
+
+    //this._createSideAnnotation()
   }
 
   /**
@@ -110,8 +115,6 @@ class Annotation {
     element.addClass('annotation_element')
     element.attr('title', this.semanticAnnotation.id)
     element.attr('data-rash-annotation-id', this.semanticAnnotation.id)
-
-    this._createSideAnnotation(element)
   }
 
   /**
@@ -250,13 +253,6 @@ class Annotation {
       }
 
     })
-
-    // Create the side annotation passing the distance of the height
-    //this._createSideAnnotation(startMarker)
-
-    // Remove the starting and ending markers
-    $(startMarker).remove()
-    $(endMarker).remove()
   }
 
   /**
