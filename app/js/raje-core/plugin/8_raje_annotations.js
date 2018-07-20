@@ -48,7 +48,7 @@ handleAnnotation = e => {
   const selection = tinymce.activeEditor.selection
 
   // Show the popup
-  showAnnotationPopup(e.pageX, e.pageY)
+  showAnnotationPopup(e.clientX, e.clientY)
 }
 
 /**
@@ -70,8 +70,8 @@ createAnnotation = (text, creator) => {
     "id": lastAnnotation.id,
     "@contenxt": "http://www.w3.org/ns/anno.jsonld",
     "created": Date.now(),
-    "bodyValue": 'tmp',
-    "creator": 'spino9330',
+    "bodyValue": text,
+    "creator": creator,
     "Motivation": commenting,
     "target": {
       "selector": {
@@ -150,8 +150,7 @@ showAnnotationFormPopup = () => {
   })
 
   $(`${annotatorFormPopupSelector} a.btn-success`).on('click', function () {
-    let text = $(`${annotatorFormPopupSelector}>textarea`).text()
-    createAnnotation(text, creator)
+    createAnnotation($(`${annotatorFormPopupSelector}>textarea`).val(), creator)
     hideAnnotationFormPopup()
   })
 
@@ -162,6 +161,9 @@ showAnnotationFormPopup = () => {
 
 }
 
+/**
+ * 
+ */
 hideAnnotationFormPopup = () => {
   $(annotatorFormPopupSelector).remove()
 }
