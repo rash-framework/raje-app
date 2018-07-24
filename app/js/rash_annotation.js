@@ -1,5 +1,8 @@
 const replying = 'replying'
 const commenting = 'commenting'
+const start_role = 'start'
+const end_role = 'end'
+const raje_iframe_selector = '#raje_root_ifr'
 
 /**
  * 
@@ -87,7 +90,17 @@ class Annotation {
       this._fragmentateAnnotation()
     }
 
-    //this._createSideAnnotation()
+    this._createSideAnnotation()
+    this._removeMarkers()
+  }
+
+  /**
+   * 
+   */
+  _removeMarkers() {
+
+    $(this._getMarkerSelector(start_role)).remove()
+    $(this._getMarkerSelector(end_role)).remove()
   }
 
   /**
@@ -258,9 +271,7 @@ class Annotation {
   /**
    * 
    */
-  _createSideAnnotation(element) {
-
-    const getWrapAnnotationSelector = id => `span.cgen.annotation_hilight[data-rash-annotation-id="${id}"]`
+  _createSideAnnotation() {
 
     /**
      * 
@@ -272,8 +283,13 @@ class Annotation {
           return annotation
     }
 
-    // Get the distance from the top of the document
-    this.top = $(element).offset().top - 25
+    if ($(raje_iframe_selector).length > 0)
+      this._getCoordinatesRaje()
+    else
+      this._getCoordinatesNormal()
+
+    // Get he average distance between the starting and the ending element
+    this.top = (this.coordinates.start.top + this.coordinates.end.top) / 2
 
     let sideAnnotation
 
@@ -284,15 +300,13 @@ class Annotation {
       sideAnnotation = $(`span.side_note[data-rash-annotation-id="${annotation.semanticAnnotation.id}"]`)
 
       sideAnnotation.attr('title', `${sideAnnotation.attr('title')},${this.semanticAnnotation.id}`)
-      sideAnnotation.text(1 + parseInt(sideAnnotation.text()))
+      sideAnnotation.text('1')
 
       this.top = annotation.top
     }
 
     // Create a new annotation in this way
     else {
-
-      const height = $(element).height()
 
       sideAnnotation = $(`<span style="top:${this.top}px" title="${this.semanticAnnotation.id}" data-rash-annotation-id="${this.semanticAnnotation.id}" class="btn btn-default cgen side_note">1</span>`)
 
@@ -344,6 +358,10 @@ class Annotation {
 
     $(`span[data-rash-annotation-id="${this.semanticAnnotation.id}"][data-rash-original-parent-content]`).each(function () {
       $(this).parent().replaceWith($(this).attr('data-rash-original-parent-content'))
+    })
+
+    $(`span[data-rash-annotation-id="${this.semanticAnnotation.id}"]`).each(function () {
+      $(this).remove()
     })
   }
 
@@ -453,6 +471,42 @@ class Annotation {
     return {
       id: annotation_prefix + (lastId + 1),
       element: lastAnnotation
+    }
+  }
+
+  /**
+   * 
+   */
+  _getCoordinatesRaje() {
+
+    updateIframeFromSavedContent()
+
+    let startRange = new Range()
+    let endRange = new Range()
+
+    startRange.selectNode($(raje_iframe_selector).contents().find(this._getMarkerSelector(start_role))[0])
+    endRange.selectNode($(raje_iframe_selector).contents().find(this._getMarkerSelector(end_role))[0])
+
+    this.coordinates = {
+      start: startRange.getBoundingClientRect(),
+      end: endRange.getBoundingClientRect()
+    }
+  }
+
+  /**
+   * 
+   */
+  _getCoordinatesNormal() {
+
+    let startRange = new Range()
+    let endRange = new Range()
+
+    startRange.selectNode($(this._getMarkerSelector(start_role))[0])
+    endRange.selectNode($(this._getMarkerSelector(end_role))[0])
+
+    this.coordinates = {
+      start: startRange.getBoundingClientRect(),
+      end: endRange.getBoundingClientRect()
     }
   }
 }

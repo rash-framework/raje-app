@@ -44,9 +44,6 @@ tinymce.PluginManager.add('raje_annotations', function (editor, url) {
  */
 handleAnnotation = e => {
 
-  // Save the selection
-  const selection = tinymce.activeEditor.selection
-
   // Show the popup
   showAnnotationPopup(e.clientX, e.clientY)
 }
@@ -117,7 +114,7 @@ showAnnotationPopup = (x, y) => {
     </div>`)
 
   annotatorPopup.css({
-    top: y + 12,
+    top: y - 20,
     left: x - 18.5
   })
 
@@ -173,4 +170,12 @@ hideAnnotationFormPopup = () => {
  */
 hideAnnotationPopup = () => {
   $(annotatorPopupSelector).remove()
+}
+
+/**
+ * 
+ */
+updateAnnotationsOnSave = () => {
+  //TODO: change data-rash-original[-parent]-content
+  //TODO: change the offsets and the selectors
 }

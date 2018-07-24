@@ -51,10 +51,19 @@ tinymce.PluginManager.add('raje_save', function (editor, url) {
       article.find('head').children('style[type="text/css"]').remove()
       article.find('head').children('link[id]').remove()
 
+      // If the plugin raje_annotations is added to tinymce 
+      if (typeof tinymce.activeEditor.plugins.raje_annotations != undefined)
+        updateAnnotationsOnSave()
+        
       // Execute derash (replace all cgen elements with its original content)
       article.find('*[data-rash-original-content]').each(function () {
         let originalContent = $(this).attr('data-rash-original-content')
         $(this).replaceWith(originalContent)
+      })
+
+      article.find('*[data-rash-original-parent-content]').each(function () {
+        let originalContent = $(this).attr('data-rash-original-parent-content')
+        $(this).parent().replaceWith(originalContent)
       })
 
       // Execute derash changing the wrapper
