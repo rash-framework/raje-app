@@ -300,7 +300,7 @@ class Annotation {
       sideAnnotation = $(`span.side_note[data-rash-annotation-id="${annotation.semanticAnnotation.id}"]`)
 
       sideAnnotation.attr('title', `${sideAnnotation.attr('title')},${this.semanticAnnotation.id}`)
-      sideAnnotation.text('1')
+      sideAnnotation.text(parseInt(sideAnnotation.text(), 10) + parseInt(1, 10))
 
       this.top = annotation.top
     }
@@ -352,15 +352,17 @@ class Annotation {
    * 
    */
   remove() {
-    $(`span[data-rash-annotation-id="${this.semanticAnnotation.id}"][data-rash-original-content]`).each(function () {
+    let id = this.semanticAnnotation.id
+
+    $(`span[data-rash-annotation-id="${id}"][data-rash-original-content]`).each(function () {
       $(this).replaceWith($(this).attr('data-rash-original-content'))
     })
 
-    $(`span[data-rash-annotation-id="${this.semanticAnnotation.id}"][data-rash-original-parent-content]`).each(function () {
+    $(`span[data-rash-annotation-id="${id}"][data-rash-original-parent-content]`).each(function () {
       $(this).parent().replaceWith($(this).attr('data-rash-original-parent-content'))
     })
 
-    $(`span[data-rash-annotation-id="${this.semanticAnnotation.id}"]`).each(function () {
+    $(`*[data-rash-annotation-id="${id}"]`).each(function () {
       $(this).remove()
     })
   }
