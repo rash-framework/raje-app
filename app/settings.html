@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+  <title>RAje | settings</title>
+
+  <!-- Bootstrap -->
+  <link href="css/bootstrap.min.css" rel="stylesheet">
+</head>
+
+<body>
+  <div class="container">
+    <form>
+      <h3>User preferences</h3>
+      <div class="form-group">
+        <label for="exampleInputEmail1">Username</label>
+        <input type="text" class="form-control" id="txtUsername">
+      </div>
+      <a id="btnSave" class="btn btn-success">Save</a>
+    </form>
+  </div>
+
+  <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+  <script>
+    window.$ = window.jQuery = require('jquery');
+  </script>
+  <!-- Include all compiled plugins (below), or include individual files as needed -->
+  <script src="js/bootstrap.min.js"></script>
+
+  <script>
+    ipcRenderer = require('electron').ipcRenderer
+
+    $(document).ready(function () {
+
+      $('#txtUsername').val(ipcRenderer.sendSync('getSettings'))
+    })
+
+
+    $('a#btnSave').on('click', function () {
+
+      const username = $('#txtUsername').val()
+
+      if (username.trim().length > 0) {
+        ipcRenderer.send('setSettings', username)
+        window.close()
+      }
+    })
+  </script>
+
+</body>
+
+</html>

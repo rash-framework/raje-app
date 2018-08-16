@@ -27,6 +27,16 @@ module.exports = {
             type: 'separator'
           },
           {
+            label: 'Preferences',
+            accelerator: 'CmdOrCtrl+,',
+            click() {
+              global.showSettings()
+            }
+          },
+          {
+            type: 'separator'
+          },
+          {
             role: 'services',
             submenu: []
           },
@@ -199,7 +209,7 @@ module.exports = {
           },
           {
             label: 'Logout',
-            click(){
+            click() {
               global.logoutGithub()
             }
           }
@@ -251,6 +261,15 @@ module.exports = {
         label: 'RAJE',
         submenu: [{
             role: 'about'
+          },
+          {
+            type: 'separator'
+          }, {
+            label: 'Preferences',
+            accelerator: 'CmdOrCtrl+,',
+            click() {
+              global.showSettings()
+            }
           },
           {
             type: 'separator'

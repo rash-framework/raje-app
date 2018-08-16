@@ -127,7 +127,10 @@ const alreadyExistingArticle = localRootPath => {
 
         // Add the init_rajemce script
         RAJE_FS.addRajeCoreInArticle(editorWindowUrl)
-          .then(() => showEditor(editorWindowUrl))
+          .then(() =>
+            RAJE_FS._copyAssets(global.articleSettings.savePath)
+            .then(assets => showEditor(editorWindowUrl))
+          )
       }
     })
 
@@ -492,6 +495,20 @@ ipcMain.on('getVersionSync', (event, arg) => {
   event.returnValue = PACKAGE.version
 })
 
+/**
+ * 
+ */
+ipcMain.on('setSettings', (event, arg) => {
+  global.setSettings(arg)
+})
+
+/**
+ * 
+ */
+ipcMain.on('getSettings', event => {
+  global.getSettings().then(settings => event.returnValue = settings)
+})
+
 //#endregion
 
 //#region Global methods
@@ -615,5 +632,45 @@ global.getUserStoredData = () =>
 global.push = function () {
   RAJE_GITHUB.initRepo(global.articleSettings.savePath)
 }
+
+
+/**
+ * 
+ */
+global.showSettings = () => {
+
+  settingsWindowsUrl = url.format({
+    pathname: path.join(__dirname, RAJE_CONST.files.settings),
+    protocol: 'file:',
+    slashes: true
+  })
+
+  windowManager.open(RAJE_CONST.windows.settings, RAJE_CONST.windows.settings, settingsWindowsUrl, false, {
+    height: 400,
+    width: 600,
+    parent: windowManager.getCurrent(),
+    movable: true,
+    alwaysOnTop: true
+  })
+}
+
+/**
+ * 
+ * @param {JSON} settings 
+ */
+global.setSettings = settings => {
+
+  RAJE_STORAGE.setSettings(settings)
+}
+
+/**
+ * 
+ */
+global.getSettings = () =>
+  new Promise((resolve, reject) =>
+    RAJE_STORAGE.getSettings()
+    .then(data => resolve(data))
+    .catch(error => reject(error))
+  )
 
 //#endregion

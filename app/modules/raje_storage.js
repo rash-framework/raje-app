@@ -5,10 +5,8 @@ const path = require('path')
 
 const RAJE_CONST = require('./raje_const')
 
-global.RECENT_ARTICLE_STORAGE = "RECENT_ARTICLE_STORAGE"
-global.GITHUB_DATA = 'GITHUB_DATA'
-
 const storage_get = util.promisify(storage.get)
+const storage_set = util.promisify(storage.set)
 
 const RAJE_STORAGE = {
 
@@ -20,7 +18,7 @@ const RAJE_STORAGE = {
     var dt = datetime.create()
 
     return {
-      path: path.join(absolutePath,RAJE_CONST.files.template),
+      path: path.join(absolutePath, RAJE_CONST.files.template),
       title: title,
       date: `Created on ${dt.format('d/m/y')} at ${dt.format('H:M')}`
     }
@@ -70,7 +68,7 @@ const RAJE_STORAGE = {
    * Update the recentArticles Array
    */
   updateRecentArticles: function (recentArticles) {
-    storage.set(global.RECENT_ARTICLE_STORAGE, recentArticles, err => {
+    storage.set(RAJE_CONST.storage.recent_articles, recentArticles, err => {
       if (err) throw callback(err)
     })
   },
@@ -80,7 +78,7 @@ const RAJE_STORAGE = {
    */
   getRecentArticles: function (callback) {
 
-    storage.get(global.RECENT_ARTICLE_STORAGE, (err, recentArticles) => {
+    storage.get(RAJE_CONST.storage.recent_articles, (err, recentArticles) => {
       if (err) return callback(err)
 
       // If the result isn't an array, instatiate it
@@ -95,7 +93,7 @@ const RAJE_STORAGE = {
    * 
    */
   getRecentArticlesSync: function () {
-    storage.get(global.RECENT_ARTICLE_STORAGE, (err, recentArticles) => {
+    storage.get(RAJE_CONST.storage.recent_articles, (err, recentArticles) => {
       if (err) throw err
 
       // If the result isn't an array, instatiate it
@@ -110,7 +108,7 @@ const RAJE_STORAGE = {
    * 
    */
   pushGithubData: function (data, callback) {
-    storage.set(global.GITHUB_DATA, data, err => {
+    storage.set(RAJE_CONST.storage.github_data, data, err => {
       if (err) throw callback(err)
 
       callback(null)
@@ -122,7 +120,7 @@ const RAJE_STORAGE = {
    */
   getGithubData: () =>
     new Promise((resolve, reject) =>
-      storage_get(global.GITHUB_DATA)
+      storage_get(RAJE_CONST.storage.github_data)
       .then(data => resolve(data))
       .catch(error => reject(error))
     ),
@@ -131,7 +129,7 @@ const RAJE_STORAGE = {
    * 
    */
   deleteGithubData: function (callback) {
-    storage.remove(global.GITHUB_DATA, err => {
+    storage.remove(RAJE_CONST.storage.github_data, err => {
       if (err) throw callback(err)
 
       global.github_data = {}
@@ -139,6 +137,20 @@ const RAJE_STORAGE = {
       callback(null, global.GITHUB_LOGOUT_SUCCESS)
     })
   },
+
+  setSettings: settings =>
+    new Promise((resolve, reject) =>
+      storage_set(RAJE_CONST.storage.settings, settings)
+      .then(data => resolve(data))
+      .catch(error => reject(error))
+    ),
+
+  getSettings: () =>
+    new Promise((resolve, reject) =>
+      storage_get(RAJE_CONST.storage.settings)
+      .then(data => resolve(data))
+      .catch(error => reject(error))
+    ),
 
   /**
    * DEBUG only - clear all elements in storage

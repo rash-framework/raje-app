@@ -4,12 +4,19 @@ let raje_const = {
   index_path: path.normalize(`${__dirname}/..`),
   windows: {
     editor: 'editor',
-    splash: 'splash'
+    splash: 'splash',
+    settings: 'settings'
   },
   files: {
     template: 'index.html',
     splash: 'splash.html',
+    settings: 'settings.html',
     raje_hidden: '.raje'
+  },
+  storage: {
+    settings: 'settings_storage',
+    recent_articles: 'recent_articl_storage',
+    github_data: 'github_data_storage'
   },
   dirs: {
     image: 'img',
