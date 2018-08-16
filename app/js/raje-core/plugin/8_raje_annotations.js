@@ -2,6 +2,7 @@ const not_annotable_elements = `${NON_EDITABLE_HEADER_SELECTOR},${SIDEBAR_ANNOTA
 const annotatorPopupSelector = '#annotatorPopup'
 const annotatorFormPopupSelector = '#annotatorFormPopup'
 const creator = 'spino9330'
+const annotationWrapper = 'span[data-rash-annotation-type]'
 
 tinymce.PluginManager.add('raje_annotations', function (editor, url) {
 
@@ -175,7 +176,25 @@ hideAnnotationPopup = () => {
 /**
  * 
  */
-updateAnnotationsOnSave = () => {
+updateAnnotationsOnSave = article => {
+
+  const content = 'data-rash-original-content'
+  const parent = 'data-rash-original-parent-content'
+  let attribute
+
+  article.find(annotationWrapper).each(function () {
+
+    if ($(this).attr(content))
+      attribute = content
+
+    if ($(this).attr(parent))
+      attribute = parent
+
+    $(this).attr(attribute, $(this).html())
+  })
+
   //TODO: change data-rash-original[-parent]-content
   //TODO: change the offsets and the selectors
+
+  return article
 }

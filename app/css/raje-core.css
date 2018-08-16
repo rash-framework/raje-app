@@ -161,7 +161,7 @@ aside#annotations[contentEditable=false] {
 #annotatorFormPopup>textarea {
   background-color: #f3f3f3;
   outline: 0;
-  border-radius: 0;
+  border-radius: 5px 5px 0 0;
 }
 
 #annotatorFormPopup>.annotatorFormPopup_footer {

@@ -36,6 +36,8 @@ tinymce.PluginManager.add('raje_save', function (editor, url) {
      */
     getDerashedArticle: function () {
 
+      tinymce.triggerSave()
+
       // Save html references
       let article = $('html').clone()
       let tinymceSavedContent = article.find('#raje_root')
@@ -53,8 +55,8 @@ tinymce.PluginManager.add('raje_save', function (editor, url) {
 
       // If the plugin raje_annotations is added to tinymce 
       if (typeof tinymce.activeEditor.plugins.raje_annotations != undefined)
-        updateAnnotationsOnSave()
-        
+        article = updateAnnotationsOnSave(article)
+
       // Execute derash (replace all cgen elements with its original content)
       article.find('*[data-rash-original-content]').each(function () {
         let originalContent = $(this).attr('data-rash-original-content')
