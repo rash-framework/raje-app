@@ -34,20 +34,28 @@
   <script>
     ipcRenderer = require('electron').ipcRenderer
 
+    const getAllSettings = () => {
+
+      const username = $('#txtUsername').val()
+      let data = {}
+
+      if (username.trim().length > 0)
+        data = {
+          username: username
+        }
+
+      return data
+    }
+
     $(document).ready(function () {
 
-      $('#txtUsername').val(ipcRenderer.sendSync('getSettings'))
+      $('#txtUsername').val(ipcRenderer.sendSync('getSettings').username)
     })
-
 
     $('a#btnSave').on('click', function () {
 
-      const username = $('#txtUsername').val()
-
-      if (username.trim().length > 0) {
-        ipcRenderer.send('setSettings', username)
-        window.close()
-      }
+      ipcRenderer.send('setSettings', getAllSettings())
+      window.close()
     })
   </script>
 

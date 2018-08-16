@@ -1,7 +1,6 @@
 const not_annotable_elements = `${NON_EDITABLE_HEADER_SELECTOR},${SIDEBAR_ANNOTATION},${INLINE_FORMULA_SELECTOR}`
 const annotatorPopupSelector = '#annotatorPopup'
 const annotatorFormPopupSelector = '#annotatorFormPopup'
-const creator = 'spino9330'
 const annotationWrapper = 'span[data-rash-annotation-type]'
 
 tinymce.PluginManager.add('raje_annotations', function (editor, url) {
@@ -148,6 +147,9 @@ showAnnotationFormPopup = () => {
   })
 
   $(`${annotatorFormPopupSelector} a.btn-success`).on('click', function () {
+
+    const creator = ipcRenderer.sendSync('getSettings').username
+
     createAnnotation($(`${annotatorFormPopupSelector}>textarea`).val(), creator)
     hideAnnotationFormPopup()
   })
