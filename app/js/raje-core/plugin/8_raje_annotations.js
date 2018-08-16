@@ -178,45 +178,67 @@ hideAnnotationPopup = () => {
  */
 updateAnnotationsOnSave = article => {
 
-  // Change data-rash-original[-parent]-content
+  /**
+   * 
+   * @param {JQuery object} node 
+   * @param {Integer} offset optional, it's needed for the ending offset
+   */
+  const getOffset = (node, offset = 0) => {
+
+    node = node[0].previousSibling
+
+    while (node != null) {
+
+      if (node.nodeType == 3)
+        offset += node.length
+      else
+        offset += node.innerText.length
+
+      node = node.previousSibling
+    }
+
+    return offset
+  }
 
   // Get all annotation scripts
   article.find('script[type="application/ld+json"]').each(function () {
 
+    // Change the offsets and the selectors
     let json = JSON.parse($(this).html())
 
     // Get the id of the current annotation
     const id = json.id
 
     // Get the list of highlighted annotations
-    const annotations = $(`span.cgen.annotation_hilight[data-rash-annotation-id="${id}"]`)
+    const first = $(`span.cgen.annotation_hilight[data-rash-annotation-id="${id}"]`).first()
+    const last = $(`span.cgen.annotation_hilight[data-rash-annotation-id="${id}"]`).last()
+
+    // Update both start and end offsets, the ending offset has also the currnt length
+    json.target.selector.start['@value'] = getOffset(first)
+    json.target.selector.end['@value'] = getOffset(last, last.text().length)
 
     // Update both start and end selectors with the right xpath
-    json.target.selector.startSelector['@value'] = Annotation.getXPath($(annotations[0]))
-    json.target.selector.endSelector['@value'] = Annotation.getXPath($(annotations[annotations.length - 1]))
+    json.target.selector.startSelector['@value'] = Annotation.getXPath(first)
+    json.target.selector.endSelector['@value'] = Annotation.getXPath(last)
 
-    console.log(json)
+    $(this).html(JSON.stringify(json, null, 2))
   })
 
+  // Change data-rash-original[-parent]-content
+  const content = 'data-rash-original-content'
+  const parent = 'data-rash-original-parent-content'
+  let attribute
 
-  /*
-    const content = 'data-rash-original-content'
-    const parent = 'data-rash-original-parent-content'
-    let attribute
+  article.find(annotationWrapper).each(function () {
 
-    article.find(annotationWrapper).each(function () {
+    if ($(this).attr(content))
+      attribute = content
 
-      if ($(this).attr(content))
-        attribute = content
+    if ($(this).attr(parent))
+      attribute = parent
 
-      if ($(this).attr(parent))
-        attribute = parent
-
-      $(this).attr(attribute, $(this).html())
-    })
-  */
-
-  //TODO: change the offsets and the selectors
+    $(this).attr(attribute, $(this).html())
+  })
 
   return article
 }
