@@ -178,22 +178,44 @@ hideAnnotationPopup = () => {
  */
 updateAnnotationsOnSave = article => {
 
-  const content = 'data-rash-original-content'
-  const parent = 'data-rash-original-parent-content'
-  let attribute
+  // Change data-rash-original[-parent]-content
 
-  article.find(annotationWrapper).each(function () {
+  // Get all annotation scripts
+  article.find('script[type="application/ld+json"]').each(function () {
 
-    if ($(this).attr(content))
-      attribute = content
+    let json = JSON.parse($(this).html())
 
-    if ($(this).attr(parent))
-      attribute = parent
+    // Get the id of the current annotation
+    const id = json.id
 
-    $(this).attr(attribute, $(this).html())
+    // Get the list of highlighted annotations
+    const annotations = $(`span.cgen.annotation_hilight[data-rash-annotation-id="${id}"]`)
+
+    // Update both start and end selectors with the right xpath
+    json.target.selector.startSelector['@value'] = Annotation.getXPath($(annotations[0]))
+    json.target.selector.endSelector['@value'] = Annotation.getXPath($(annotations[annotations.length - 1]))
+
+    console.log(json)
   })
 
-  //TODO: change data-rash-original[-parent]-content
+
+  /*
+    const content = 'data-rash-original-content'
+    const parent = 'data-rash-original-parent-content'
+    let attribute
+
+    article.find(annotationWrapper).each(function () {
+
+      if ($(this).attr(content))
+        attribute = content
+
+      if ($(this).attr(parent))
+        attribute = parent
+
+      $(this).attr(attribute, $(this).html())
+    })
+  */
+
   //TODO: change the offsets and the selectors
 
   return article
