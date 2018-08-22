@@ -15,6 +15,7 @@ Under the following terms:
 */
 
 @namespace mathml url(http://www.w3.org/1998/Math/MathML);
+
 /* Font */
 
 body {
@@ -231,9 +232,9 @@ aside#annotations.active>div.side_note_body.active {
   border: 1px solid #ccc;
 }
 
-aside#annotations.active>div.side_note_body p {
+aside#annotations.active>div.side_note_body div.side_note_wrapper {
   font-size: 12px;
-  margin-bottom: 0 !important
+  margin-bottom: 0 !important;
 }
 
 aside#annotations.active>div.side_note_body hr {
@@ -252,18 +253,28 @@ aside#annotations.active>div.side_note_body .media-list {
   margin-bottom: 0;
 }
 
-aside#annotations.active>div.side_note_body .side_node_date {
+aside#annotations.active>div.side_note_body .side_note_date {
   color: #999999;
 }
 
+aside#annotations.active>div.side_note_body .side_note_replay {
+  float: right;
+  margin-top: 10px;
+  display: none;
+}
+
+aside#annotations.active>div.side_note_body .side_note_replay.active {
+  display: inline-block;
+}
+
 .annotation_hilight {
-  background-color: rgba(255, 255, 60, .3);
+  background-color: rgba(255, 255, 60, 0.3);
   padding-left: 0;
   padding-right: 0;
 }
 
 .annotation_hilight.selected {
-  background-color: rgba(255, 255, 60, .9);
+  background-color: rgba(255, 255, 60, 0.9);
 }
 
 .annotation_element {
@@ -290,6 +301,7 @@ body {
   position: fixed;
   bottom: 0;
   width: 100%;
+
   /* Set the fixed height of the footer here */
   height: 60px;
   background-color: #f5f5f5;
@@ -392,48 +404,61 @@ section[role=doc-bibliography]>ul {
     size: A4;
     margin: 20mm 0mm 20mm 0mm;
   }
+
   html,
   body {
     width: 210mm;
     height: 297mm;
   }
+
   p {
     font-size: 10pt;
     text-align: justify;
   }
+
   pre {
     text-align: left;
   }
+
   figcaption,
   figure>p {
     text-align: center;
   }
+
   .title {
     font-size: 16pt !important;
   }
+
   h1 {
     font-size: 14pt !important;
   }
+
   h2 {
     font-size: 12pt !important;
   }
+
   h3 {
     font-size: 11pt !important;
   }
+
   h4,
   h5,
   h6 {
     font-size: 10pt !important;
   }
+
   pre {
     font-size: 8pt !important;
   }
+
   blockquote {
     font-size: 10pt !important;
   }
+
   address {
     font-size: 12pt !important;
   }
+
   table {
     max-width: 100%;
     font-size: 80%;

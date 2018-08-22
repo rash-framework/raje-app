@@ -17,6 +17,11 @@ class Annotation {
 
     this.semanticAnnotation = semanticAnnotation
 
+    // Save the html elements connected to the annotation
+    this.side_note
+    this.side_note_body
+    this.note = []
+
     switch (this.semanticAnnotation.Motivation) {
 
       case commenting:
@@ -62,11 +67,12 @@ class Annotation {
    */
   _getAnnotationBody() {
     return `
-      <p>
-        ${this.semanticAnnotation.bodyValue}<br/>
-        <a href="#">@${this.semanticAnnotation.creator}</a><br/>
-        <span class="side_node_date">${new Date(this.semanticAnnotation.created).toUTCString().replace(':00 GMT','')}</span>
-      </p>`
+      <div class="side_note_wrapper">
+        <div class="side_node_text">${this.semanticAnnotation.bodyValue}</div>
+        <div><a href="#">@${this.semanticAnnotation.creator}</a></div>
+        <div class="side_note_date">${new Date(this.semanticAnnotation.created).toUTCString().replace(':00 GMT','')}</div>
+        <div class="btn btn-primary side_note_replay">replay</div>
+      </div>`
   }
 
   /**
@@ -92,6 +98,17 @@ class Annotation {
 
     this._createSideAnnotation()
     this._removeMarkers()
+
+    console.log(this.note)
+    console.log(this.side_note)
+    console.log(this.side_note_body)
+  }
+
+  /**
+   * 
+   */
+  getId() {
+    return this.semanticAnnotation.id
   }
 
   /**
@@ -249,7 +266,7 @@ class Annotation {
 
       // Don't print all elements that are not text or html nodes
       if ((node.nodeType != 1 && node.nodeType != 3)) //|| $(node).is('data-rash-annotation-id'))
-        return
+        return 
 
       let text = node.nodeType !== 3 ? node.outerHTML : node.nodeValue
 
@@ -266,6 +283,9 @@ class Annotation {
       }
 
     })
+
+    // Keep track of the current element
+    this.note = $(`span[data-rash-annotation-type="wrap"][data-rash-annotation-id="${this.semanticAnnotation.id}"]`)
   }
 
   /**
@@ -278,9 +298,10 @@ class Annotation {
      * @param {*} top 
      */
     const nearAnnotation = (top) => {
-      for (let annotation of ANNOTATIONS)
+      ANNOTATIONS.forEach(annotation => {
         if (Math.abs(top - annotation.top) < 100)
           return annotation
+      })
     }
 
     if ($(raje_iframe_selector).length > 0)
@@ -291,16 +312,14 @@ class Annotation {
     // Get he average distance between the starting and the ending element
     this.top = (this.coordinates.start.top + this.coordinates.end.top) / 2
 
-    let sideAnnotation
-
     // Check if there is another annotation
     let annotation = nearAnnotation(this.top)
     if (typeof annotation != 'undefined') {
 
-      sideAnnotation = $(`span.side_note[data-rash-annotation-id="${annotation.semanticAnnotation.id}"]`)
+      this.side_note = $(`span.side_note[data-rash-annotation-id="${annotation.semanticAnnotation.id}"]`)
 
-      sideAnnotation.attr('title', `${sideAnnotation.attr('title')},${this.semanticAnnotation.id}`)
-      sideAnnotation.text(parseInt(sideAnnotation.text(), 10) + parseInt(1, 10))
+      this.side_note.attr('title', `${this.side_note.attr('title')},${this.semanticAnnotation.id}`)
+      this.side_note.text(parseInt(this.side_note.text(), 10) + parseInt(1, 10))
 
       this.top = annotation.top
     }
@@ -308,18 +327,18 @@ class Annotation {
     // Create a new annotation in this way
     else {
 
-      sideAnnotation = $(`<span style="top:${this.top}px" title="${this.semanticAnnotation.id}" data-rash-annotation-id="${this.semanticAnnotation.id}" class="btn btn-default cgen side_note">1</span>`)
+      this.side_note = $(`<span style="top:${this.top}px" title="${this.semanticAnnotation.id}" data-rash-annotation-id="${this.semanticAnnotation.id}" class="btn btn-default cgen side_note">1</span>`)
 
-      $(annotation_sidebar_selector).append(sideAnnotation)
+      $(annotation_sidebar_selector).append(this.side_note)
     }
 
-    const referencedNotes = sideAnnotation.attr('title').split(',')
+    const referencedNotes = this.side_note.attr('title').split(',')
 
     // Remove the previous hover function
-    sideAnnotation.unbind('mouseenter mouseleave click')
+    this.side_note.unbind('mouseenter mouseleave click')
 
     // Add the new hover function
-    sideAnnotation.on('mouseenter mouseleave', function () {
+    this.side_note.on('mouseenter mouseleave', function () {
 
       let selector = getWrapAnnotationSelector(referencedNotes[0])
 
@@ -331,21 +350,21 @@ class Annotation {
       })
     })
 
-    sideAnnotation.on('click', function () {
+    this.side_note.on('click', function () {
       rash.showAnnotation(referencedNotes)
     })
 
     // Create annotation body
-    const sideAnnotationBody = $(`
+    this.side_note_body = $(`
       <div style="top:${this.top}px" class="cgen side_note_body" data-rash-annotation-id="${this.semanticAnnotation.id}">${this._getAnnotationBody()}</div>`)
 
-    sideAnnotationBody.on('mouseenter mouseleave', function () {
+    this.side_note_body.on('mouseenter mouseleave', function () {
       $(getWrapAnnotationSelector($(this).attr('data-rash-annotation-id'))).each(function () {
         $(this).toggleClass('selected')
       })
     })
 
-    $(annotation_sidebar_selector).append(sideAnnotationBody)
+    $(annotation_sidebar_selector).append(this.side_note_body)
   }
 
   /**
@@ -510,5 +529,12 @@ class Annotation {
       start: startRange.getBoundingClientRect(),
       end: endRange.getBoundingClientRect()
     }
+  }
+
+  /**
+   * 
+   */
+  showLastReplayButton() {
+
   }
 }

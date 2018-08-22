@@ -16,7 +16,7 @@
  * OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-let ANNOTATIONS = []
+let ANNOTATIONS = new Map()
 
 /* Additional jQuery functions */
 jQuery.fn.extend({
@@ -748,15 +748,14 @@ const rash = {
   renderAnnotations: () => {
 
     $(semantic_annotation_selector).each(function () {
-      ANNOTATIONS.push(new Annotation(JSON.parse($(this).html())))
+
+      const newNote = new Annotation(JSON.parse($(this).html()))
+      ANNOTATIONS.set(newNote.getId(), newNote)
     })
   },
 
   clearAnnotations: () => {
-    for (let annotation of ANNOTATIONS)
-      annotation.remove()
-
-    ANNOTATIONS = []
+    ANNOTATIONS.clear()
   },
 
   /* /END Render semantic annotations */

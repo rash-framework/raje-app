@@ -17,8 +17,10 @@ tinymce.PluginManager.add('raje_annotations', function (editor, url) {
       if (clickedElement.is('span#toggleSidebar') || clickedElement.parent().is('span#toggleSidebar'))
         rash.toggleSidebar()
 
-      if (clickedElement.is('span[data-rash-annotation-id]'))
+      if (clickedElement.is('span[data-rash-annotation-id]')) {
+        let annotation = ANNOTATIONS.get(clickedElement.attr('data-rash-annotation-id'))
         rash.showAnnotation(clickedElement.attr('title').split(','))
+      }
 
       updateIframeFromSavedContent()
     }
