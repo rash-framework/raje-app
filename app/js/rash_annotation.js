@@ -4,6 +4,9 @@ const start_role = 'start'
 const end_role = 'end'
 const raje_iframe_selector = '#raje_root_ifr'
 
+const raje_string = 'raje'
+const rash_string = 'rash'
+
 /**
  * 
  */
@@ -18,9 +21,13 @@ class Annotation {
     this.semanticAnnotation = semanticAnnotation
 
     // Save the html elements connected to the annotation
-    this.side_note
-    this.side_note_body
-    this.note = []
+    this.side_note_selector = `.side_note[data-rash-annotation-id="${this.semanticAnnotation.id}"]`
+    this.side_note_body_selector = `.side_note_body[data-rash-annotation-id="${this.semanticAnnotation.id}"]`
+
+    this.note_selector = `.annotation_highlight[data-rash-annotation-id="${this.semanticAnnotation.id}"]`
+
+    this.start_marker_selector = `span[data-rash-annotation-id="${this.semanticAnnotation.id}"][data-rash-annotation-role="${start_role}"]`
+    this.end_marker_selector = `span[data-rash-annotation-id="${this.semanticAnnotation.id}"][data-rash-annotation-role="${end_role}"]`
 
     switch (this.semanticAnnotation.Motivation) {
 
@@ -52,14 +59,7 @@ class Annotation {
    * 
    */
   _getMarker(role) {
-    return `<span class="cgen" data-rash-original-content="" data-rash-annotation-role="${role}" data-rash-annotation-id="${this.semanticAnnotation.id}"/>`
-  }
-
-  /**
-   * 
-   */
-  _getMarkerSelector(role) {
-    return `span[data-rash-annotation-id="${this.semanticAnnotation.id}"][data-rash-annotation-role="${role}"]`
+    return $(`<span class="cgen" data-rash-original-content="" data-rash-annotation-role="${role}" data-rash-annotation-id="${this.semanticAnnotation.id}"/>`)
   }
 
   /**
@@ -98,10 +98,6 @@ class Annotation {
 
     this._createSideAnnotation()
     this._removeMarkers()
-
-    console.log(this.note)
-    console.log(this.side_note)
-    console.log(this.side_note_body)
   }
 
   /**
@@ -116,8 +112,8 @@ class Annotation {
    */
   _removeMarkers() {
 
-    $(this._getMarkerSelector(start_role)).remove()
-    $(this._getMarkerSelector(end_role)).remove()
+    $(this.start_marker_selector).remove()
+    $(this.end_marker_selector).remove()
   }
 
   /**
@@ -172,7 +168,7 @@ class Annotation {
       range.setStart(node, offset)
 
       // Insert a node where the range starts
-      range.insertNode($(this._getMarker(selector.role))[0])
+      range.insertNode(this._getMarker(selector.role)[0])
 
       written = true
     }
@@ -229,19 +225,15 @@ class Annotation {
    */
   _fragmentateAnnotation() {
 
-    // Save the markers
-    let startMarker = $(this._getMarkerSelector(this.startSelector.role))[0]
-    let endMarker = $(this._getMarkerSelector(this.endSelector.role))[0]
-
     // Save all the elements that must be wrapped
     let elements = []
 
     // Start from the next element of the starting marker and iterate until the endMarker is found
-    let next = startMarker.nextSibling
-    while (next != null && next != endMarker) {
+    let next = $(this.start_marker_selector)[0].nextSibling
+    while (next != null && next != $(this.end_marker_selector)[0]) {
 
       // If the element is a node, that containt the marker at any level
-      if (next.nodeType != 3 && ($(next).is('tr,th,td') || $(next).find(endMarker).length > 0))
+      if (next.nodeType != 3 && ($(next).is('tr,th,td') || $(next).find($(this.end_marker_selector)[0]).length > 0))
         next = next.firstChild
 
       else {
@@ -266,7 +258,7 @@ class Annotation {
 
       // Don't print all elements that are not text or html nodes
       if ((node.nodeType != 1 && node.nodeType != 3)) //|| $(node).is('data-rash-annotation-id'))
-        return 
+        return
 
       let text = node.nodeType !== 3 ? node.outerHTML : node.nodeValue
 
@@ -275,17 +267,14 @@ class Annotation {
 
         // If the element is a block element, wrap its content inside a wrapper
         if ($(node).is('p,:header'))
-          $(node).html(`<span data-rash-original-parent-content="${text}" data-rash-annotation-index="${++index}" data-rash-annotation-type="wrap" title="#${this.semanticAnnotation.id}" data-rash-annotation-id="${this.semanticAnnotation.id}" class="cgen annotation_hilight">${$(text).html()}</span>`)
+          $(node).html(`<span data-rash-original-parent-content="${text}" data-rash-annotation-index="${++index}" data-rash-annotation-type="wrap" title="#${this.semanticAnnotation.id}" data-rash-annotation-id="${this.semanticAnnotation.id}" class="cgen annotation_highlight">${$(text).html()}</span>`)
 
         // Or wrap its content in a note
         else
-          $(node).replaceWith(`<span data-rash-original-content="${text}" data-rash-annotation-index="${++index}" data-rash-annotation-type="wrap" title="#${this.semanticAnnotation.id}" data-rash-annotation-id="${this.semanticAnnotation.id}" class="cgen annotation_hilight">${text}</span>`)
+          $(node).replaceWith(`<span data-rash-original-content="${text}" data-rash-annotation-index="${++index}" data-rash-annotation-type="wrap" title="#${this.semanticAnnotation.id}" data-rash-annotation-id="${this.semanticAnnotation.id}" class="cgen annotation_highlight">${text}</span>`)
       }
 
     })
-
-    // Keep track of the current element
-    this.note = $(`span[data-rash-annotation-type="wrap"][data-rash-annotation-id="${this.semanticAnnotation.id}"]`)
   }
 
   /**
@@ -304,22 +293,21 @@ class Annotation {
       })
     }
 
-    if ($(raje_iframe_selector).length > 0)
-      this._getCoordinatesRaje()
-    else
-      this._getCoordinatesNormal()
+    this.coordinates = this._getCoordinates()
 
     // Get he average distance between the starting and the ending element
     this.top = (this.coordinates.start.top + this.coordinates.end.top) / 2
+
+    let side_note
 
     // Check if there is another annotation
     let annotation = nearAnnotation(this.top)
     if (typeof annotation != 'undefined') {
 
-      this.side_note = $(`span.side_note[data-rash-annotation-id="${annotation.semanticAnnotation.id}"]`)
+      side_note = $(`span.side_note[data-rash-annotation-id="${annotation.semanticAnnotation.id}"]`)
 
-      this.side_note.attr('title', `${this.side_note.attr('title')},${this.semanticAnnotation.id}`)
-      this.side_note.text(parseInt(this.side_note.text(), 10) + parseInt(1, 10))
+      side_note.attr('title', `${side_note.attr('title')},${this.semanticAnnotation.id}`)
+      side_note.text(parseInt(side_note.text(), 10) + parseInt(1, 10))
 
       this.top = annotation.top
     }
@@ -327,18 +315,18 @@ class Annotation {
     // Create a new annotation in this way
     else {
 
-      this.side_note = $(`<span style="top:${this.top}px" title="${this.semanticAnnotation.id}" data-rash-annotation-id="${this.semanticAnnotation.id}" class="btn btn-default cgen side_note">1</span>`)
+      side_note = $(`<span style="top:${this.top}px" title="${this.semanticAnnotation.id}" data-rash-annotation-id="${this.semanticAnnotation.id}" class="btn btn-default cgen side_note">1</span>`)
 
-      $(annotation_sidebar_selector).append(this.side_note)
+      $(annotation_sidebar_selector).append(side_note)
     }
 
-    const referencedNotes = this.side_note.attr('title').split(',')
+    const referencedNotes = side_note.attr('title').split(',')
 
     // Remove the previous hover function
-    this.side_note.unbind('mouseenter mouseleave click')
+    side_note.unbind('mouseenter mouseleave click')
 
     // Add the new hover function
-    this.side_note.on('mouseenter mouseleave', function () {
+    side_note.on('mouseenter mouseleave', function () {
 
       let selector = getWrapAnnotationSelector(referencedNotes[0])
 
@@ -350,28 +338,28 @@ class Annotation {
       })
     })
 
-    this.side_note.on('click', function () {
+    side_note.on('click', function () {
       rash.showAnnotation(referencedNotes)
     })
 
     // Create annotation body
-    this.side_note_body = $(`
+    let side_note_body = $(`
       <div style="top:${this.top}px" class="cgen side_note_body" data-rash-annotation-id="${this.semanticAnnotation.id}">${this._getAnnotationBody()}</div>`)
 
-    this.side_note_body.on('mouseenter mouseleave', function () {
+    side_note_body.on('mouseenter mouseleave', function () {
       $(getWrapAnnotationSelector($(this).attr('data-rash-annotation-id'))).each(function () {
         $(this).toggleClass('selected')
       })
     })
 
-    $(annotation_sidebar_selector).append(this.side_note_body)
+    $(annotation_sidebar_selector).append(side_note_body)
   }
 
   /**
    * 
    */
   remove() {
-    let id = this.semanticAnnotation.id
+    let id = this.getId()
 
     $(`span[data-rash-annotation-id="${id}"][data-rash-original-content]`).each(function () {
       $(this).replaceWith($(this).attr('data-rash-original-content'))
@@ -498,43 +486,74 @@ class Annotation {
   /**
    * 
    */
-  _getCoordinatesRaje() {
+  _getCoordinates() {
+
+    let selector = ($(raje_iframe_selector).length > 0) ? raje_string : rash_string
+
+    return new CoordinateContext(selector).coordinateContextInterface(this.start_marker_selector, this.end_marker_selector)
+  }
+}
+
+//#region Strategy design pattern for the coordinates
+
+class CoordinateContext {
+
+  constructor(type) {
+    switch (type) {
+      case raje_string:
+        this.strategy = new CoordinateStrategyRaje()
+        break
+
+      case rash_string:
+        this.strategy = new CoordinateStrategyRash()
+        break
+    }
+  }
+
+  coordinateContextInterface(start_marker, end_marker) {
+    return this.strategy.getCoordinates(start_marker, end_marker)
+  }
+}
+
+class CoordinateStrategy {
+
+  getCoordinates() {}
+}
+
+class CoordinateStrategyRaje extends CoordinateStrategy {
+
+  getCoordinates(start_selector, end_selector) {
 
     updateIframeFromSavedContent()
 
     let startRange = new Range()
     let endRange = new Range()
 
-    startRange.selectNode($(raje_iframe_selector).contents().find(this._getMarkerSelector(start_role))[0])
-    endRange.selectNode($(raje_iframe_selector).contents().find(this._getMarkerSelector(end_role))[0])
+    startRange.selectNode($(raje_iframe_selector).contents().find(start_selector)[0])
+    endRange.selectNode($(raje_iframe_selector).contents().find(end_selector)[0])
 
-    this.coordinates = {
+    return {
       start: startRange.getBoundingClientRect(),
       end: endRange.getBoundingClientRect()
     }
   }
+}
 
-  /**
-   * 
-   */
-  _getCoordinatesNormal() {
+class CoordinateStrategyRash extends CoordinateStrategy {
+
+  getCoordinates(start_selector, end_selector) {
 
     let startRange = new Range()
     let endRange = new Range()
 
-    startRange.selectNode($(this._getMarkerSelector(start_role))[0])
-    endRange.selectNode($(this._getMarkerSelector(end_role))[0])
+    startRange.selectNode($(start_selector)[0])
+    endRange.selectNode($(end_selector)[0])
 
-    this.coordinates = {
+    return {
       start: startRange.getBoundingClientRect(),
       end: endRange.getBoundingClientRect()
     }
   }
-
-  /**
-   * 
-   */
-  showLastReplayButton() {
-
-  }
 }
+
+//#endregion

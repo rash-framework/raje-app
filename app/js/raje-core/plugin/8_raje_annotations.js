@@ -2,6 +2,7 @@ const not_annotable_elements = `${NON_EDITABLE_HEADER_SELECTOR},${SIDEBAR_ANNOTA
 const annotatorPopupSelector = '#annotatorPopup'
 const annotatorFormPopupSelector = '#annotatorFormPopup'
 const annotationWrapper = 'span[data-rash-annotation-type]'
+const side_note_replay = '.side_note_replay'
 
 tinymce.PluginManager.add('raje_annotations', function (editor, url) {
 
@@ -18,8 +19,23 @@ tinymce.PluginManager.add('raje_annotations', function (editor, url) {
         rash.toggleSidebar()
 
       if (clickedElement.is('span[data-rash-annotation-id]')) {
-        let annotation = ANNOTATIONS.get(clickedElement.attr('data-rash-annotation-id'))
+
+        const annotation = ANNOTATIONS.get(clickedElement.attr('data-rash-annotation-id'))
+
+        const replay_button = $(annotation.side_note_body_selector).find(side_note_replay)
+
+        replay_button.addClass('active')
+
         rash.showAnnotation(clickedElement.attr('title').split(','))
+      }
+
+      if (clickedElement.is(`${side_note_replay}.active`)) {
+
+        let id = $(clickedElement).parents('[data-rash-annotation-id]').last().attr('data-rash-annotation-id')
+
+        const annotation = ANNOTATIONS.get(id)
+
+        console.log(annotation)
       }
 
       updateIframeFromSavedContent()
@@ -53,7 +69,7 @@ handleAnnotation = e => {
 /**
  * 
  */
-createAnnotation = (text, creator) => {
+createAnnotation = (text, creator, motivation) => {
 
   const selection = tinymce.activeEditor.selection
   const range = selection.getRng()
@@ -71,7 +87,7 @@ createAnnotation = (text, creator) => {
     "created": Date.now(),
     "bodyValue": text,
     "creator": creator,
-    "Motivation": commenting,
+    "Motivation": motivation,
     "target": {
       "selector": {
         "startSelector": {
@@ -152,7 +168,7 @@ showAnnotationFormPopup = () => {
 
     const creator = ipcRenderer.sendSync('getSettings').username
 
-    createAnnotation($(`${annotatorFormPopupSelector}>textarea`).val(), creator)
+    createAnnotation($(`${annotatorFormPopupSelector}>textarea`).val(), creator, commenting)
     hideAnnotationFormPopup()
   })
 
@@ -206,6 +222,8 @@ updateAnnotationsOnSave = article => {
 
   // Get all annotation scripts
   article.find('script[type="application/ld+json"]').each(function () {
+
+    //TODO update also the Map()
 
     // Change the offsets and the selectors
     let json = JSON.parse($(this).html())
