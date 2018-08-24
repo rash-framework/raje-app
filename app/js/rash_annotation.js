@@ -66,12 +66,16 @@ class Annotation {
    * 
    */
   _getAnnotationBody() {
+
     return `
       <div class="side_note_wrapper">
         <div class="side_node_text">${this.semanticAnnotation.bodyValue}</div>
         <div><a href="#">@${this.semanticAnnotation.creator}</a></div>
-        <div class="side_note_date">${new Date(this.semanticAnnotation.created).toUTCString().replace(':00 GMT','')}</div>
-        <div class="btn btn-primary side_note_replay">replay</div>
+        <div class="side_note_date">${new Date(this.semanticAnnotation.created).toUTCString()}</div>
+        <div class="side_note_reply container-fluid">
+          <div class="row"><textarea rows="3" contenteditable class="form-control"></textarea></div>
+          <div class="row"><a class="btn btn-primary btn-xs side_note_reply_button">reply</a></div> 
+        </div>
       </div>`
   }
 
@@ -126,10 +130,7 @@ class Annotation {
     if (!this.startElement.parent().is(annotation_sidebar_selector))
       this.startElement.parentsUntil(annotation_sidebar_selector)
 
-    if (this.startElement.children('ul').length == 0)
-      this.startElement.append($('<ul></ul>'))
-
-    this.startElement.children('ul').append(`<div data-rash-annotation-id="${this.semanticAnnotation.id}" ><hr/>${this._getAnnotationBody()}</li>`)
+    this.startElement.append(`<div data-rash-annotation-id="${this.semanticAnnotation.id}" class="side_note_body" ><hr/>${this._getAnnotationBody()}`)
   }
 
   /**

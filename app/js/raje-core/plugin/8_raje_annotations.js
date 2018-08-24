@@ -2,9 +2,8 @@ const not_annotable_elements = `${NON_EDITABLE_HEADER_SELECTOR},${SIDEBAR_ANNOTA
 const annotatorPopupSelector = '#annotatorPopup'
 const annotatorFormPopupSelector = '#annotatorFormPopup'
 const annotationWrapper = 'span[data-rash-annotation-type]'
-const side_note_replay = '.side_note_replay'
 
-tinymce.PluginManager.add('raje_annotations', function (editor, url) {
+tinymce.PluginManager.add('raje_annotations', function (editor) {
 
   editor.on('click', e => {
 
@@ -12,33 +11,46 @@ tinymce.PluginManager.add('raje_annotations', function (editor, url) {
 
     if (clickedElement.parents(SIDEBAR_ANNOTATION).length) {
 
-      if (clickedElement.is('span#toggleAnnotations') || clickedElement.parent().is('span#toggleAnnotations'))
+      // Toggle annotation button
+      if (clickedElement.is('span#toggleAnnotations') || clickedElement.parent().is('span#toggleAnnotations')) {
         rash.toggleAnnotations()
+        updateIframeFromSavedContent()
+      }
 
-      if (clickedElement.is('span#toggleSidebar') || clickedElement.parent().is('span#toggleSidebar'))
+      // Toggle sidebar button
+      else if (clickedElement.is('span#toggleSidebar') || clickedElement.parent().is('span#toggleSidebar')) {
         rash.toggleSidebar()
+        updateIframeFromSavedContent()
+      }
 
-      if (clickedElement.is('span[data-rash-annotation-id]')) {
+      // Show annotation 
+      else if (clickedElement.is('span[data-rash-annotation-id]')) {
 
-        const annotation = ANNOTATIONS.get(clickedElement.attr('data-rash-annotation-id'))
-
-        const replay_button = $(annotation.side_note_body_selector).find(side_note_replay)
-
-        replay_button.addClass('active')
-
+        rash.displayLastReplayArea(clickedElement.attr('data-rash-annotation-id'))
         rash.showAnnotation(clickedElement.attr('title').split(','))
+        updateIframeFromSavedContent()
       }
 
-      if (clickedElement.is(`${side_note_replay}.active`)) {
+      // Focus text area
+      else if (clickedElement.is('textarea'))
+        $(this).focus()
 
-        let id = $(clickedElement).parents('[data-rash-annotation-id]').last().attr('data-rash-annotation-id')
+      else if (clickedElement.is(`.side_note_reply_button`)) {
 
-        const annotation = ANNOTATIONS.get(id)
+        const parents = clickedElement.parents('[data-rash-annotation-id]')
 
-        console.log(annotation)
+        const ancestor_note_body = parents.last()
+        const parent_note_body = parents.first()
+        const parent_note_id = parent_note_body.attr('data-rash-annotation-id')
+
+        const replayingText = parent_note_body.find('textarea').val()
+
+        // Check if the text is ok
+        if (replayingText.trim().length > 0) {
+          createAnnotationReplying(replayingText, parent_note_id)
+          updateIframeFromSavedContent()
+        }
       }
-
-      updateIframeFromSavedContent()
     }
 
     // Close annotatorFormPopup if the user click somewhere else
@@ -69,7 +81,9 @@ handleAnnotation = e => {
 /**
  * 
  */
-createAnnotation = (text, creator, motivation) => {
+createAnnotationCommenting = text => {
+
+  const creator = ipcRenderer.sendSync('getSettings').username
 
   const selection = tinymce.activeEditor.selection
   const range = selection.getRng()
@@ -84,10 +98,10 @@ createAnnotation = (text, creator, motivation) => {
   const data = {
     "id": lastAnnotation.id,
     "@contenxt": "http://www.w3.org/ns/anno.jsonld",
-    "created": Date.now(),
+    "created": Date.now() + (-(new Date().getTimezoneOffset() * 60000)),
     "bodyValue": text,
     "creator": creator,
-    "Motivation": motivation,
+    "Motivation": commenting,
     "target": {
       "selector": {
         "startSelector": {
@@ -110,12 +124,39 @@ createAnnotation = (text, creator, motivation) => {
     }
   }
 
-  // The adding of the script is inside a undo level
   tinymce.activeEditor.undoManager.transact(function () {
 
     $('#raje_root').append(`<script id="${data.id}" type="application/ld+json">${JSON.stringify(data, null, 2) }</script>`)
     rash.clearAnnotations()
     rash.renderAnnotations()
+    updateIframeFromSavedContent()
+  })
+}
+
+/**
+ * 
+ */
+createAnnotationReplying = (text, targetId) => {
+
+  const creator = ipcRenderer.sendSync('getSettings').username
+  const lastAnnotation = Annotation.getLastAnnotation()
+
+  const data = {
+    "id": lastAnnotation.id,
+    "@contenxt": "http://www.w3.org/ns/anno.jsonld",
+    "created": Date.now(),
+    "bodyValue": text,
+    "creator": creator,
+    "Motivation": replying,
+    "target": targetId
+  }
+
+  // Add the new annotation without clearing everything
+  tinymce.activeEditor.undoManager.transact(function () {
+
+    $('#raje_root').append(`<script id="${data.id}" type="application/ld+json">${JSON.stringify(data, null, 2) }</script>`)
+    rash.renderSingleAnnotation(data)
+    rash.displayLastReplayArea(data.target)
     updateIframeFromSavedContent()
   })
 }
@@ -166,9 +207,7 @@ showAnnotationFormPopup = () => {
 
   $(`${annotatorFormPopupSelector} a.btn-success`).on('click', function () {
 
-    const creator = ipcRenderer.sendSync('getSettings').username
-
-    createAnnotation($(`${annotatorFormPopupSelector}>textarea`).val(), creator, commenting)
+    createAnnotationCommenting($(`${annotatorFormPopupSelector}>textarea`).val(), commenting)
     hideAnnotationFormPopup()
   })
 

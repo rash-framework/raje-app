@@ -352,7 +352,6 @@ const rash = {
     })
 
     $('#toggleSidebar').on('click', function () {
-
       rash.toggleSidebar()
     })
   },
@@ -754,7 +753,50 @@ const rash = {
     })
   },
 
+  /* Render a single annotation */
+
+  renderSingleAnnotation: semanticBody => {
+
+    const newNote = new Annotation(semanticBody)
+    ANNOTATIONS.set(newNote.getId(), newNote)
+  },
+
+  /* /END Render a single annotation */
+
+  displayLastReplayArea: noteId => {
+
+    const side_note_reply = '.side_note_reply'
+
+    // Get the side note and the list of replying children
+    let side_note_body = $(ANNOTATIONS.get(noteId).side_note_body_selector)
+
+    // Get the root annotation 
+    if (!side_note_body.parent().is(annotation_sidebar_selector))
+      side_note_body = side_note_body.parentsUntil(annotation_sidebar_selector)
+
+    // Get the list of replying annotations
+    const replayingChildren = side_note_body.find('[data-rash-annotation-id]')
+
+    // Remove all classes active
+    side_note_body.find(side_note_reply).removeClass('active')
+    replayingChildren.each(function () {
+      $(this).find(side_note_reply).removeClass('active')
+    })
+
+    // Set as active the last note of the list 
+    if (replayingChildren.length > 0)
+      replayingChildren.last().find(side_note_reply).addClass('active')
+
+    else
+      side_note_body.find(side_note_reply).addClass('active')
+  },
+
   clearAnnotations: () => {
+
+    ANNOTATIONS.forEach(annotation => {
+      annotation.remove()
+    })
+
     ANNOTATIONS.clear()
   },
 
@@ -785,8 +827,12 @@ const rash = {
 
     $(annotation_sidebar_selector).toggleClass('active')
 
-    $(sidebody_annotation_selector).each(function () {
-      $(this).removeClass('active')
+    ANNOTATIONS.forEach(annotation => {
+
+      let side_note_body = $(annotation.side_note_body_selector)
+
+      side_note_body.removeClass('active')
+      side_note_body.find('.side_note_reply').removeClass('active')
     })
   },
 

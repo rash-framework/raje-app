@@ -15,7 +15,6 @@ Under the following terms:
 */
 
 @namespace mathml url(http://www.w3.org/1998/Math/MathML);
-
 /* Font */
 
 body {
@@ -257,14 +256,22 @@ aside#annotations.active>div.side_note_body .side_note_date {
   color: #999999;
 }
 
-aside#annotations.active>div.side_note_body .side_note_replay {
-  float: right;
+aside#annotations.active>div.side_note_body .side_note_reply {
   margin-top: 10px;
   display: none;
 }
 
-aside#annotations.active>div.side_note_body .side_note_replay.active {
-  display: inline-block;
+aside#annotations.active>div.side_note_body .side_note_reply.active {
+  display: block;
+}
+
+aside#annotations.active>div.side_note_body .side_note_reply.active .row {
+  margin-top: 5px
+}
+
+aside#annotations.active>div.side_note_body .side_note_reply.active textarea {
+  font-size: 12px;
+  line-height: 12px
 }
 
 .annotation_highlight {
@@ -301,7 +308,6 @@ body {
   position: fixed;
   bottom: 0;
   width: 100%;
-
   /* Set the fixed height of the footer here */
   height: 60px;
   background-color: #f5f5f5;
@@ -404,61 +410,48 @@ section[role=doc-bibliography]>ul {
     size: A4;
     margin: 20mm 0mm 20mm 0mm;
   }
-
   html,
   body {
     width: 210mm;
     height: 297mm;
   }
-
   p {
     font-size: 10pt;
     text-align: justify;
   }
-
   pre {
     text-align: left;
   }
-
   figcaption,
   figure>p {
     text-align: center;
   }
-
   .title {
     font-size: 16pt !important;
   }
-
   h1 {
     font-size: 14pt !important;
   }
-
   h2 {
     font-size: 12pt !important;
   }
-
   h3 {
     font-size: 11pt !important;
   }
-
   h4,
   h5,
   h6 {
     font-size: 10pt !important;
   }
-
   pre {
     font-size: 8pt !important;
   }
-
   blockquote {
     font-size: 10pt !important;
   }
-
   address {
     font-size: 12pt !important;
   }
-
   table {
     max-width: 100%;
     font-size: 80%;
