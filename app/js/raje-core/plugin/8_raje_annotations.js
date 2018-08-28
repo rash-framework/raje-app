@@ -14,13 +14,13 @@ tinymce.PluginManager.add('raje_annotations', function (editor) {
       // Toggle annotation button
       if (clickedElement.is('span#toggleAnnotations') || clickedElement.parent().is('span#toggleAnnotations')) {
         rash.toggleAnnotations()
-        updateIframeFromSavedContent()
+        //updateIframeFromSavedContent()
       }
 
       // Toggle sidebar button
       else if (clickedElement.is('span#toggleSidebar') || clickedElement.parent().is('span#toggleSidebar')) {
         rash.toggleSidebar()
-        updateIframeFromSavedContent()
+        //updateIframeFromSavedContent()
       }
 
       // Show annotation 
@@ -28,12 +28,8 @@ tinymce.PluginManager.add('raje_annotations', function (editor) {
 
         rash.displayLastReplayArea(clickedElement.attr('data-rash-annotation-id'))
         rash.showAnnotation(clickedElement.attr('title').split(','))
-        updateIframeFromSavedContent()
+        //updateIframeFromSavedContent()
       }
-
-      // Focus text area
-      else if (clickedElement.is('textarea'))
-        $(this).focus()
 
       else if (clickedElement.is(`.side_note_reply_button`)) {
 
@@ -48,7 +44,7 @@ tinymce.PluginManager.add('raje_annotations', function (editor) {
         // Check if the text is ok
         if (replayingText.trim().length > 0) {
           createAnnotationReplying(replayingText, parent_note_id)
-          updateIframeFromSavedContent()
+          //updateIframeFromSavedContent()
         }
       }
     }
@@ -65,6 +61,51 @@ tinymce.PluginManager.add('raje_annotations', function (editor) {
     // If the selection is not collapsed and the element selected is an "annotable element"
     if (!tinymce.activeEditor.selection.isCollapsed() && !$(tinymce.activeEditor.selection.getNode()).is(not_annotable_elements))
       handleAnnotation(e)
+  })
+
+  editor.on('MouseOver', e => {
+
+    deselectAnnotationHighlight = () => {
+      $('.annotation_highlight.selected').removeClass('selected')
+      //updateIframeFromSavedContent()
+    }
+
+    let hoveredElement = $(e.srcElement)
+
+    if (hoveredElement.parents(SIDEBAR_ANNOTATION).length) {
+
+      // Add the class selected to the right annotation
+      if (hoveredElement.is('.side_note')) {
+
+        $(ANNOTATIONS.get(hoveredElement.attr('data-rash-annotation-id')).note_selector).addClass('selected')
+        updateIframeFromSavedContent()
+      }
+
+      // Remove the annotation highlight 
+      else if ($('.annotation_highlight.selected').length > 0)
+        deselectAnnotationHighlight()
+    }
+
+    // Remove the annotation highlight 
+    else if ($('.annotation_highlight.selected').length > 0)
+      deselectAnnotationHighlight()
+  })
+
+  editor.on('init', () => {
+
+    editor.$('#toggleAnnotations').on('click', function () {
+      alert('clicked')
+    })
+  })
+
+
+  editor.on('ExecCommand', function (e) {
+
+    if (e.command == 'Undo' || e.command == 'Redo') {
+      editor.$('#toggleAnnotations').on('click', function () {
+        alert('clicked')
+      })
+    }
   })
 })
 
@@ -129,7 +170,7 @@ createAnnotationCommenting = text => {
     $('#raje_root').append(`<script id="${data.id}" type="application/ld+json">${JSON.stringify(data, null, 2) }</script>`)
     rash.clearAnnotations()
     rash.renderAnnotations()
-    updateIframeFromSavedContent()
+    //updateIframeFromSavedContent()
   })
 }
 
@@ -157,7 +198,7 @@ createAnnotationReplying = (text, targetId) => {
     $('#raje_root').append(`<script id="${data.id}" type="application/ld+json">${JSON.stringify(data, null, 2) }</script>`)
     rash.renderSingleAnnotation(data)
     rash.displayLastReplayArea(data.target)
-    updateIframeFromSavedContent()
+    //updateIframeFromSavedContent()
   })
 }
 

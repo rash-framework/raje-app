@@ -93,7 +93,7 @@ tinymce.PluginManager.add('raje_crossref', function (editor, url) {
 
       let sections = []
 
-      $('section').each(function () {
+      tinymce.activeEditor.$('section').each(function () {
 
         let level = ''
 
@@ -103,7 +103,7 @@ tinymce.PluginManager.add('raje_crossref', function (editor, url) {
           if (!$(this).attr('role')) {
 
             // Save its deepness
-            let parentSections = $(this).parentsUntil('div#raje_root')
+            let parentSections = $(this).parentsUntil('body')
 
             if (parentSections.length) {
 
@@ -132,7 +132,7 @@ tinymce.PluginManager.add('raje_crossref', function (editor, url) {
     getAllReferenceableTables: function () {
       let tables = []
 
-      $('figure:has(table)').each(function () {
+      tinymce.activeEditor.$('figure:has(table)').each(function () {
         tables.push({
           reference: $(this).attr('id'),
           text: $(this).find('figcaption').text()
@@ -145,7 +145,7 @@ tinymce.PluginManager.add('raje_crossref', function (editor, url) {
     getAllReferenceableListings: function () {
       let listings = []
 
-      $('figure:has(pre:has(code))').each(function () {
+      tinymce.activeEditor.$('figure:has(pre:has(code))').each(function () {
         listings.push({
           reference: $(this).attr('id'),
           text: $(this).find('figcaption').text()
@@ -158,7 +158,7 @@ tinymce.PluginManager.add('raje_crossref', function (editor, url) {
     getAllReferenceableFigures: function () {
       let figures = []
 
-      $(FIGURE_IMAGE_SELECTOR).each(function () {
+      tinymce.activeEditor.$(FIGURE_IMAGE_SELECTOR).each(function () {
         figures.push({
           reference: $(this).attr('id'),
           text: $(this).find('figcaption').text()
@@ -171,7 +171,7 @@ tinymce.PluginManager.add('raje_crossref', function (editor, url) {
     getAllReferenceableFormulas: function () {
       let formulas = []
 
-      $(formulabox_selector).each(function () {
+      tinymce.activeEditor.$(formulabox_selector).each(function () {
         formulas.push({
           reference: $(this).parents(FIGURE_SELECTOR).attr('id'),
           text: `Formula ${$(this).parents(FIGURE_SELECTOR).find('span.cgen').text()}`
@@ -183,7 +183,8 @@ tinymce.PluginManager.add('raje_crossref', function (editor, url) {
 
     getAllReferenceableReferences: function () {
       let references = []
-      $('section[role=doc-bibliography] li').each(function () {
+      
+      tinymce.activeEditor.$('section[role=doc-bibliography] li').each(function () {
         references.push({
           reference: $(this).attr('id'),
           text: $(this).text(),
@@ -194,7 +195,7 @@ tinymce.PluginManager.add('raje_crossref', function (editor, url) {
       return references
     },
 
-    add: function (reference, next) {
+    add: function (reference) {
 
       // Create the empty reference with a whitespace at the end
       tinymce.activeEditor.selection.setContent(`<a contenteditable="false" href="#${reference}">&nbsp;</a>&nbsp;`)
@@ -207,12 +208,9 @@ tinymce.PluginManager.add('raje_crossref', function (editor, url) {
       references()
 
       // Prevent adding of nested a as footnotes
-      $('a>sup>a').each(function () {
+      tinymce.activeEditor.$('a>sup>a').each(function () {
         $(this).parent().html($(this).text())
       })
-
-      // Update editor with the right references
-      updateIframeFromSavedContent()
     }
   }
 })
@@ -250,8 +248,11 @@ tinymce.PluginManager.add('raje_footnotes', function (editor, url) {
 })
 
 function references() {
+
+  tinymce.triggerSave()
+
   /* References */
-  $("a[href]").each(function () {
+  tinymce.activeEditor.$("a[href]").each(function () {
     if ($.trim($(this).text()) == '') {
       var cur_id = $(this).attr("href");
       original_content = $(this).html()
@@ -364,10 +365,10 @@ function references() {
 
 function updateReferences() {
 
-  if ($('span.cgen[data-rash-original-content],sup.cgen.fn').length) {
+  if (tinymce.activeEditor.$('span.cgen[data-rash-original-content],sup.cgen.fn').length) {
 
     // Restore all saved content
-    $('span.cgen[data-rash-original-content],sup.cgen.fn').each(function () {
+    tinymce.activeEditor.$('span.cgen[data-rash-original-content],sup.cgen.fn').each(function () {
 
       // Save original content and reference
       let original_content = $(this).attr('data-rash-original-content')
@@ -375,7 +376,7 @@ function updateReferences() {
 
       $(this).parent('a').replaceWith(`<a contenteditable="false" href="${original_reference}">${original_content}</a>`)
     })
-
+    
     references()
   }
 }

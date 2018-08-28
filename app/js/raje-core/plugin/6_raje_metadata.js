@@ -176,9 +176,10 @@ tinymce.PluginManager.add('raje_metadata', function (editor, url) {
         $('head').append(`<meta property="prism:keyword" content="${keyword}"/>`)
       })
 
-      $('#raje_root').addHeaderHTML()
+      tinymce.activeEditor.$('body').addHeaderHTML()
       setNonEditableHeader()
-      updateIframeFromSavedContent()
+
+      tinymce.triggerSave()
     }
   }
 

@@ -159,7 +159,7 @@ if (hasBackend) {
             }
           }
         })
-        
+
         /**
          * 
          */
@@ -272,40 +272,6 @@ if (hasBackend) {
     $(`div[aria-label='heading']`).find('button').trigger('click')
   })
 
-
-  /**
-   * Update content in the iframe, with the one stored by tinymce
-   * And save/restore the selection
-   */
-  function updateIframeFromSavedContent() {
-
-    // Save the bookmark 
-    let bookmark = tinymce.activeEditor.selection.getBookmark(2, true)
-
-    // Update iframe content
-    tinymce.activeEditor.setContent($('#raje_root').html())
-
-    // Restore the bookmark 
-    tinymce.activeEditor.selection.moveToBookmark(bookmark)
-  }
-
-  /**
-   * 
-   */
-  function updateIframeFromSavedContentWithoutUndo() {
-
-    tinymce.activeEditor.undoManager.ignore(function () {
-      // Save the bookmark 
-      let bookmark = tinymce.activeEditor.selection.getBookmark(2, true)
-
-      // Update iframe content
-      tinymce.activeEditor.setContent($('#raje_root').html())
-
-      // Restore the bookmark 
-      tinymce.activeEditor.selection.moveToBookmark(bookmark)
-    })
-  }
-
   /**
    * Accept a js object that exists in frame
    * @param {*} element 
@@ -395,7 +361,7 @@ if (hasBackend) {
    * @param {*} elementSelector 
    */
   function scrollTo(elementSelector) {
-    $(tinymce.activeEditor.getBody()).find(elementSelector).get(0).scrollIntoView();
+    tinymce.activeEditor.$(elementSelector)[0].scrollIntoView();
   }
 
   /**
@@ -405,7 +371,7 @@ if (hasBackend) {
 
     let lastId = 0
 
-    $(elementSelector).each(function () {
+    tinymce.activeEditor.$(elementSelector).each(function () {
       let currentId = parseInt($(this).attr('id').replace(SUFFIX, ''))
       lastId = currentId > lastId ? currentId : lastId
     })
@@ -417,9 +383,9 @@ if (hasBackend) {
    * 
    */
   function headingDimension() {
-    $('h1,h2,h3,h4,h5,h6').each(function () {
+    tinymce.activeEditor.$('h1,h2,h3,h4,h5,h6').each(function () {
 
-      if (!$(this).parents(HEADER_SELECTOR).length) {
+      if (!$(this).parents(HEADER_SELECTOR).length && !$(this).parents(SPECIAL_SECTION_SELECTOR).length) {
         var counter = 0;
         $(this).parents("section").each(function () {
           if ($(this).children("h1,h2,h3,h4,h5,h6").length > 0) {
@@ -553,7 +519,7 @@ if (hasBackend) {
           formula.updateStructure(figureFormula)
 
           // Update the content and clear the whole undo levels set
-          updateIframeFromSavedContent()
+          //updateIframeFromSavedContent()
           tinymce.activeEditor.undoManager.clear()
         }
       )

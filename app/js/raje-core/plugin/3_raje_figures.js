@@ -14,7 +14,7 @@ let remove_listing = 0
  * @param {*} formulaValue 
  * @param {*} callback 
  */
-function openInlineFormulaEditor(formulaValue, callback) {
+function openInlineFormulaEditor(formulaValue) {
   tinymce.activeEditor.windowManager.open({
       title: 'Math formula editor',
       url: 'js/raje-core/plugin/raje_formula.html',
@@ -51,7 +51,7 @@ function openInlineFormulaEditor(formulaValue, callback) {
  * @param {*} formulaValue 
  * @param {*} callback 
  */
-function openFormulaEditor(formulaValue, callback) {
+function openFormulaEditor(formulaValue) {
   tinymce.activeEditor.windowManager.open({
       title: 'Math formula editor',
       url: 'js/raje-core/plugin/raje_formula.html',
@@ -86,7 +86,7 @@ function openFormulaEditor(formulaValue, callback) {
 /**
  * Raje_table
  */
-tinymce.PluginManager.add('raje_table', function (editor, url) {
+tinymce.PluginManager.add('raje_table', function (editor) {
 
   // Add a button that handle the inline element
   editor.addButton('raje_table', {
@@ -139,7 +139,7 @@ tinymce.PluginManager.add('raje_table', function (editor, url) {
   })
 
   // Handle strange structural modification empty figures or with caption as first child
-  editor.on('nodeChange', function (e) {
+  editor.on('nodeChange', function () {
     handleFigureChange(tinymce.activeEditor.selection)
   })
 
@@ -174,17 +174,14 @@ tinymce.PluginManager.add('raje_table', function (editor, url) {
         else
           selectedElement.replaceWith(newTable)
 
-        // Save updates 
-        tinymce.triggerSave()
-
         // Update all captions with RASH function
         captions()
 
         // Update all cross-ref
         updateReferences()
 
-        // Update Rendered RASH
-        updateIframeFromSavedContent()
+        // Save updates 
+        tinymce.triggerSave()
       })
     },
 
@@ -295,17 +292,14 @@ tinymce.PluginManager.add('raje_image', function (editor, url) {
         else
           selectedElement.replaceWith(newFigure)
 
-        // Save updates 
-        tinymce.triggerSave()
-
         // Update all captions with RASH function
         captions()
 
         // Update all cross-ref
         updateReferences()
 
-        // Update Rendered RASH
-        updateIframeFromSavedContent()
+        // Save updates 
+        tinymce.triggerSave()
       })
     },
 
@@ -425,7 +419,7 @@ tinymce.PluginManager.add('raje_formula', function (editor, url) {
         updateReferences()
 
         // Update Rendered RASH
-        updateIframeFromSavedContent()
+        //updateIframeFromSavedContent()
 
         // Move the caret at the start of the next element
         moveCaret(tinymce.activeEditor.dom.getNext(tinymce.activeEditor.dom.get(id), '*'), true)
@@ -443,7 +437,7 @@ tinymce.PluginManager.add('raje_formula', function (editor, url) {
       tinymce.activeEditor.undoManager.transact(function () {
 
         selectedFigure.find('svg').replaceWith(formula_svg)
-        updateIframeFromSavedContent()
+        //updateIframeFromSavedContent()
       })
     },
 
@@ -582,8 +576,6 @@ tinymce.PluginManager.add('raje_listing', function (editor, url) {
         else
           selectedElement.replaceWith(newListing)
 
-        // Save updates 
-        tinymce.triggerSave()
 
         // Update all captions with RASH function
         captions()
@@ -594,8 +586,8 @@ tinymce.PluginManager.add('raje_listing', function (editor, url) {
         // Update all cross-ref
         updateReferences()
 
-        // Update Rendered RASH
-        updateIframeFromSavedContent()
+        // Save updates 
+        tinymce.triggerSave()
       })
 
     },
@@ -668,7 +660,7 @@ tinymce.PluginManager.add('raje_inline_formula', function (editor, url) {
         updateReferences()
 
         // Update Rendered RASH
-        updateIframeFromSavedContent()
+        //updateIframeFromSavedContent()
       })
 
     },
@@ -683,7 +675,7 @@ tinymce.PluginManager.add('raje_inline_formula', function (editor, url) {
       tinymce.activeEditor.undoManager.transact(function () {
 
         selectedFigure.find('svg').replaceWith(formula_svg)
-        updateIframeFromSavedContent()
+        //updateIframeFromSavedContent()
       })
     },
 
@@ -735,17 +727,14 @@ tinymce.PluginManager.add('raje_codeblock', function (editor, url) {
           else
             selectedElement.replaceWith(blockCode)
 
-          // Save updates 
-          tinymce.triggerSave()
-
           // Update all captions with RASH function
           captions()
 
           // Move the caret
           selectRange(blockCode.find('code')[0], 0)
 
-          // Update Rendered RASH
-          updateIframeFromSavedContent()
+          // Save updates 
+          tinymce.triggerSave()
         })
       }
     },
@@ -817,17 +806,14 @@ tinymce.PluginManager.add('raje_quoteblock', function (editor, url) {
           else
             selectedElement.replaceWith(blockQuote)
 
-          // Save updates 
-          tinymce.triggerSave()
-
           // Update all captions with RASH function
           captions()
 
           // Move the caret
           moveCaret(blockQuote[0])
 
-          // Update Rendered RASH
-          updateIframeFromSavedContent()
+          // Save updates 
+          tinymce.triggerSave()
         })
       }
     },
@@ -962,23 +948,23 @@ tinymce.PluginManager.add('raje_quoteblock', function (editor, url) {
 function captions() {
 
   /* Captions */
-  $(figurebox_selector).each(function () {
+  tinymce.activeEditor.$(figurebox_selector).each(function () {
     var cur_caption = $(this).parents("figure").find("figcaption");
-    var cur_number = $(this).findNumber(figurebox_selector);
+    var cur_number = $(this).findNumberRaje(figurebox_selector);
     cur_caption.find('strong').remove();
     cur_caption.html("<strong class=\"cgen\" data-rash-original-content=\"\" contenteditable=\"false\">Figure " + cur_number +
       ". </strong>" + cur_caption.html());
   });
-  $(tablebox_selector).each(function () {
+  tinymce.activeEditor.$(tablebox_selector).each(function () {
     var cur_caption = $(this).parents("figure").find("figcaption");
-    var cur_number = $(this).findNumber(tablebox_selector);
+    var cur_number = $(this).findNumberRaje(tablebox_selector);
     cur_caption.find('strong').remove();
     cur_caption.html("<strong class=\"cgen\" data-rash-original-content=\"\" contenteditable=\"false\" >Table " + cur_number +
       ". </strong>" + cur_caption.html());
   });
-  $(formulabox_selector).each(function () {
+  tinymce.activeEditor.$(formulabox_selector).each(function () {
     var cur_caption = $(this).parents("figure").find("p");
-    var cur_number = $(this).findNumber(formulabox_selector);
+    var cur_number = $(this).findNumberRaje(formulabox_selector);
 
     if (cur_caption.find('span.cgen').length) {
       cur_caption.find('span.cgen').remove();
@@ -987,9 +973,9 @@ function captions() {
       cur_caption.html(cur_caption.html() + "<span class=\"cgen\" data-rash-original-content=\"\" > (" +
         cur_number + ")</span>");
   });
-  $(listingbox_selector).each(function () {
+  tinymce.activeEditor.$(listingbox_selector).each(function () {
     var cur_caption = $(this).parents("figure").find("figcaption");
-    var cur_number = $(this).findNumber(listingbox_selector);
+    var cur_number = $(this).findNumberRaje(listingbox_selector);
     cur_caption.find('strong').remove();
     cur_caption.html("<strong class=\"cgen\" data-rash-original-content=\"\" contenteditable=\"false\">Listing " + cur_number +
       ". </strong>" + cur_caption.html());
@@ -1155,13 +1141,11 @@ function handleFigureEnter(sel) {
  * 
  * @param {*} sel => tinymce selection
  */
-function handleFigureChange(sel) {
-
-  tinymce.triggerSave()
+function handleFigureChange() {
 
   // If rash-generated section is delete, re-add it
   if ($('figcaption:not(:has(strong))').length) {
     captions()
-    updateIframeFromSavedContent()
+    tinymce.triggerSave()
   }
 }

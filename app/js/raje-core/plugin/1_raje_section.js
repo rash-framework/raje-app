@@ -2,89 +2,65 @@
  * RASH section plugin RAJE
  */
 
-tinymce.PluginManager.add('raje_section', function (editor, url) {
+tinymce.PluginManager.add('raje_section', function (editor) {
 
-  let raje_section_flag = false
-  let raje_stored_selection
-
+  // Add the button to select the section
   editor.addButton('raje_section', {
     type: 'menubutton',
-    text: 'Headings',
+    text: HEADINGS_BUTTONLIST_LABEL,
     title: 'heading',
     icons: false,
 
     // Sections sub menu
     menu: [{
-      text: `${HEADING}1.`,
+      text: `${HEADING_BUTTON_LABEL}1.`,
       onclick: function (e) {
         section.addOrDownUpgrade(e, 1)
       }
     }, {
-      text: `${HEADING}1.1.`,
+      text: `${HEADING_BUTTON_LABEL}1.1.`,
       onclick: function (e) {
         section.addOrDownUpgrade(e, 2)
       }
     }, {
-      text: `${HEADING}1.1.1.`,
+      text: `${HEADING_BUTTON_LABEL}1.1.1.`,
       onclick: function (e) {
         section.addOrDownUpgrade(e, 3)
       }
     }, {
-      text: `${HEADING}1.1.1.1.`,
+      text: `${HEADING_BUTTON_LABEL}1.1.1.1.`,
       onclick: function (e) {
         section.addOrDownUpgrade(e, 4)
       }
     }, {
-      text: `${HEADING}1.1.1.1.1.`,
+      text: `${HEADING_BUTTON_LABEL}1.1.1.1.1.`,
       onclick: function (e) {
         section.addOrDownUpgrade(e, 5)
       }
     }, {
-      text: `${HEADING}1.1.1.1.1.1.`,
+      text: `${HEADING_BUTTON_LABEL}1.1.1.1.1.1.`,
       onclick: function (e) {
         section.addOrDownUpgrade(e, 6)
       }
     }, {
-      text: 'Special',
+      text: SPECIAL_BUTTON_LABEL,
       menu: [{
-          text: 'Abstract',
+          text: ABSTRACT_BUTTON_LABEL,
           onclick: function () {
 
             section.addAbstract()
           }
         },
         {
-          text: 'Acknowledgements',
+          text: ACKNOWLEDGEMENTS_BUTTON_LABEL,
           onclick: function () {
             section.addAcknowledgements()
           }
         },
         {
-          text: 'References',
+          text: REFERENCES_BUTTON_LABEL,
           onclick: function () {
-
-            tinymce.triggerSave()
-
-            // Only if bibliography section doesn't exists
-            if (!$(BIBLIOGRAPHY_SELECTOR).length) {
-
-              // TODO change here
-              tinymce.activeEditor.undoManager.transact(function () {
-                // Add new biblioentry
-                section.addBiblioentry()
-
-                // Update iframe
-                updateIframeFromSavedContent()
-
-                //move caret and set focus to active aditor #105
-                tinymce.activeEditor.selection.select(tinymce.activeEditor.dom.select(`${BIBLIOENTRY_SELECTOR}:last-child`)[0], true)
-              })
-            } else
-              tinymce.activeEditor.selection.select(tinymce.activeEditor.dom.select(`${BIBLIOGRAPHY_SELECTOR}>h1`)[0])
-
-            scrollTo(`${BIBLIOENTRY_SELECTOR}:last-child`)
-
-            tinymce.activeEditor.focus()
+            section.handleAddBliblioentry()
           }
         }
       ]
@@ -100,12 +76,13 @@ tinymce.PluginManager.add('raje_section', function (editor, url) {
     let startNode = $(selection.getRng().startContainer)
     let endNode = $(selection.getRng().endContainer)
 
+    // Check if the caret is inside a section
     if ((section.cursorInSection(selection) || section.cursorInSpecialSection(selection))) {
 
       // Block special chars in special elements
       if (checkIfSpecialChar(e.keyCode) &&
         (startNode.parents(SPECIAL_SECTION_SELECTOR).length || endNode.parents(SPECIAL_SECTION_SELECTOR).length) &&
-        (startNode.parents('h1').length > 0 || endNode.parents('h1').length > 0)) {
+        (startNode.parents(H1).length > 0 || endNode.parents(H1).length > 0)) {
 
         e.stopImmediatePropagation()
         return false
@@ -127,12 +104,11 @@ tinymce.PluginManager.add('raje_section', function (editor, url) {
             // Both delete event and update are stored in a single undo level
             tinymce.activeEditor.undoManager.transact(function () {
 
-              tinymce.activeEditor.execCommand('delete')
+              tinymce.activeEditor.execCommand(DELETE_CMD)
               section.updateBibliographySection()
               updateReferences()
 
-              // update iframe
-              updateIframeFromSavedContent()
+              tinymce.triggerSave()
             })
 
             return false
@@ -146,11 +122,10 @@ tinymce.PluginManager.add('raje_section', function (editor, url) {
             tinymce.activeEditor.undoManager.transact(function () {
 
               // Execute normal delete
-              $(BIBLIOGRAPHY_SELECTOR).remove()
+              tinymce.activeEditor.$(BIBLIOGRAPHY_SELECTOR).remove()
               updateReferences()
 
-              // Update iframe and restore selection
-              updateIframeFromSavedContent()
+              tinymce.triggerSave()
             })
 
             return false
@@ -160,6 +135,8 @@ tinymce.PluginManager.add('raje_section', function (editor, url) {
           if (!section.cursorInSpecialSection(selection)) {
             e.stopImmediatePropagation()
             section.manageDelete()
+            tinymce.triggerSave()
+            return false
           }
         }
 
@@ -170,7 +147,7 @@ tinymce.PluginManager.add('raje_section', function (editor, url) {
           if (section.cursorInSpecialSection(selection)) {
 
             // Remove special section if the cursor is at the beginning
-            if ((startNode.parents('h1').length || startNode.is('h1')) && tinymce.activeEditor.selection.getRng().startOffset == 0) {
+            if ((startNode.parents(H1).length || startNode.is(H1)) && tinymce.activeEditor.selection.getRng().startOffset == 0) {
 
               e.stopImmediatePropagation()
               section.deleteSpecialSection(selectedElement)
@@ -185,12 +162,10 @@ tinymce.PluginManager.add('raje_section', function (editor, url) {
               tinymce.activeEditor.undoManager.transact(function () {
 
                 // Execute normal delete
-                tinymce.activeEditor.execCommand('delete')
-                tinymce.triggerSave()
+                tinymce.activeEditor.execCommand(DELETE_CMD)
                 updateReferences()
 
-                // Update iframe and restore selection
-                updateIframeFromSavedContent()
+                tinymce.triggerSave()
               })
 
               return false
@@ -209,15 +184,13 @@ tinymce.PluginManager.add('raje_section', function (editor, url) {
                 if (!endnote.prev(ENDNOTE_SELECTOR).length && !endnote.next(ENDNOTE_SELECTOR).length)
                   $(ENDNOTES_SELECTOR).remove()
 
-                else {
-                  tinymce.activeEditor.execCommand('delete')
-                  tinymce.triggerSave()
-                }
+                else 
+                  tinymce.activeEditor.execCommand(DELETE_CMD)
+                
 
                 updateReferences()
 
-                // Update iframe and restore selection
-                updateIframeFromSavedContent()
+                tinymce.triggerSave()
               })
 
               return false
@@ -243,17 +216,17 @@ tinymce.PluginManager.add('raje_section', function (editor, url) {
           section.addWithEnter()
           return false
         }
-  
+
         // If selection is before/after header
         if (selectedElement.is('p')) {
-  
+
           // Block enter before header
-          if (selectedElement.attr('data-mce-caret') == 'before'){
+          if (selectedElement.attr('data-mce-caret') == 'before') {
             e.stopImmediatePropagation()
             return false
           }
-  
-  
+
+
           // Add new section after header
           if (selectedElement.attr('data-mce-caret') == 'after') {
             e.stopImmediatePropagation()
@@ -261,46 +234,43 @@ tinymce.PluginManager.add('raje_section', function (editor, url) {
             return false
           }
         }
-  
+
         // If enter is pressed inside bibliography selector
         if (selectedElement.parents(BIBLIOGRAPHY_SELECTOR).length) {
-  
-          tinymce.triggerSave()
-  
+
           let id = getSuccessiveElementId(BIBLIOENTRY_SELECTOR, BIBLIOENTRY_SUFFIX)
-  
+
           // Pressing enter in h1 will add a new biblioentry and caret reposition
-          if (selectedElement.is('h1')) {
-  
+          if (selectedElement.is(H1)) {
+
             section.addBiblioentry(id)
-            updateIframeFromSavedContent()
+            tinymce.triggerSave()
           }
-  
+
           // If selected element is inside text
           else if (selectedElement.is('p'))
             section.addBiblioentry(id, null, selectedElement.parent('li'))
-  
-  
+
           // If selected element is without text
           else if (selectedElement.is('li'))
             section.addBiblioentry(id, null, selectedElement)
-  
+
           // Move caret #105
           tinymce.activeEditor.selection.setCursorLocation(tinymce.activeEditor.dom.select(`${BIBLIOENTRY_SELECTOR}#${id} > p`)[0], false)
           return false
         }
-  
+
         // Adding sections with shortcuts #
         if (selectedElement.is('p') && selectedElement.text().trim().substring(0, 1) == '#') {
-  
+
           let level = section.getLevelFromHash(selectedElement.text().trim())
           let deepness = $(selectedElement).parentsUntil(RAJE_SELECTOR).length - level + 1
-  
+
           // Insert section only if caret is inside abstract section, and user is going to insert a sub section
           // OR the cursor isn't inside other special sections
           // AND selectedElement isn't inside a figure
           if (((selectedElement.parents(ABSTRACT_SELECTOR).length && deepness > 0) || !selectedElement.parents(SPECIAL_SECTION_SELECTOR).length) && !selectedElement.parents(FIGURE_SELECTOR).length) {
-  
+
             section.add(level, selectedElement.text().substring(level).trim())
             return false
           }
@@ -319,13 +289,13 @@ section = {
   /**
    * Function called when a new section needs to be attached, with buttons
    */
-  add: function (level, text) {
+  add: (level, text) => {
 
     // Select current node
     let selectedElement = $(tinymce.activeEditor.selection.getNode())
 
     // Create the section
-    let newSection = this.create(text != null ? text : selectedElement.html().trim(), level)
+    let newSection = section.create(text != null ? text : selectedElement.html().trim(), level)
 
     tinymce.activeEditor.undoManager.transact(function () {
 
@@ -338,7 +308,6 @@ section = {
         // If the new heading has text nodes, the offset won't be 0 (as normal) but instead it'll be length of node text
         moveCaret(newSection.find(':header').first()[0])
 
-        // Update editor content
         tinymce.triggerSave()
       }
     })
@@ -347,16 +316,19 @@ section = {
   /**
    * 
    */
-  addOrDownUpgrade: function (e, level) {
+  addOrDownUpgrade: (e, level) => {
 
     let selectedMenuItem = $(e.target).parent('.mce-menu-item')
 
+    // Upgrade the header selected from iframe
     if (selectedMenuItem.attr(DATA_UPGRADE))
       return this.upgrade()
 
+    // Downgrade the header selected from iframe
     if (selectedMenuItem.attr(DATA_DOWNGRADE))
       return this.downgrade()
 
+    // Transform the paragraph selected from iframe
     return this.add(level)
   },
 
@@ -386,7 +358,6 @@ section = {
 
         moveCaret(newSection.find(':header').first()[0], true)
 
-        // Update editor
         tinymce.triggerSave()
       })
     } else
@@ -398,7 +369,7 @@ section = {
    */
   getNextId: function () {
     let id = 0
-    $('section[id]').each(function () {
+    tinymce.activeEditor.$('section[id]').each(function () {
       if ($(this).attr('id').indexOf('section') > -1) {
         let currId = parseInt($(this).attr('id').replace('section', ''))
         id = id > currId ? id : currId
@@ -459,10 +430,8 @@ section = {
    * Return JQeury object that represent the section
    */
   create: function (text, level) {
-    // Create the section
 
     // Trim white spaces and add zero_space char if nothing is inside
-
     if (typeof text != "undefined") {
       text = text.trim()
       if (text.length == 0)
@@ -478,7 +447,7 @@ section = {
    */
   manageSection: function (selectedElement, newSection, level) {
 
-    let deepness = $(selectedElement).parentsUntil(RAJE_SELECTOR).length - level + 1
+    let deepness = $(selectedElement).parentsUntil('body').length - level + 1
 
     if (deepness >= 0) {
 
@@ -525,7 +494,7 @@ section = {
       let selectedSection = selectedElement.parent(SECTION_SELECTOR)
       let parentSection = selectedSection.parent(SECTION_SELECTOR)
 
-      // If there is a parent section upgrade is allowed
+      // If there is a parent section, the upgrade is allowed
       if (parentSection.length) {
 
         // Everything in here, is an atomic undo level
@@ -540,7 +509,6 @@ section = {
 
           tinymce.triggerSave()
           headingDimension()
-          updateIframeFromSavedContent()
         })
       }
 
@@ -575,10 +543,8 @@ section = {
           // Update dimension and move the section out
           siblingSection.append(bodySection)
 
-          tinymce.triggerSave()
           // Refresh tinymce content and set the heading dimension
           headingDimension()
-          updateIframeFromSavedContent()
         })
       }
     }
@@ -593,14 +559,12 @@ section = {
    */
   addAbstract: function () {
 
-    if (!$(ABSTRACT_SELECTOR).length) {
+    if (!tinymce.activeEditor.$(ABSTRACT_SELECTOR).length) {
 
       tinymce.activeEditor.undoManager.transact(function () {
 
         // This section can only be placed after non editable header
-        $(NON_EDITABLE_HEADER_SELECTOR).after(`<section id="doc-abstract" role="doc-abstract"><h1>Abstract</h1></section>`)
-
-        updateIframeFromSavedContent()
+        tinymce.activeEditor.$(NON_EDITABLE_HEADER_SELECTOR).after(`<section id="doc-abstract" role="doc-abstract"><h1>Abstract</h1></section>`)
       })
     }
 
@@ -614,7 +578,7 @@ section = {
    */
   addAcknowledgements: function () {
 
-    if (!$(ACKNOWLEDGEMENTS_SELECTOR).length) {
+    if (!tinymce.activeEditor.$(ACKNOWLEDGEMENTS_SELECTOR).length) {
 
       let ack = $(`<section id="doc-acknowledgements" role="doc-acknowledgements"><h1>Acknowledgements</h1></section>`)
 
@@ -623,22 +587,41 @@ section = {
         // Insert this section after last non special section 
         // OR after abstract section 
         // OR after non editable header
-        if ($(MAIN_SECTION_SELECTOR).length)
-          $(MAIN_SECTION_SELECTOR).last().after(ack)
+        if (tinymce.activeEditor.$(MAIN_SECTION_SELECTOR).length)
+          tinymce.activeEditor.$(MAIN_SECTION_SELECTOR).last().after(ack)
 
-        else if ($(ABSTRACT_SELECTOR).length)
-          $(ABSTRACT_SELECTOR).after(ack)
+        else if (tinymce.activeEditor.$(ABSTRACT_SELECTOR).length)
+          tinymce.activeEditor.$(ABSTRACT_SELECTOR).after(ack)
 
         else
-          $(NON_EDITABLE_HEADER_SELECTOR).after(ack)
-
-        updateIframeFromSavedContent()
+          tinymce.activeEditor.$(NON_EDITABLE_HEADER_SELECTOR).after(ack)
       })
     }
 
     //move caret and set focus to active aditor #105
     moveCaret(tinymce.activeEditor.dom.select(`${ACKNOWLEDGEMENTS_SELECTOR} > h1`)[0])
     scrollTo(ACKNOWLEDGEMENTS_SELECTOR)
+  },
+
+  handleAddBliblioentry: function () {
+
+    // Only if bibliography section doesn't exists
+    if (!tinymce.activeEditor.$(BIBLIOGRAPHY_SELECTOR).length) {
+
+      tinymce.activeEditor.undoManager.transact(function () {
+
+        // Add new biblioentry
+        section.addBiblioentry()
+
+        //move caret and set focus to active aditor #105
+        tinymce.activeEditor.selection.select(tinymce.activeEditor.dom.select(`${BIBLIOENTRY_SELECTOR}:last-child`)[0], true)
+      })
+    } else
+      tinymce.activeEditor.selection.select(tinymce.activeEditor.dom.select(`${BIBLIOGRAPHY_SELECTOR}>h1`)[0])
+
+    scrollTo(`${BIBLIOENTRY_SELECTOR}:last-child`)
+    tinymce.triggerSave()
+    tinymce.activeEditor.focus()
   },
 
   /**
@@ -648,7 +631,7 @@ section = {
   addBiblioentry: function (id, text, listItem) {
 
     // Add bibliography section if not exists
-    if (!$(BIBLIOGRAPHY_SELECTOR).length) {
+    if (!tinymce.activeEditor.$(BIBLIOGRAPHY_SELECTOR).length) {
 
       let bibliography = $(`<section id="doc-bibliography" role="doc-bibliography"><h1>References</h1><ul></ul></section>`)
 
@@ -656,23 +639,23 @@ section = {
       // OR after last non special section
       // OR after abstract section
       // OR after non editable header 
-      if ($(ACKNOWLEDGEMENTS_SELECTOR).length)
-        $(ACKNOWLEDGEMENTS_SELECTOR).after(bibliography)
+      if (tinymce.activeEditor.$(ACKNOWLEDGEMENTS_SELECTOR).length)
+        tinymce.activeEditor.$(ACKNOWLEDGEMENTS_SELECTOR).after(bibliography)
 
-      else if ($(MAIN_SECTION_SELECTOR).length)
-        $(MAIN_SECTION_SELECTOR).last().after(bibliography)
+      else if (tinymce.activeEditor.$(MAIN_SECTION_SELECTOR).length)
+        tinymce.activeEditor.$(MAIN_SECTION_SELECTOR).last().after(bibliography)
 
-      else if ($(ABSTRACT_SELECTOR).length)
-        $(ABSTRACT_SELECTOR).after(bibliography)
+      else if (tinymce.activeEditor.$(ABSTRACT_SELECTOR).length)
+        tinymce.activeEditor.$(ABSTRACT_SELECTOR).after(bibliography)
 
       else
-        $(NON_EDITABLE_HEADER_SELECTOR).after(bibliography)
+        tinymce.activeEditor.$(NON_EDITABLE_HEADER_SELECTOR).after(bibliography)
 
     }
 
     // Add ul in bibliography section if not exists
-    if (!$(BIBLIOGRAPHY_SELECTOR).find('ul').length)
-      $(BIBLIOGRAPHY_SELECTOR).append('<ul></ul>')
+    if (!tinymce.activeEditor.$(BIBLIOGRAPHY_SELECTOR).find('ul').length)
+      tinymce.activeEditor.$(BIBLIOGRAPHY_SELECTOR).append('<ul></ul>')
 
     // IF id and text aren't passed as parameters, these can be retrieved or init from here
     id = (id) ? id : getSuccessiveElementId(BIBLIOENTRY_SELECTOR, BIBLIOENTRY_SUFFIX)
@@ -683,7 +666,7 @@ section = {
     // Append new li to ul at last position
     // OR insert the new li right after the current one
     if (!listItem)
-      $(`${BIBLIOGRAPHY_SELECTOR} ul`).append(newItem)
+      tinymce.activeEditor.$(`${BIBLIOGRAPHY_SELECTOR} ul`).append(newItem)
 
     else
       listItem.after(newItem)
@@ -694,11 +677,8 @@ section = {
    */
   updateBibliographySection: function () {
 
-    // Synchronize iframe and stored content
-    tinymce.triggerSave()
-
     // Remove all sections without p child
-    $(`${BIBLIOENTRY_SELECTOR}:not(:has(p))`).each(function () {
+    tinymce.activeEditor.$(`${BIBLIOENTRY_SELECTOR}:not(:has(p))`).each(function () {
       $(this).remove()
     })
   },
@@ -807,11 +787,11 @@ section = {
           // menu item inside the dropdown
           let menuItem = menu.children(`:eq(${index})`)
 
-          let tmp = list[index].replace(HEADING, '')
+          let tmp = list[index].replace(HEADING_BUTTON_LABEL, '')
           tmp = tmp.split('.')
           tmp[index - 1] = parseInt(tmp[index - 1]) - 1
 
-          let text = HEADING + tmp.join('.')
+          let text = HEADING_BUTTON_LABEL + tmp.join('.')
 
           menuItem.find('span.mce-text').text(text)
           menuItem.removeClass('mce-disabled')
@@ -857,7 +837,7 @@ section = {
     // Update text of all menu item
     for (let i = 0; i <= preHeaders.length; i++) {
 
-      let text = HEADING
+      let text = HEADING_BUTTON_LABEL
 
       // Update text based on section structure
       if (i != preHeaders.length) {
@@ -887,7 +867,7 @@ section = {
     let cnt = 1
 
     menu.children(':lt(6)').each(function () {
-      let text = HEADING
+      let text = HEADING_BUTTON_LABEL
 
       for (let i = 0; i < cnt; i++)
         text += `1.`
@@ -950,7 +930,7 @@ section = {
           }
 
           // Execute delete
-          tinymce.activeEditor.execCommand('delete')
+          tinymce.activeEditor.execCommand(DELETE_CMD)
 
           // Detach all next_begin
           startNode.nextAll().each(function () {
@@ -962,15 +942,11 @@ section = {
             startNode.parent('section').append(element)
           })
 
-          tinymce.triggerSave()
-
           // Refresh headings
           headingDimension()
 
           // Update references if needed
           updateReferences()
-
-          updateIframeFromSavedContent()
         })
       }
     }
@@ -985,11 +961,11 @@ section = {
 
       // Remove the section and update 
       selectedElement.parent(SPECIAL_SECTION_SELECTOR).remove()
-      tinymce.triggerSave()
 
       // Update references
       updateReferences()
-      updateIframeFromSavedContent()
+
+      tinymce.triggerSave()
     })
   },
 

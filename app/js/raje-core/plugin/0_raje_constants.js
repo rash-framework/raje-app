@@ -1,28 +1,57 @@
+//#region 1_raje_section.js Constants
+
+// Text of button labels
+const HEADING_BUTTON_LABEL = 'Heading '
+const SPECIAL_BUTTON_LABEL = 'Special'
+const ABSTRACT_BUTTON_LABEL = 'Abstract'
+const ACKNOWLEDGEMENTS_BUTTON_LABEL = 'Acknowledgements'
+const REFERENCES_BUTTON_LABEL = 'References'
+const HEADINGS_BUTTONLIST_LABEL = 'Headings'
+
+// Message text
+const HEADING_TRASFORMATION_FORBIDDEN = 'Error, you cannot transform the current header in this way!'
+
+// Section selector
+const MAIN_SECTION_SELECTOR = 'section:not([role])'
+const SECTION_SELECTOR = 'section:not([role])'
+const SPECIAL_SECTION_SELECTOR = 'section[role]'
+const BIBLIOGRAPHY_SELECTOR = 'section[role=doc-bibliography]'
+const ENDNOTES_SELECTOR = 'section[role=doc-endnotes]'
+const ENDNOTE_SELECTOR = 'section[role=doc-endnote]'
+
+// Element selector
+const H1 = 'h1'
+const BIBLIOENTRY_SELECTOR = 'li[role=doc-biblioentry]'
+
+
+//#endregion
+
+//#region commands
+
+const DELETE_CMD = 'Delete'
+const UNDO_CMD = 'Undo'
+const REDO_CMD = 'Redo'
+
+//#endregion
+
 const NON_EDITABLE_HEADER_SELECTOR = 'header.page-header.container.cgen'
 const BIBLIOENTRY_SUFFIX = 'biblioentry_'
 const ENDNOTE_SUFFIX = 'endnote_'
 
-const BIBLIOGRAPHY_SELECTOR = 'section[role=doc-bibliography]'
-const BIBLIOENTRY_SELECTOR = 'li[role=doc-biblioentry]'
-
-const ENDNOTES_SELECTOR = 'section[role=doc-endnotes]'
-const ENDNOTE_SELECTOR = 'section[role=doc-endnote]'
 
 const ABSTRACT_SELECTOR = 'section[role=doc-abstract]'
 const ACKNOWLEDGEMENTS_SELECTOR = 'section[role=doc-acknowledgements]'
 
-const MAIN_SECTION_SELECTOR = 'div#raje_root > section:not([role])'
-const SECTION_SELECTOR = 'section:not([role])'
-const SPECIAL_SECTION_SELECTOR = 'section[role]'
+
 
 const MENU_SELECTOR = 'div[id^=mceu_][id$=-body][role=menu]'
 
 const DATA_UPGRADE = 'data-upgrade'
 const DATA_DOWNGRADE = 'data-downgrade'
 
-const HEADING = 'Heading '
 
-const HEADING_TRASFORMATION_FORBIDDEN = 'Error, you cannot transform the current header in this way!'
+
+
 
 const DISABLE_SELECTOR_FIGURES = 'figure *, h1, h2, h3, h4, h5, h6,' + BIBLIOGRAPHY_SELECTOR
 
