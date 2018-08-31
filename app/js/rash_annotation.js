@@ -308,7 +308,7 @@ class Annotation {
 
       // In the case that the element has siblings
       if (element.siblings(nodeName).length) {
-        cssSelector += `:nth-child(${element.prevAll(nodeName).length + 1})`
+        cssSelector += `:nth-child(${element.prevAll().length + 1})`
       }
     }
 
@@ -505,13 +505,14 @@ class AnnotationRaje extends Annotation {
 
     // Save all the elements that must be wrapped
     let elements = []
+    const endMarker = tinymce.activeEditor.$(this.end_marker_selector)[0]
 
     // Start from the next element of the starting marker and iterate until the endMarker is found
     let next = tinymce.activeEditor.$(this.start_marker_selector)[0].nextSibling
-    while (next != null && next != tinymce.activeEditor.$(this.end_marker_selector)[0]) {
+    while (next != null && !next.isEqualNode(endMarker)) {
 
       // If the element is a node, that containt the marker at any level
-      if (next.nodeType != 3 && ($(next).is('tr,th,td') || $(next).find($(this.end_marker_selector)[0]).length > 0))
+      if (next.nodeType != 3 && ($(next).is('tr,th,td') || $(next).find(this.end_marker_selector).length))
         next = next.firstChild
 
       else {
@@ -520,12 +521,15 @@ class AnnotationRaje extends Annotation {
         elements.push(next)
 
         // If the next sibling doesn't exist, go up and look at the next element of the parent
-        if (next.nextSibling == null)
-          next = next.parentElement.nextSibling
+        if (next.nextSibling == null) {
 
-        // Otherwise preceed normally
-        else
-          next = next.nextSibling
+          do
+            next = next.parentElement
+
+          while (next.nextSibling == null)
+        }
+
+        next = next.nextSibling
       }
     }
 
@@ -598,37 +602,9 @@ class AnnotationRaje extends Annotation {
       tinymce.activeEditor.$(annotation_sidebar_selector).append(side_note)
     }
 
-    /*
-    // Remove the previous hover function
-    side_note.off('mouseenter mouseleave click')
-
-    // Add the new hover function
-    side_note.on('mouseenter mouseleave', function () {
-
-      let selector = getWrapAnnotationSelector(referencedNotes[0])
-
-      for (let i = 1; i < referencedNotes.length; i++)
-        selector += `,${getWrapAnnotationSelector(referencedNotes[i])}`
-
-      $(selector).each(function () {
-        $(this).toggleClass('selected')
-      })
-    })
-
-    side_note.on('click', function () {
-      rash.showAnnotation(referencedNotes)
-    })*/
-
     // Create annotation body
     let side_note_body = $(`
       <div style="top:${this.top}px" class="cgen side_note_body" data-rash-annotation-id="${this.semanticAnnotation.id}">${this._getAnnotationBody()}</div>`)
-
-    /*
-    side_note_body.on('mouseenter mouseleave', function () {
-      $(getWrapAnnotationSelector($(this).attr('data-rash-annotation-id'))).each(function () {
-        $(this).toggleClass('selected')
-      })
-    })*/
 
     tinymce.activeEditor.$(annotation_sidebar_selector).append(side_note_body)
   }
