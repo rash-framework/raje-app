@@ -569,10 +569,15 @@ class AnnotationRaje extends Annotation {
      * @param {*} top 
      */
     const nearAnnotation = (top) => {
+
+      let nearAnnotations = []
+
       ANNOTATIONS.forEach(annotation => {
         if (Math.abs(top - annotation.top) < 100)
-          return annotation
+          nearAnnotations.push(annotation)
       })
+
+      return nearAnnotations
     }
 
     this.coordinates = this._getCoordinates()
@@ -584,9 +589,12 @@ class AnnotationRaje extends Annotation {
 
     // Check if there is another annotation
     let annotation = nearAnnotation(this.top)
-    if (typeof annotation != 'undefined') {
 
-      side_note = $(`span.side_note[data-rash-annotation-id="${annotation.semanticAnnotation.id}"]`)
+    if (annotation.length) {
+
+      annotation = annotation[0]
+
+      side_note = tinymce.activeEditor.$(`span.side_note[data-rash-annotation-id="${annotation.id}"]`)
 
       side_note.attr('title', `${side_note.attr('title')},${this.semanticAnnotation.id}`)
       side_note.text(parseInt(side_note.text(), 10) + parseInt(1, 10))
