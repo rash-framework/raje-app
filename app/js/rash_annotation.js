@@ -2,20 +2,109 @@ const replying = 'replying'
 const commenting = 'commenting'
 const start_role = 'start'
 const end_role = 'end'
-const raje_iframe_selector = '#raje_root_ifr'
 
 const raje_string = 'raje'
 const rash_string = 'rash'
 
-/**
- * 
- */
-class Annotation {
+const active_class = 'active'
+const selected_class = 'selected'
 
-  /**
-   * 
-   * @param {*} semanticAnnotation 
-   */
+const side_note_reply_selector = '.side_note_reply'
+
+class AnnotationContext {
+
+  constructor(semanticAnnotation) {
+
+    const type = (tinymce.activeEditor) ? raje_string : rash_string
+
+    switch (type) {
+
+      case raje_string:
+        this.annotation = new AnnotationRaje(semanticAnnotation)
+        break
+
+      case rash_string:
+        this.annotation = new AnnotationRash(semanticAnnotation)
+        break
+    }
+  }
+
+  static render() {
+
+    const type = (tinymce.activeEditor) ? raje_string : rash_string
+
+    switch (type) {
+
+      case raje_string:
+        AnnotationRaje.render()
+        break
+
+      case rash_string:
+        AnnotationRash.render()
+        break
+    }
+  }
+
+  static getOffset(container, offset, path) {
+    const type = (tinymce.activeEditor) ? raje_string : rash_string
+
+    switch (type) {
+
+      case raje_string:
+        return AnnotationRaje.getOffset(container, offset, path)
+
+      case rash_string:
+        return AnnotationRash.getOffset(container, offset, path)
+    }
+  }
+
+  static getCssSelector(node) {
+    return Annotation.getCssSelector(node)
+  }
+
+  static getLastAnnotation() {
+    return Annotation.getLastAnnotation()
+  }
+
+  static showAnnotationFromAttribute(titleAttribute) {
+
+    AnnotationContext.toggleAnnotationToolbar()
+
+    titleAttribute = titleAttribute.split(',')
+
+    for (let id of titleAttribute)
+      tinymce.activeEditor.$(ANNOTATIONS.get(id).side_note_body_selector).toggleClass(active_class)
+  }
+
+  static highlightAnnotationFromAttribute(titleAttribute) {
+
+    titleAttribute = titleAttribute.split(',')
+
+    for (let id of titleAttribute)
+      tinymce.activeEditor.$(ANNOTATIONS.get(id).note_selector).toggleClass(selected_class)
+  }
+
+  static toggleAnnotationToolbar() {
+
+    tinymce.activeEditor.$(annotation_sidebar_selector).toggleClass(active_class)
+
+    ANNOTATIONS.forEach(annotation => {
+      tinymce.activeEditor.$(annotation.side_note_body_selector).removeClass(active_class)
+      tinymce.activeEditor.$(annotation.side_note_body_selector).find(side_note_reply_selector).removeClass(active_class)
+    })
+  }
+
+  static clearAnnotations() {
+
+    ANNOTATIONS.forEach(annotation => {
+      annotation.remove()
+    })
+
+    ANNOTATIONS.clear()
+  }
+}
+
+class Annotation {
   constructor(semanticAnnotation) {
 
     this.semanticAnnotation = semanticAnnotation
@@ -36,13 +125,13 @@ class Annotation {
         this.startSelector = {
           selector: semanticAnnotation.target.selector.startSelector[json_value_key],
           offset: semanticAnnotation.target.selector.start[json_value_key],
-          role: 'start'
+          role: start_role
         }
 
         this.endSelector = {
           selector: semanticAnnotation.target.selector.endSelector[json_value_key],
           offset: semanticAnnotation.target.selector.end[json_value_key],
-          role: 'end'
+          role: end_role
         }
 
         this._addMarker()
@@ -53,13 +142,6 @@ class Annotation {
         break
 
     }
-  }
-
-  /**
-   * 
-   */
-  _getMarker(role) {
-    return $(`<span class="cgen" data-rash-original-content="" data-rash-annotation-role="${role}" data-rash-annotation-id="${this.semanticAnnotation.id}"/>`)
   }
 
   /**
@@ -82,26 +164,8 @@ class Annotation {
   /**
    * 
    */
-  _addMarker() {
-
-    // Save the elements
-    this.startElement = $(document).xpath(this.startSelector.selector)
-    this.endElement = $(document).xpath(this.endSelector.selector)
-
-    // Check if the annotation wraps entirely a html element
-    if (this.startElement.is(this.endElement) && (this.startSelector.offset == 0 && this.endElement.text().length == this.endSelector.offset))
-      this._wrapElement(this.startElement)
-
-    // Else do it normally
-    else {
-      this._createMarker(this.startElement, this.startSelector)
-      this._createMarker(this.endElement, this.endSelector)
-
-      this._fragmentateAnnotation()
-    }
-
-    this._createSideAnnotation()
-    this._removeMarkers()
+  _getMarker(role) {
+    return $(`<span class="cgen" data-rash-original-content="" data-rash-annotation-role="${role}" data-rash-annotation-id="${this.semanticAnnotation.id}"/>`)
   }
 
   /**
@@ -114,34 +178,140 @@ class Annotation {
   /**
    * 
    */
-  _removeMarkers() {
+  static getLastAnnotation() {
 
-    $(this.start_marker_selector).remove()
-    $(this.end_marker_selector).remove()
+    const annotation_prefix = 'annotation_'
+    let lastId = 0
+    let lastAnnotation = $('head').children().last()
+
+    $(semantic_annotation_selector).each(function () {
+      let currentId = parseInt($(this).attr('id').replace(annotation_prefix, ''))
+
+      if (currentId > lastId) {
+        lastId = currentId
+        lastAnnotation = $(`${semantic_annotation_selector}#${annotation_prefix + lastId}`)
+      }
+    })
+
+    return {
+      id: annotation_prefix + (lastId + 1),
+      element: lastAnnotation
+    }
+  }
+
+  static getCssSelector(node) {
+
+    const ending = 'body'
+
+    // The allowed starting elements
+    const not_blocked_elements = 'section, p, :header, table, tr, th, td, tbody, ol, ul, li'
+
+    // Create the needed vars
+    let parents = []
+
+    if (node.is(not_blocked_elements))
+      parents.push(node)
+
+    // Add the entire collection inside the array of parent elements
+    node.parentsUntil(ending).each(function () {
+      if ($(this).is(not_blocked_elements))
+        parents.push($(this))
+    })
+
+    let lastParent = parents.pop()
+    let cssSelector = `${lastParent[0].nodeName.toLowerCase()}#${lastParent.attr('id')}`
+
+    // Reverse the array in order to have the parents in the left
+    parents.reverse()
+
+    // Create the cssSelector for all elements
+    for (let element of parents) {
+
+      const nodeName = element[0].nodeName
+      cssSelector += `>${nodeName.toLowerCase()}`
+
+      // In the case that the element has siblings
+      if (element.siblings(nodeName).length) {
+        cssSelector += `:nth-child(${element.prevAll(nodeName).length + 1})`
+      }
+    }
+
+    return cssSelector
+  }
+
+}
+
+class AnnotationRaje extends Annotation {
+
+  /**
+   * 
+   * @param JSONObject semanticAnnotation 
+   */
+  constructor(semanticAnnotation) {
+    super(semanticAnnotation)
+  }
+
+  setEvents(){
+    this._setClickEvents()
+    this._setHoverEvents()
   }
 
   /**
    * 
    */
-  _addReply() {
+  _setClickEvents() {
 
-    this.startElement = $(`${annotation_sidebar_selector} div[data-rash-annotation-id='${this.semanticAnnotation.target}']`)
+    const instance = this
 
-    if (!this.startElement.parent().is(annotation_sidebar_selector))
-      this.startElement.parentsUntil(annotation_sidebar_selector)
+    if (tinymce.activeEditor.$(this.side_note_selector).length)
+      tinymce.activeEditor.$(this.side_note_selector).on('click', function () {
+        AnnotationContext.showAnnotationFromAttribute(tinymce.activeEditor.$(instance.side_note_selector).attr('title'))
+      })
+  }
 
-    this.startElement.append(`<div data-rash-annotation-id="${this.semanticAnnotation.id}" class="side_note_body" ><hr/>${this._getAnnotationBody()}`)
+  _setHoverEvents() {
+
+    const instance = this
+
+    if (tinymce.activeEditor.$(this.side_note_selector).length)
+      tinymce.activeEditor.$(this.side_note_selector).on('mouseenter mouseleave', function () {
+        AnnotationContext.highlightAnnotationFromAttribute(tinymce.activeEditor.$(instance.side_note_selector).attr('title'))
+      })
+
+    if (tinymce.activeEditor.$(this.side_note_body_selector).length)
+      tinymce.activeEditor.$(this.side_note_body_selector).on('mouseenter mouseleave', function () {
+        AnnotationContext.highlightAnnotationFromAttribute(tinymce.activeEditor.$(instance.side_note_body_selector).attr('data-rash-annotation-id'))
+      })
   }
 
   /**
    * 
-   * @param {*} element 
    */
-  _wrapElement(element) {
+  _addMarker() {
 
-    element.addClass('annotation_element')
-    element.attr('title', this.semanticAnnotation.id)
-    element.attr('data-rash-annotation-id', this.semanticAnnotation.id)
+    // Save the elements
+    this.startElement = tinymce.activeEditor.$(this.startSelector.selector)
+    this.endElement = tinymce.activeEditor.$(this.endSelector.selector)
+
+    // Check if the annotation wraps entirely a html element
+    if (this.startElement[0].isEqualNode(this.endElement[0]) && (this.startSelector.offset == 0 && this.endElement.text().length == this.endSelector.offset))
+      this._wrapElement(this.startElement)
+
+    // Else do it normally
+    else {
+      this._createMarker(this.startElement, this.startSelector)
+      this._createMarker(this.endElement, this.endSelector)
+
+      this._fragmentateAnnotation()
+    }
+
+    this._createSideAnnotation()
+
+    this.setEvents()
+
+    this._removeMarkers()
+
+    tinymce.triggerSave()
   }
 
   /**
@@ -230,8 +400,8 @@ class Annotation {
     let elements = []
 
     // Start from the next element of the starting marker and iterate until the endMarker is found
-    let next = $(this.start_marker_selector)[0].nextSibling
-    while (next != null && next != $(this.end_marker_selector)[0]) {
+    let next = tinymce.activeEditor.$(this.start_marker_selector)[0].nextSibling
+    while (next != null && next != tinymce.activeEditor.$(this.end_marker_selector)[0]) {
 
       // If the element is a node, that containt the marker at any level
       if (next.nodeType != 3 && ($(next).is('tr,th,td') || $(next).find($(this.end_marker_selector)[0]).length > 0))
@@ -277,6 +447,316 @@ class Annotation {
 
     })
   }
+
+  /**
+   * 
+   */
+  _createSideAnnotation() {
+
+    /**
+     * 
+     * @param {*} top 
+     */
+    const nearAnnotation = (top) => {
+      ANNOTATIONS.forEach(annotation => {
+        if (Math.abs(top - annotation.top) < 100)
+          return annotation
+      })
+    }
+
+    this.coordinates = this._getCoordinates()
+
+    // Get he average distance between the starting and the ending element
+    this.top = (this.coordinates.start.top + this.coordinates.end.top) / 2
+
+    let side_note
+
+    // Check if there is another annotation
+    let annotation = nearAnnotation(this.top)
+    if (typeof annotation != 'undefined') {
+
+      side_note = $(`span.side_note[data-rash-annotation-id="${annotation.semanticAnnotation.id}"]`)
+
+      side_note.attr('title', `${side_note.attr('title')},${this.semanticAnnotation.id}`)
+      side_note.text(parseInt(side_note.text(), 10) + parseInt(1, 10))
+
+      this.top = annotation.top
+    }
+
+    // Create a new annotation in this way
+    else {
+
+      side_note = $(`<span style="top:${this.top}px" title="${this.semanticAnnotation.id}" data-rash-annotation-id="${this.semanticAnnotation.id}" class="btn btn-default cgen side_note">1</span>`)
+
+      tinymce.activeEditor.$(annotation_sidebar_selector).append(side_note)
+    }
+
+    /*
+    // Remove the previous hover function
+    side_note.off('mouseenter mouseleave click')
+
+    // Add the new hover function
+    side_note.on('mouseenter mouseleave', function () {
+
+      let selector = getWrapAnnotationSelector(referencedNotes[0])
+
+      for (let i = 1; i < referencedNotes.length; i++)
+        selector += `,${getWrapAnnotationSelector(referencedNotes[i])}`
+
+      $(selector).each(function () {
+        $(this).toggleClass('selected')
+      })
+    })
+
+    side_note.on('click', function () {
+      rash.showAnnotation(referencedNotes)
+    })*/
+
+    // Create annotation body
+    let side_note_body = $(`
+      <div style="top:${this.top}px" class="cgen side_note_body" data-rash-annotation-id="${this.semanticAnnotation.id}">${this._getAnnotationBody()}</div>`)
+
+    /*
+    side_note_body.on('mouseenter mouseleave', function () {
+      $(getWrapAnnotationSelector($(this).attr('data-rash-annotation-id'))).each(function () {
+        $(this).toggleClass('selected')
+      })
+    })*/
+
+    tinymce.activeEditor.$(annotation_sidebar_selector).append(side_note_body)
+  }
+
+  /**
+   * 
+   */
+  _removeMarkers() {
+
+    tinymce.activeEditor.$(this.start_marker_selector).remove()
+    tinymce.activeEditor.$(this.end_marker_selector).remove()
+  }
+
+  /**
+   * 
+   */
+  _addReply() {
+
+    this.startElement = $(`${annotation_sidebar_selector} div[data-rash-annotation-id='${this.semanticAnnotation.target}']`)
+
+    if (!this.startElement.parent().is(annotation_sidebar_selector))
+      this.startElement.parentsUntil(annotation_sidebar_selector)
+
+    this.startElement.append(`<div data-rash-annotation-id="${this.semanticAnnotation.id}" class="side_note_body" ><hr/>${this._getAnnotationBody()}`)
+  }
+
+  /**
+   * 
+   */
+  _getCoordinates() {
+
+    let startRange = new Range()
+    let endRange = new Range()
+
+    startRange.selectNode(tinymce.activeEditor.$(this.start_marker_selector)[0])
+    endRange.selectNode(tinymce.activeEditor.$(this.end_marker_selector)[0])
+
+    return {
+      start: startRange.getBoundingClientRect(),
+      end: endRange.getBoundingClientRect()
+    }
+  }
+
+  /**
+   * 
+   */
+  static render() {
+    tinymce.activeEditor.$(semantic_annotation_selector).each(function () {
+      const newNote = new AnnotationContext(JSON.parse($(this).html())).annotation
+      ANNOTATIONS.set(newNote.getId(), newNote)
+    })
+  }
+
+  /**
+   * 
+   * @param {*} container 
+   * @param {*} offset 
+   * @param {*} path 
+   */
+  static getOffset(container, offset, path) {
+
+    /**
+     * 
+     * Analyze all the nodes contained inside @param element, keeping all the offsets
+     * 
+     * @param JQqueryObject element 
+     */
+    const _analyzeContent = element => {
+
+      for (let node of element.childNodes) {
+
+        if (found)
+          break
+
+        // If the 
+        if (node.nodeType == 1) {
+
+          // If the element is the svg formula
+          if ($(node).is('svg[data-math-original-input]'))
+            minOffset += $(node).attr('data-math-original-input').length
+
+          // Or do the normal behaviour
+          else
+            _analyzeContent(node)
+        }
+
+        // Act normally if the element is a text node
+        else {
+
+          node.nodeValue = node.nodeValue.replace(/\s+/g, ' ')
+
+          if (container.isEqualNode(node)) {
+            offset += minOffset
+            found = true
+          }
+
+          minOffset += node.length
+        }
+      }
+    }
+
+    let minOffset = 0
+    let found = false
+
+    _analyzeContent(tinymce.activeEditor.$(path)[0])
+
+    return offset
+  }
+}
+
+class AnnotationRash extends Annotation {
+  constructor(semanticAnnotation) {
+    super(semanticAnnotation)
+  }
+
+  static render() {}
+
+  _getCoordinates(start_selector, end_selector) {
+
+    let startRange = new Range()
+    let endRange = new Range()
+
+    startRange.selectNode($(start_selector)[0])
+    endRange.selectNode($(end_selector)[0])
+
+    return {
+      start: startRange.getBoundingClientRect(),
+      end: endRange.getBoundingClientRect()
+    }
+  }
+}
+
+/**
+ * 
+ */
+class Annotation1 {
+
+  /**
+   * 
+   * @param {*} semanticAnnotation 
+   */
+  constructor(semanticAnnotation) {
+
+    this.semanticAnnotation = semanticAnnotation
+
+    // Save the html elements connected to the annotation
+    this.side_note_selector = `.side_note[data-rash-annotation-id="${this.semanticAnnotation.id}"]`
+    this.side_note_body_selector = `.side_note_body[data-rash-annotation-id="${this.semanticAnnotation.id}"]`
+
+    this.note_selector = `.annotation_highlight[data-rash-annotation-id="${this.semanticAnnotation.id}"]`
+
+    this.start_marker_selector = `span[data-rash-annotation-id="${this.semanticAnnotation.id}"][data-rash-annotation-role="${start_role}"]`
+    this.end_marker_selector = `span[data-rash-annotation-id="${this.semanticAnnotation.id}"][data-rash-annotation-role="${end_role}"]`
+
+    switch (this.semanticAnnotation.Motivation) {
+
+      case commenting:
+        // Create the starting selector
+        this.startSelector = {
+          selector: semanticAnnotation.target.selector.startSelector[json_value_key],
+          offset: semanticAnnotation.target.selector.start[json_value_key],
+          role: 'start'
+        }
+
+        this.endSelector = {
+          selector: semanticAnnotation.target.selector.endSelector[json_value_key],
+          offset: semanticAnnotation.target.selector.end[json_value_key],
+          role: 'end'
+        }
+
+        this._addMarker()
+        break
+
+      case replying:
+        this._addReply()
+        break
+
+    }
+  }
+
+
+  /**
+   * 
+   */
+  _addMarker() {
+
+    // Save the elements
+    this.startElement = $(document).xpath(this.startSelector.selector)
+    this.endElement = $(document).xpath(this.endSelector.selector)
+
+    // Check if the annotation wraps entirely a html element
+    if (this.startElement.is(this.endElement) && (this.startSelector.offset == 0 && this.endElement.text().length == this.endSelector.offset))
+      this._wrapElement(this.startElement)
+
+    // Else do it normally
+    else {
+      this._createMarker(this.startElement, this.startSelector)
+      this._createMarker(this.endElement, this.endSelector)
+
+      this._fragmentateAnnotation()
+    }
+
+    this._createSideAnnotation()
+    this._removeMarkers()
+  }
+
+  /**
+   * 
+   */
+  getId() {
+    return this.semanticAnnotation.id
+  }
+
+  /**
+   * 
+   */
+  _removeMarkers() {
+
+    $(this.start_marker_selector).remove()
+    $(this.end_marker_selector).remove()
+  }
+
+  /**
+   * 
+   */
+  _addReply() {
+
+    this.startElement = $(`${annotation_sidebar_selector} div[data-rash-annotation-id='${this.semanticAnnotation.target}']`)
+
+    if (!this.startElement.parent().is(annotation_sidebar_selector))
+      this.startElement.parentsUntil(annotation_sidebar_selector)
+
+    this.startElement.append(`<div data-rash-annotation-id="${this.semanticAnnotation.id}" class="side_note_body" ><hr/>${this._getAnnotationBody()}`)
+  }
+
 
   /**
    * 
@@ -378,115 +858,6 @@ class Annotation {
   /**
    * 
    */
-  static getXPath(node) {
-
-    // The allowed starting elements
-    const not_blocked_elements = 'section, p, :header, table, tr, th, td, tbody, ol, ul, li'
-
-    // Create the neede vars
-    let xpath = '/'
-    let parents = []
-
-    if (node.is(not_blocked_elements))
-      parents.push(node)
-
-    // Add the entire collection inside the array of parent elements
-    node.parentsUntil('body').each(function () {
-      if ($(this).is(not_blocked_elements))
-        parents.push($(this))
-    })
-
-    // Reverse the array in order to have the parents in the left
-    parents.reverse()
-
-    // Create the Xpath for all elements
-    for (let element of parents)
-      xpath += `/${element[0].nodeName.toLowerCase()}[${element.prevAll(element[0].nodeName).length + 1}]`
-
-
-    return xpath
-  }
-
-  /**
-   * 
-   */
-  static getOffset(container, offset, path) {
-
-    /**
-     * 
-     * Analyze all the nodes contained inside @param element, keeping all the offsets
-     * 
-     * @param JQqueryObject element 
-     */
-    const _analyzeContent = element => {
-
-      for (let node of element.childNodes) {
-
-        if (found)
-          break
-
-        // If the 
-        if (node.nodeType == 1) {
-
-          // If the element is the svg formula
-          if ($(node).is('svg[data-math-original-input]'))
-            minOffset += $(node).attr('data-math-original-input').length
-
-          // Or do the normal behaviour
-          else
-            _analyzeContent(node)
-        }
-
-        // Act normally if the element is a text node
-        else {
-
-          node.nodeValue = node.nodeValue.replace(/\s+/g, ' ')
-
-          if (container.isEqualNode(node)) {
-            offset += minOffset
-            found = true
-          }
-
-          minOffset += node.length
-        }
-      }
-    }
-
-    let minOffset = 0
-    let found = false
-
-    _analyzeContent($(document).xpath(path)[0])
-
-    return offset
-  }
-
-  /**
-   * 
-   */
-  static getLastAnnotation() {
-
-    const annotation_prefix = 'annotation_'
-    let lastId = 0
-    let lastAnnotation = $('head').children().last()
-
-    $(semantic_annotation_selector).each(function () {
-      let currentId = parseInt($(this).attr('id').replace(annotation_prefix, ''))
-
-      if (currentId > lastId) {
-        lastId = currentId
-        lastAnnotation = $(`${semantic_annotation_selector}#${annotation_prefix + lastId}`)
-      }
-    })
-
-    return {
-      id: annotation_prefix + (lastId + 1),
-      element: lastAnnotation
-    }
-  }
-
-  /**
-   * 
-   */
   _getCoordinates() {
 
     let selector = ($(raje_iframe_selector).length > 0) ? raje_string : rash_string
@@ -494,67 +865,3 @@ class Annotation {
     return new CoordinateContext(selector).coordinateContextInterface(this.start_marker_selector, this.end_marker_selector)
   }
 }
-
-//#region Strategy design pattern for the coordinates
-
-class CoordinateContext {
-
-  constructor(type) {
-    switch (type) {
-      case raje_string:
-        this.strategy = new CoordinateStrategyRaje()
-        break
-
-      case rash_string:
-        this.strategy = new CoordinateStrategyRash()
-        break
-    }
-  }
-
-  coordinateContextInterface(start_marker, end_marker) {
-    return this.strategy.getCoordinates(start_marker, end_marker)
-  }
-}
-
-class CoordinateStrategy {
-
-  getCoordinates() {}
-}
-
-class CoordinateStrategyRaje extends CoordinateStrategy {
-
-  getCoordinates(start_selector, end_selector) {
-
-    updateIframeFromSavedContent()
-
-    let startRange = new Range()
-    let endRange = new Range()
-
-    startRange.selectNode($(raje_iframe_selector).contents().find(start_selector)[0])
-    endRange.selectNode($(raje_iframe_selector).contents().find(end_selector)[0])
-
-    return {
-      start: startRange.getBoundingClientRect(),
-      end: endRange.getBoundingClientRect()
-    }
-  }
-}
-
-class CoordinateStrategyRash extends CoordinateStrategy {
-
-  getCoordinates(start_selector, end_selector) {
-
-    let startRange = new Range()
-    let endRange = new Range()
-
-    startRange.selectNode($(start_selector)[0])
-    endRange.selectNode($(end_selector)[0])
-
-    return {
-      start: startRange.getBoundingClientRect(),
-      end: endRange.getBoundingClientRect()
-    }
-  }
-}
-
-//#endregion

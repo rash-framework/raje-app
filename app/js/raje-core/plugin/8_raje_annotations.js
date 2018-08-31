@@ -5,33 +5,14 @@ const annotationWrapper = 'span[data-rash-annotation-type]'
 
 tinymce.PluginManager.add('raje_annotations', function (editor) {
 
+
   editor.on('click', e => {
 
     let clickedElement = $(e.srcElement)
 
     if (clickedElement.parents(SIDEBAR_ANNOTATION).length) {
 
-      // Toggle annotation button
-      if (clickedElement.is('span#toggleAnnotations') || clickedElement.parent().is('span#toggleAnnotations')) {
-        rash.toggleAnnotations()
-        //updateIframeFromSavedContent()
-      }
-
-      // Toggle sidebar button
-      else if (clickedElement.is('span#toggleSidebar') || clickedElement.parent().is('span#toggleSidebar')) {
-        rash.toggleSidebar()
-        //updateIframeFromSavedContent()
-      }
-
-      // Show annotation 
-      else if (clickedElement.is('span[data-rash-annotation-id]')) {
-
-        rash.displayLastReplayArea(clickedElement.attr('data-rash-annotation-id'))
-        rash.showAnnotation(clickedElement.attr('title').split(','))
-        //updateIframeFromSavedContent()
-      }
-
-      else if (clickedElement.is(`.side_note_reply_button`)) {
+      if (clickedElement.is(`.side_note_reply_button`)) {
 
         const parents = clickedElement.parents('[data-rash-annotation-id]')
 
@@ -63,52 +44,32 @@ tinymce.PluginManager.add('raje_annotations', function (editor) {
       handleAnnotation(e)
   })
 
-  editor.on('MouseOver', e => {
-
-    deselectAnnotationHighlight = () => {
-      $('.annotation_highlight.selected').removeClass('selected')
-      //updateIframeFromSavedContent()
-    }
-
-    let hoveredElement = $(e.srcElement)
-
-    if (hoveredElement.parents(SIDEBAR_ANNOTATION).length) {
-
-      // Add the class selected to the right annotation
-      if (hoveredElement.is('.side_note')) {
-
-        $(ANNOTATIONS.get(hoveredElement.attr('data-rash-annotation-id')).note_selector).addClass('selected')
-        updateIframeFromSavedContent()
-      }
-
-      // Remove the annotation highlight 
-      else if ($('.annotation_highlight.selected').length > 0)
-        deselectAnnotationHighlight()
-    }
-
-    // Remove the annotation highlight 
-    else if ($('.annotation_highlight.selected').length > 0)
-      deselectAnnotationHighlight()
-  })
-
   editor.on('init', () => {
 
-    editor.$('#toggleAnnotations').on('click', function () {
+    editor.$(toggle_annotation_selector).on('click', function () {
       alert('clicked')
     })
-  })
 
+    editor.$(toggle_sidebar_selector).on('click', function () {
+      AnnotationContext.toggleAnnotationToolbar()
+    })
+  })
 
   editor.on('ExecCommand', function (e) {
 
     if (e.command == 'Undo' || e.command == 'Redo') {
-      editor.$('#toggleAnnotations').on('click', function () {
+      editor.$(toggle_annotation_selector).on('click', function () {
         alert('clicked')
       })
+
+      editor.$(toggle_sidebar_selector).on('click', function () {
+        AnnotationContext.toggleAnnotationToolbar()
+      })
+
+      ANNOTATIONS.forEach(annotation => annotation.setEvents())
     }
   })
 })
-
 
 /**
  * 
@@ -128,13 +89,17 @@ createAnnotationCommenting = text => {
 
   const selection = tinymce.activeEditor.selection
   const range = selection.getRng()
-  const lastAnnotation = Annotation.getLastAnnotation()
 
-  const startXPath = Annotation.getXPath($(selection.getStart()))
-  const startOffset = Annotation.getOffset(range.startContainer, range.startOffset, startXPath)
+  const rangeStartOffset = range.startOffset
+  const rangeEndOffset = range.endOffset
 
-  const endXPath = Annotation.getXPath($(selection.getEnd()))
-  const endOffset = Annotation.getOffset(range.endContainer, range.endOffset, endXPath)
+  const lastAnnotation = AnnotationContext.getLastAnnotation()
+
+  const startCssSelector = AnnotationContext.getCssSelector($(selection.getStart()))
+  const startOffset = AnnotationContext.getOffset(range.startContainer, rangeStartOffset, startCssSelector)
+
+  const endCssSelector = AnnotationContext.getCssSelector($(selection.getEnd()))
+  const endOffset = AnnotationContext.getOffset(range.endContainer, rangeEndOffset, endCssSelector)
 
   const data = {
     "id": lastAnnotation.id,
@@ -146,12 +111,12 @@ createAnnotationCommenting = text => {
     "target": {
       "selector": {
         "startSelector": {
-          "@type": "XPathSelector",
-          "@value": startXPath
+          "@type": "CssSelector",
+          "@value": startCssSelector
         },
         "endSelector": {
-          "@type": "XPathSelector",
-          "@value": endXPath
+          "@type": "CssSelector",
+          "@value": endCssSelector
         },
         "start": {
           "@type": "DataPositionSelector",
@@ -167,10 +132,9 @@ createAnnotationCommenting = text => {
 
   tinymce.activeEditor.undoManager.transact(function () {
 
-    $('#raje_root').append(`<script id="${data.id}" type="application/ld+json">${JSON.stringify(data, null, 2) }</script>`)
-    rash.clearAnnotations()
-    rash.renderAnnotations()
-    //updateIframeFromSavedContent()
+    tinymce.activeEditor.$('body').append(`<script id="${data.id}" type="application/ld+json">${JSON.stringify(data, null, 2) }</script>`)
+    AnnotationContext.clearAnnotations()
+    AnnotationContext.render()
   })
 }
 

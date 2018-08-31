@@ -31,6 +31,18 @@ jQuery.fn.extend({
   countElements: function (css_selector) {
     return $(this).find(css_selector).length
   },
+  findNumberRaje: function (css_selector) {
+    var cur_count = 0
+    var cur_el = $(this)
+    var found = false
+    tinymce.activeEditor.$(css_selector).each(function () {
+      if (!found) {
+        cur_count++
+        found = cur_el[0] === $(this)[0]
+      }
+    })
+    return cur_count
+  },
   findNumber: function (css_selector) {
     var cur_count = 0
     var cur_el = $(this)
@@ -745,27 +757,20 @@ const rash = {
   /* Render semantic annotations */
 
   renderAnnotations: () => {
-
-    $(semantic_annotation_selector).each(function () {
-
-      const newNote = new Annotation(JSON.parse($(this).html()))
-      ANNOTATIONS.set(newNote.getId(), newNote)
-    })
+    AnnotationContext.render()
   },
 
   /* Render a single annotation */
 
   renderSingleAnnotation: semanticBody => {
 
-    const newNote = new Annotation(semanticBody)
+    const newNote = new AnnotationContext(semanticBody).annotation
     ANNOTATIONS.set(newNote.getId(), newNote)
   },
 
   /* /END Render a single annotation */
 
   displayLastReplayArea: noteId => {
-
-    const side_note_reply = '.side_note_reply'
 
     // Get the side note and the list of replying children
     let side_note_body = $(ANNOTATIONS.get(noteId).side_note_body_selector)
@@ -778,26 +783,17 @@ const rash = {
     const replayingChildren = side_note_body.find('[data-rash-annotation-id]')
 
     // Remove all classes active
-    side_note_body.find(side_note_reply).removeClass('active')
+    side_note_body.find(side_note_reply_selector).removeClass('active')
     replayingChildren.each(function () {
-      $(this).find(side_note_reply).removeClass('active')
+      $(this).find(side_note_reply_selector).removeClass('active')
     })
 
     // Set as active the last note of the list 
     if (replayingChildren.length > 0)
-      replayingChildren.last().find(side_note_reply).addClass('active')
+      replayingChildren.last().find(side_note_reply_selector).addClass('active')
 
     else
-      side_note_body.find(side_note_reply).addClass('active')
-  },
-
-  clearAnnotations: () => {
-
-    ANNOTATIONS.forEach(annotation => {
-      annotation.remove()
-    })
-
-    ANNOTATIONS.clear()
+      side_note_body.find(side_note_reply_selector).addClass('active')
   },
 
   /* /END Render semantic annotations */
@@ -823,6 +819,8 @@ const rash = {
     })
   },
 
+  /* /END Toggle annotations */
+
   toggleSidebar: () => {
 
     $(annotation_sidebar_selector).toggleClass('active')
@@ -832,7 +830,7 @@ const rash = {
       let side_note_body = $(annotation.side_note_body_selector)
 
       side_note_body.removeClass('active')
-      side_note_body.find('.side_note_reply').removeClass('active')
+      side_note_body.find(side_note_reply_selector).removeClass('active')
     })
   },
 
@@ -851,8 +849,6 @@ const rash = {
       $(this).toggleClass('active')
     })
   }
-
-  /* /END Toggle annotations */
 }
 
 $(() => rash.run())

@@ -34,6 +34,14 @@ const REDO_CMD = 'Redo'
 
 //#endregion
 
+//#region Annotations
+
+const side_note_reply_selector = '.side_note_reply'
+const toggle_annotation_selector = '#toggleAnnotations'
+const toggle_sidebar_selector = '#toggleSidebar'
+
+//#endregion
+
 const NON_EDITABLE_HEADER_SELECTOR = 'header.page-header.container.cgen'
 const BIBLIOENTRY_SUFFIX = 'biblioentry_'
 const ENDNOTE_SUFFIX = 'endnote_'
