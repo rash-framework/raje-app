@@ -8,8 +8,14 @@ const rash_string = 'rash'
 
 const active_class = 'active'
 const selected_class = 'selected'
+const annotation_highlight_class = 'annotation_highlight'
+const hidden_class = 'hidden'
 
 const side_note_reply_selector = '.side_note_reply'
+const side_note_reply_button_selector = '.side_note_reply_button'
+
+const data_rash_original_content = 'data-rash-original-content'
+const data_rash_original_parent_content = 'data-rash-original-parent-content'
 
 class AnnotationContext {
 
@@ -45,6 +51,10 @@ class AnnotationContext {
     }
   }
 
+  static renderSingle(id, body) {
+    Annotation.renderSingle(id, body)
+  }
+
   static getOffset(container, offset, path) {
     const type = (tinymce.activeEditor) ? raje_string : rash_string
 
@@ -62,20 +72,52 @@ class AnnotationContext {
     return Annotation.getCssSelector(node)
   }
 
-  static getLastAnnotation() {
-    return Annotation.getLastAnnotation()
+  static getNextAnnotationId() {
+    return Annotation.getNextAnnotationId()
   }
 
+  // TODO change rash/raje
   static showAnnotationFromAttribute(titleAttribute) {
 
     AnnotationContext.toggleAnnotationToolbar()
 
     titleAttribute = titleAttribute.split(',')
 
-    for (let id of titleAttribute)
-      tinymce.activeEditor.$(ANNOTATIONS.get(id).side_note_body_selector).toggleClass(active_class)
+    /*
+      // Get the side note and the list of replying children
+      let side_note_body = $(ANNOTATIONS.get(noteId).side_note_body_selector)
+
+      // Get the root annotation 
+      if (!side_note_body.parent().is(annotation_sidebar_selector))
+        side_note_body = side_note_body.parentsUntil(annotation_sidebar_selector)
+
+      // Get the list of replying annotations
+      const replayingChildren = side_note_body.find('[data-rash-annotation-id]')
+
+      // Remove all classes active
+      side_note_body.find(side_note_reply_selector).removeClass('active')
+      replayingChildren.each(function () {
+        $(this).find(side_note_reply_selector).removeClass('active')
+      })
+
+      // Set as active the last note of the list 
+      if (replayingChildren.length > 0)
+        replayingChildren.last().find(side_note_reply_selector).addClass('active')
+
+      else
+        side_note_body.find(side_note_reply_selector).addClass('active')
+      */
+
+    for (let id of titleAttribute) {
+
+      const sideNoteBodyElement = tinymce.activeEditor.$(ANNOTATIONS.get(id).side_note_body_selector).first()
+
+      sideNoteBodyElement.toggleClass(active_class)
+      sideNoteBodyElement.find(side_note_reply_selector).last().addClass(active_class)
+    }
   }
 
+  // TODO change rash/raje
   static highlightAnnotationFromAttribute(titleAttribute) {
 
     titleAttribute = titleAttribute.split(',')
@@ -84,6 +126,7 @@ class AnnotationContext {
       tinymce.activeEditor.$(ANNOTATIONS.get(id).note_selector).toggleClass(selected_class)
   }
 
+  // TODO change rash/raje
   static toggleAnnotationToolbar() {
 
     tinymce.activeEditor.$(annotation_sidebar_selector).toggleClass(active_class)
@@ -92,6 +135,14 @@ class AnnotationContext {
       tinymce.activeEditor.$(annotation.side_note_body_selector).removeClass(active_class)
       tinymce.activeEditor.$(annotation.side_note_body_selector).find(side_note_reply_selector).removeClass(active_class)
     })
+  }
+
+  // TODO change rash/raje
+  static toggleAnnotation() {
+
+    tinymce.activeEditor.$(annotation_sidebar_selector).removeClass(active_class)
+
+    ANNOTATIONS.forEach(annotation => annotation.hide())
   }
 
   static clearAnnotations() {
@@ -108,12 +159,14 @@ class Annotation {
   constructor(semanticAnnotation) {
 
     this.semanticAnnotation = semanticAnnotation
+    this.role = semanticAnnotation.Motivation
+    this.id = semanticAnnotation.id
 
     // Save the html elements connected to the annotation
     this.side_note_selector = `.side_note[data-rash-annotation-id="${this.semanticAnnotation.id}"]`
     this.side_note_body_selector = `.side_note_body[data-rash-annotation-id="${this.semanticAnnotation.id}"]`
 
-    this.note_selector = `.annotation_highlight[data-rash-annotation-id="${this.semanticAnnotation.id}"]`
+    this.note_selector = `[data-rash-annotation-id="${this.semanticAnnotation.id}"][data-rash-annotation-type="wrap"]`
 
     this.start_marker_selector = `span[data-rash-annotation-id="${this.semanticAnnotation.id}"][data-rash-annotation-role="${start_role}"]`
     this.end_marker_selector = `span[data-rash-annotation-id="${this.semanticAnnotation.id}"][data-rash-annotation-role="${end_role}"]`
@@ -178,27 +231,50 @@ class Annotation {
   /**
    * 
    */
-  static getLastAnnotation() {
+  getParentAnnotation() {
 
-    const annotation_prefix = 'annotation_'
-    let lastId = 0
-    let lastAnnotation = $('head').children().last()
+    if (this.role == replying)
+      return ANNOTATIONS.get(this.semanticAnnotation.target)
 
-    $(semantic_annotation_selector).each(function () {
-      let currentId = parseInt($(this).attr('id').replace(annotation_prefix, ''))
-
-      if (currentId > lastId) {
-        lastId = currentId
-        lastAnnotation = $(`${semantic_annotation_selector}#${annotation_prefix + lastId}`)
-      }
-    })
-
-    return {
-      id: annotation_prefix + (lastId + 1),
-      element: lastAnnotation
-    }
+    else
+      return this
   }
 
+  /**
+   * 
+   */
+  getRootAnnotation() {
+
+    let annotation = this
+
+    while (annotation.role == replying)
+      annotation = ANNOTATIONS.get(this.semanticAnnotation.target)
+
+    return annotation
+  }
+
+  /**
+   * 
+   */
+  static getNextAnnotationId() {
+
+    const suffix = 'annotation_'
+    let id = 0
+
+    ANNOTATIONS.forEach(annotation => {
+      const annotationId = annotation.id.replace(suffix, '')
+      id = id > annotationId ? id : annotationId
+    })
+
+    id++
+
+    return `${suffix}${id}`
+  }
+
+  /**
+   * 
+   * @param {*} node 
+   */
   static getCssSelector(node) {
 
     const ending = 'body'
@@ -239,6 +315,14 @@ class Annotation {
     return cssSelector
   }
 
+  /**
+   * 
+   * @param {*} id 
+   * @param {*} body 
+   */
+  static renderSingle(id, body) {
+    ANNOTATIONS.set(id, new AnnotationContext(body).annotation)
+  }
 }
 
 class AnnotationRaje extends Annotation {
@@ -250,8 +334,10 @@ class AnnotationRaje extends Annotation {
   constructor(semanticAnnotation) {
     super(semanticAnnotation)
   }
-
-  setEvents(){
+  /**
+   * 
+   */
+  setEvents() {
     this._setClickEvents()
     this._setHoverEvents()
   }
@@ -263,12 +349,33 @@ class AnnotationRaje extends Annotation {
 
     const instance = this
 
-    if (tinymce.activeEditor.$(this.side_note_selector).length)
-      tinymce.activeEditor.$(this.side_note_selector).on('click', function () {
+    const sideNoteElement = tinymce.activeEditor.$(this.side_note_selector)
+    if (sideNoteElement.length) {
+
+      sideNoteElement.off('click')
+      sideNoteElement.on('click', function () {
         AnnotationContext.showAnnotationFromAttribute(tinymce.activeEditor.$(instance.side_note_selector).attr('title'))
       })
+    }
+
+    const replyElement = tinymce.activeEditor.$(this.side_note_body_selector).find(side_note_reply_selector)
+
+    if (replyElement.length) {
+
+      replyElement.find(side_note_reply_button_selector).off('click')
+      replyElement.find(side_note_reply_button_selector).on('click', function () {
+
+        const replayingText = replyElement.find('textarea')[0].value
+        const parentAnnotationId = instance.getParentAnnotation().id
+
+        createAnnotationReplying(replayingText, parentAnnotationId)
+      })
+    }
   }
 
+  /**
+   * 
+   */
   _setHoverEvents() {
 
     const instance = this
@@ -540,12 +647,20 @@ class AnnotationRaje extends Annotation {
    */
   _addReply() {
 
-    this.startElement = $(`${annotation_sidebar_selector} div[data-rash-annotation-id='${this.semanticAnnotation.target}']`)
+    // Append the new annotation to its parent
+    const parentSideNoteBody = tinymce.activeEditor.$(this.getParentAnnotation().side_note_body_selector).first()
 
-    if (!this.startElement.parent().is(annotation_sidebar_selector))
-      this.startElement.parentsUntil(annotation_sidebar_selector)
+    const replyNoteElement = `<div data-rash-annotation-id="${this.semanticAnnotation.id}" class="side_note_body" ><hr/>${this._getAnnotationBody()}`
+    parentSideNoteBody.find('.side_note_wrapper').append(replyNoteElement)
 
-    this.startElement.append(`<div data-rash-annotation-id="${this.semanticAnnotation.id}" class="side_note_body" ><hr/>${this._getAnnotationBody()}`)
+    // Remove the reply element from the parent
+    parentSideNoteBody.find(side_note_reply_selector).removeClass(active_class)
+
+    // Show the reply element to the new note
+    tinymce.activeEditor.$(this.side_note_body_selector).find(side_note_reply_selector).last().addClass(active_class)
+
+    // Update click events
+    this._setClickEvents()
   }
 
   /**
@@ -563,6 +678,37 @@ class AnnotationRaje extends Annotation {
       start: startRange.getBoundingClientRect(),
       end: endRange.getBoundingClientRect()
     }
+  }
+
+  /**
+   * 
+   */
+  remove() {
+
+    // Remove side note elements
+    tinymce.activeEditor.$(this.side_note_selector).remove()
+    tinymce.activeEditor.$(this.side_note_body_selector).remove()
+
+    // Replace notes with content or parent content
+    tinymce.activeEditor.$(this.note_selector).each(function () {
+
+      if ($(this).attr(data_rash_original_content))
+        $(this).replaceWith($(this).attr(data_rash_original_content))
+
+      else if ($(this).attr(data_rash_original_parent_content))
+        $(this).parent().replaceWith($(this).attr(data_rash_original_parent_content))
+    })
+  }
+
+  /**
+   * 
+   */
+  hide() {
+
+    tinymce.activeEditor.$(this.side_note_body_selector).removeClass(active_class)
+
+    tinymce.activeEditor.$(this.side_note_selector).toggleClass(hidden_class)
+    tinymce.activeEditor.$(this.note_selector).toggleClass(annotation_highlight_class)
   }
 
   /**
@@ -654,214 +800,174 @@ class AnnotationRash extends Annotation {
   }
 }
 
-/**
- * 
- */
-class Annotation1 {
-
-  /**
-   * 
-   * @param {*} semanticAnnotation 
-   */
-  constructor(semanticAnnotation) {
-
-    this.semanticAnnotation = semanticAnnotation
-
-    // Save the html elements connected to the annotation
-    this.side_note_selector = `.side_note[data-rash-annotation-id="${this.semanticAnnotation.id}"]`
-    this.side_note_body_selector = `.side_note_body[data-rash-annotation-id="${this.semanticAnnotation.id}"]`
-
-    this.note_selector = `.annotation_highlight[data-rash-annotation-id="${this.semanticAnnotation.id}"]`
-
-    this.start_marker_selector = `span[data-rash-annotation-id="${this.semanticAnnotation.id}"][data-rash-annotation-role="${start_role}"]`
-    this.end_marker_selector = `span[data-rash-annotation-id="${this.semanticAnnotation.id}"][data-rash-annotation-role="${end_role}"]`
-
-    switch (this.semanticAnnotation.Motivation) {
-
-      case commenting:
-        // Create the starting selector
-        this.startSelector = {
-          selector: semanticAnnotation.target.selector.startSelector[json_value_key],
-          offset: semanticAnnotation.target.selector.start[json_value_key],
-          role: 'start'
-        }
-
-        this.endSelector = {
-          selector: semanticAnnotation.target.selector.endSelector[json_value_key],
-          offset: semanticAnnotation.target.selector.end[json_value_key],
-          role: 'end'
-        }
-
-        this._addMarker()
-        break
-
-      case replying:
-        this._addReply()
-        break
-
-    }
-  }
+//#region old annotation
+/*
+  class Annotation1 {
 
 
-  /**
-   * 
-   */
-  _addMarker() {
+    constructor(semanticAnnotation) {
 
-    // Save the elements
-    this.startElement = $(document).xpath(this.startSelector.selector)
-    this.endElement = $(document).xpath(this.endSelector.selector)
+      this.semanticAnnotation = semanticAnnotation
 
-    // Check if the annotation wraps entirely a html element
-    if (this.startElement.is(this.endElement) && (this.startSelector.offset == 0 && this.endElement.text().length == this.endSelector.offset))
-      this._wrapElement(this.startElement)
+      // Save the html elements connected to the annotation
+      this.side_note_selector = `.side_note[data-rash-annotation-id="${this.semanticAnnotation.id}"]`
+      this.side_note_body_selector = `.side_note_body[data-rash-annotation-id="${this.semanticAnnotation.id}"]`
 
-    // Else do it normally
-    else {
-      this._createMarker(this.startElement, this.startSelector)
-      this._createMarker(this.endElement, this.endSelector)
+      this.note_selector = `.annotation_highlight[data-rash-annotation-id="${this.semanticAnnotation.id}"]`
 
-      this._fragmentateAnnotation()
+      this.start_marker_selector = `span[data-rash-annotation-id="${this.semanticAnnotation.id}"][data-rash-annotation-role="${start_role}"]`
+      this.end_marker_selector = `span[data-rash-annotation-id="${this.semanticAnnotation.id}"][data-rash-annotation-role="${end_role}"]`
+
+      switch (this.semanticAnnotation.Motivation) {
+
+        case commenting:
+          // Create the starting selector
+          this.startSelector = {
+            selector: semanticAnnotation.target.selector.startSelector[json_value_key],
+            offset: semanticAnnotation.target.selector.start[json_value_key],
+            role: 'start'
+          }
+
+          this.endSelector = {
+            selector: semanticAnnotation.target.selector.endSelector[json_value_key],
+            offset: semanticAnnotation.target.selector.end[json_value_key],
+            role: 'end'
+          }
+
+          this._addMarker()
+          break
+
+        case replying:
+          this._addReply()
+          break
+
+      }
     }
 
-    this._createSideAnnotation()
-    this._removeMarkers()
-  }
+    _addMarker() {
 
-  /**
-   * 
-   */
-  getId() {
-    return this.semanticAnnotation.id
-  }
+      // Save the elements
+      this.startElement = $(document).xpath(this.startSelector.selector)
+      this.endElement = $(document).xpath(this.endSelector.selector)
 
-  /**
-   * 
-   */
-  _removeMarkers() {
+      // Check if the annotation wraps entirely a html element
+      if (this.startElement.is(this.endElement) && (this.startSelector.offset == 0 && this.endElement.text().length == this.endSelector.offset))
+        this._wrapElement(this.startElement)
 
-    $(this.start_marker_selector).remove()
-    $(this.end_marker_selector).remove()
-  }
+      // Else do it normally
+      else {
+        this._createMarker(this.startElement, this.startSelector)
+        this._createMarker(this.endElement, this.endSelector)
 
-  /**
-   * 
-   */
-  _addReply() {
+        this._fragmentateAnnotation()
+      }
 
-    this.startElement = $(`${annotation_sidebar_selector} div[data-rash-annotation-id='${this.semanticAnnotation.target}']`)
+      this._createSideAnnotation()
+      this._removeMarkers()
+    }
 
-    if (!this.startElement.parent().is(annotation_sidebar_selector))
-      this.startElement.parentsUntil(annotation_sidebar_selector)
+  
+    getId() {
+      return this.semanticAnnotation.id
+    }
 
-    this.startElement.append(`<div data-rash-annotation-id="${this.semanticAnnotation.id}" class="side_note_body" ><hr/>${this._getAnnotationBody()}`)
-  }
+  
+    _removeMarkers() {
+
+      $(this.start_marker_selector).remove()
+      $(this.end_marker_selector).remove()
+    }
+
+    _addReply() {
+
+      this.startElement = $(`${annotation_sidebar_selector} div[data-rash-annotation-id='${this.semanticAnnotation.target}']`)
+
+      if (!this.startElement.parent().is(annotation_sidebar_selector))
+        this.startElement.parentsUntil(annotation_sidebar_selector)
+
+      this.startElement.append(`<div data-rash-annotation-id="${this.semanticAnnotation.id}" class="side_note_body" ><hr/>${this._getAnnotationBody()}`)
+    }
 
 
-  /**
-   * 
-   */
-  _createSideAnnotation() {
+    _createSideAnnotation() {
 
-    /**
-     * 
-     * @param {*} top 
-     */
-    const nearAnnotation = (top) => {
-      ANNOTATIONS.forEach(annotation => {
-        if (Math.abs(top - annotation.top) < 100)
-          return annotation
+
+      const nearAnnotation = (top) => {
+        ANNOTATIONS.forEach(annotation => {
+          if (Math.abs(top - annotation.top) < 100)
+            return annotation
+        })
+      }
+
+      this.coordinates = this._getCoordinates()
+
+      // Get he average distance between the starting and the ending element
+      this.top = (this.coordinates.start.top + this.coordinates.end.top) / 2
+
+      let side_note
+
+      // Check if there is another annotation
+      let annotation = nearAnnotation(this.top)
+      if (typeof annotation != 'undefined') {
+
+        side_note = $(`span.side_note[data-rash-annotation-id="${annotation.semanticAnnotation.id}"]`)
+
+        side_note.attr('title', `${side_note.attr('title')},${this.semanticAnnotation.id}`)
+        side_note.text(parseInt(side_note.text(), 10) + parseInt(1, 10))
+
+        this.top = annotation.top
+      }
+
+      // Create a new annotation in this way
+      else {
+
+        side_note = $(`<span style="top:${this.top}px" title="${this.semanticAnnotation.id}" data-rash-annotation-id="${this.semanticAnnotation.id}" class="btn btn-default cgen side_note">1</span>`)
+
+        $(annotation_sidebar_selector).append(side_note)
+      }
+
+      const referencedNotes = side_note.attr('title').split(',')
+
+      // Remove the previous hover function
+      side_note.unbind('mouseenter mouseleave click')
+
+      // Add the new hover function
+      side_note.on('mouseenter mouseleave', function () {
+
+        let selector = getWrapAnnotationSelector(referencedNotes[0])
+
+        for (let i = 1; i < referencedNotes.length; i++)
+          selector += `,${getWrapAnnotationSelector(referencedNotes[i])}`
+
+        $(selector).each(function () {
+          $(this).toggleClass('selected')
+        })
       })
-    }
 
-    this.coordinates = this._getCoordinates()
-
-    // Get he average distance between the starting and the ending element
-    this.top = (this.coordinates.start.top + this.coordinates.end.top) / 2
-
-    let side_note
-
-    // Check if there is another annotation
-    let annotation = nearAnnotation(this.top)
-    if (typeof annotation != 'undefined') {
-
-      side_note = $(`span.side_note[data-rash-annotation-id="${annotation.semanticAnnotation.id}"]`)
-
-      side_note.attr('title', `${side_note.attr('title')},${this.semanticAnnotation.id}`)
-      side_note.text(parseInt(side_note.text(), 10) + parseInt(1, 10))
-
-      this.top = annotation.top
-    }
-
-    // Create a new annotation in this way
-    else {
-
-      side_note = $(`<span style="top:${this.top}px" title="${this.semanticAnnotation.id}" data-rash-annotation-id="${this.semanticAnnotation.id}" class="btn btn-default cgen side_note">1</span>`)
-
-      $(annotation_sidebar_selector).append(side_note)
-    }
-
-    const referencedNotes = side_note.attr('title').split(',')
-
-    // Remove the previous hover function
-    side_note.unbind('mouseenter mouseleave click')
-
-    // Add the new hover function
-    side_note.on('mouseenter mouseleave', function () {
-
-      let selector = getWrapAnnotationSelector(referencedNotes[0])
-
-      for (let i = 1; i < referencedNotes.length; i++)
-        selector += `,${getWrapAnnotationSelector(referencedNotes[i])}`
-
-      $(selector).each(function () {
-        $(this).toggleClass('selected')
+      side_note.on('click', function () {
+        rash.showAnnotation(referencedNotes)
       })
-    })
 
-    side_note.on('click', function () {
-      rash.showAnnotation(referencedNotes)
-    })
+      // Create annotation body
+      let side_note_body = $(`
+        <div style="top:${this.top}px" class="cgen side_note_body" data-rash-annotation-id="${this.semanticAnnotation.id}">${this._getAnnotationBody()}</div>`)
 
-    // Create annotation body
-    let side_note_body = $(`
-      <div style="top:${this.top}px" class="cgen side_note_body" data-rash-annotation-id="${this.semanticAnnotation.id}">${this._getAnnotationBody()}</div>`)
-
-    side_note_body.on('mouseenter mouseleave', function () {
-      $(getWrapAnnotationSelector($(this).attr('data-rash-annotation-id'))).each(function () {
-        $(this).toggleClass('selected')
+      side_note_body.on('mouseenter mouseleave', function () {
+        $(getWrapAnnotationSelector($(this).attr('data-rash-annotation-id'))).each(function () {
+          $(this).toggleClass('selected')
+        })
       })
-    })
 
-    $(annotation_sidebar_selector).append(side_note_body)
+      $(annotation_sidebar_selector).append(side_note_body)
+    }
+
+
+    _getCoordinates() {
+
+      let selector = ($(raje_iframe_selector).length > 0) ? raje_string : rash_string
+
+      return new CoordinateContext(selector).coordinateContextInterface(this.start_marker_selector, this.end_marker_selector)
+    }
   }
-
-  /**
-   * 
-   */
-  remove() {
-    let id = this.getId()
-
-    $(`span[data-rash-annotation-id="${id}"][data-rash-original-content]`).each(function () {
-      $(this).replaceWith($(this).attr('data-rash-original-content'))
-    })
-
-    $(`span[data-rash-annotation-id="${id}"][data-rash-original-parent-content]`).each(function () {
-      $(this).parent().replaceWith($(this).attr('data-rash-original-parent-content'))
-    })
-
-    $(`*[data-rash-annotation-id="${id}"]`).each(function () {
-      $(this).remove()
-    })
-  }
-
-  /**
-   * 
-   */
-  _getCoordinates() {
-
-    let selector = ($(raje_iframe_selector).length > 0) ? raje_string : rash_string
-
-    return new CoordinateContext(selector).coordinateContextInterface(this.start_marker_selector, this.end_marker_selector)
-  }
-}
+  */
+//#endregion

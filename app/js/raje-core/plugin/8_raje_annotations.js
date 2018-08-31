@@ -10,26 +10,6 @@ tinymce.PluginManager.add('raje_annotations', function (editor) {
 
     let clickedElement = $(e.srcElement)
 
-    if (clickedElement.parents(SIDEBAR_ANNOTATION).length) {
-
-      if (clickedElement.is(`.side_note_reply_button`)) {
-
-        const parents = clickedElement.parents('[data-rash-annotation-id]')
-
-        const ancestor_note_body = parents.last()
-        const parent_note_body = parents.first()
-        const parent_note_id = parent_note_body.attr('data-rash-annotation-id')
-
-        const replayingText = parent_note_body.find('textarea').val()
-
-        // Check if the text is ok
-        if (replayingText.trim().length > 0) {
-          createAnnotationReplying(replayingText, parent_note_id)
-          //updateIframeFromSavedContent()
-        }
-      }
-    }
-
     // Close annotatorFormPopup if the user click somewhere else
     if ($(annotatorFormPopupSelector).is(':visible') && (!clickedElement.is(annotatorFormPopupSelector) || !clickedElement.parents(annotatorFormPopupSelector).length))
       hideAnnotationFormPopup()
@@ -47,7 +27,7 @@ tinymce.PluginManager.add('raje_annotations', function (editor) {
   editor.on('init', () => {
 
     editor.$(toggle_annotation_selector).on('click', function () {
-      alert('clicked')
+      AnnotationContext.toggleAnnotation()
     })
 
     editor.$(toggle_sidebar_selector).on('click', function () {
@@ -57,9 +37,10 @@ tinymce.PluginManager.add('raje_annotations', function (editor) {
 
   editor.on('ExecCommand', function (e) {
 
-    if (e.command == 'Undo' || e.command == 'Redo') {
+    if (e.command == UNDO_CMD || e.command == REDO_CMD) {
+
       editor.$(toggle_annotation_selector).on('click', function () {
-        alert('clicked')
+        AnnotationContext.toggleAnnotation()
       })
 
       editor.$(toggle_sidebar_selector).on('click', function () {
@@ -93,7 +74,7 @@ createAnnotationCommenting = text => {
   const rangeStartOffset = range.startOffset
   const rangeEndOffset = range.endOffset
 
-  const lastAnnotation = AnnotationContext.getLastAnnotation()
+  const nextId = AnnotationContext.getNextAnnotationId()
 
   const startCssSelector = AnnotationContext.getCssSelector($(selection.getStart()))
   const startOffset = AnnotationContext.getOffset(range.startContainer, rangeStartOffset, startCssSelector)
@@ -102,7 +83,7 @@ createAnnotationCommenting = text => {
   const endOffset = AnnotationContext.getOffset(range.endContainer, rangeEndOffset, endCssSelector)
 
   const data = {
-    "id": lastAnnotation.id,
+    "id": nextId,
     "@contenxt": "http://www.w3.org/ns/anno.jsonld",
     "created": Date.now() + (-(new Date().getTimezoneOffset() * 60000)),
     "bodyValue": text,
@@ -132,7 +113,7 @@ createAnnotationCommenting = text => {
 
   tinymce.activeEditor.undoManager.transact(function () {
 
-    tinymce.activeEditor.$('body').append(`<script id="${data.id}" type="application/ld+json">${JSON.stringify(data, null, 2) }</script>`)
+    tinymce.activeEditor.$('body').append(`<script id="${nextId}" type="application/ld+json">${JSON.stringify(data, null, 2) }</script>`)
     AnnotationContext.clearAnnotations()
     AnnotationContext.render()
   })
@@ -144,12 +125,12 @@ createAnnotationCommenting = text => {
 createAnnotationReplying = (text, targetId) => {
 
   const creator = ipcRenderer.sendSync('getSettings').username
-  const lastAnnotation = Annotation.getLastAnnotation()
+  const nextId = AnnotationContext.getNextAnnotationId()
 
   const data = {
-    "id": lastAnnotation.id,
+    "id": nextId,
     "@contenxt": "http://www.w3.org/ns/anno.jsonld",
-    "created": Date.now(),
+    "created": Date.now() + (-(new Date().getTimezoneOffset() * 60000)),
     "bodyValue": text,
     "creator": creator,
     "Motivation": replying,
@@ -159,10 +140,8 @@ createAnnotationReplying = (text, targetId) => {
   // Add the new annotation without clearing everything
   tinymce.activeEditor.undoManager.transact(function () {
 
-    $('#raje_root').append(`<script id="${data.id}" type="application/ld+json">${JSON.stringify(data, null, 2) }</script>`)
-    rash.renderSingleAnnotation(data)
-    rash.displayLastReplayArea(data.target)
-    //updateIframeFromSavedContent()
+    tinymce.activeEditor.$('body').append(`<script id="${nextId}" type="application/ld+json">${JSON.stringify(data, null, 2) }</script>`)
+    AnnotationContext.renderSingle(nextId, data)
   })
 }
 
