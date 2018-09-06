@@ -3,6 +3,8 @@ const annotatorPopupSelector = '#annotatorPopup'
 const annotatorFormPopupSelector = '#annotatorFormPopup'
 const annotationWrapper = 'span[data-rash-annotation-type]'
 
+const commenting = 'commenting'
+
 tinymce.PluginManager.add('raje_annotations', function (editor) {
 
 
@@ -26,6 +28,13 @@ tinymce.PluginManager.add('raje_annotations', function (editor) {
 
   editor.on('init', () => {
 
+    // This is needed because tinymce changes "application" in "mce-application"
+    editor.$('script[type="mce-application/ld+json"]').each(function () {
+      $(this).attr('type', 'application/ld+json')
+    })
+
+    AnnotationContext.render()
+
     editor.$(toggle_annotation_selector).on('click', function () {
       AnnotationContext.toggleAnnotation()
     })
@@ -33,6 +42,20 @@ tinymce.PluginManager.add('raje_annotations', function (editor) {
     editor.$(toggle_sidebar_selector).on('click', function () {
       AnnotationContext.toggleAnnotationToolbar()
     })
+  })
+
+  editor.on('keyDown', function (e) {
+
+    let focusElement = editor.$(editor.selection.getNode())
+
+    if (focusElement.is('span[data-rash-annotation-type="wrap"]')) {
+
+      if (e.keyCode == 13) {
+
+        e.preventDefault()
+        inline.exit()
+      }
+    }
   })
 
   editor.on('ExecCommand', function (e) {
@@ -69,6 +92,7 @@ createAnnotationCommenting = text => {
   const creator = ipcRenderer.sendSync('getSettings').username
 
   const selection = tinymce.activeEditor.selection
+
   const range = selection.getRng()
 
   const rangeStartOffset = range.startOffset
@@ -247,26 +271,27 @@ updateAnnotationsOnSave = article => {
   article.find('script[type="application/ld+json"]').each(function () {
 
     //TODO update also the Map()
-
-    // Change the offsets and the selectors
     let json = JSON.parse($(this).html())
 
-    // Get the id of the current annotation
-    const id = json.id
+    if (json.Motivation == commenting) {
 
-    // Get the list of highlighted annotations
-    const first = $(`span.cgen.annotation_hilight[data-rash-annotation-id="${id}"]`).first()
-    const last = $(`span.cgen.annotation_hilight[data-rash-annotation-id="${id}"]`).last()
+      // Get annotation
+      let annotation = ANNOTATIONS.get(json.id)
 
-    // Update both start and end offsets, the ending offset has also the currnt length
-    json.target.selector.start['@value'] = getOffset(first)
-    json.target.selector.end['@value'] = getOffset(last, last.text().length)
+      // Get the list of highlighted annotations
+      const first = tinymce.activeEditor.$(annotation.note_selector).first()
+      const last = tinymce.activeEditor.$(annotation.note_selector).last()
 
-    // Update both start and end selectors with the right xpath
-    json.target.selector.startSelector['@value'] = Annotation.getXPath(first)
-    json.target.selector.endSelector['@value'] = Annotation.getXPath(last)
+      // Update both start and end offsets, the ending offset has also the currnt length
+      json.target.selector.start['@value'] = getOffset(first)
+      json.target.selector.end['@value'] = getOffset(last, last.text().length)
 
-    $(this).html(JSON.stringify(json, null, 2))
+      // Update both start and end selectors with the right xpath
+      json.target.selector.startSelector['@value'] = AnnotationContext.getCssSelector(first)
+      json.target.selector.endSelector['@value'] = AnnotationContext.getCssSelector(last)
+
+      $(this).html(JSON.stringify(json, null, 2))
+    }
   })
 
   // Change data-rash-original[-parent]-content

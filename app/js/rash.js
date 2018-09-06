@@ -359,13 +359,7 @@ const rash = {
 
     annotation_sidebar.prependTo($('body'))
 
-    $('#toggleAnnotations').on('click', function () {
-      rash.toggleAnnotations()
-    })
-
-    $('#toggleSidebar').on('click', function () {
-      rash.toggleSidebar()
-    })
+    AnnotationRash.initEvents()
   },
 
   /* /END Init annotation sidebar */
