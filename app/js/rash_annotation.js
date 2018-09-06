@@ -325,7 +325,7 @@ class AnnotationRaje extends Annotation {
 
     return `
       <div class="side_note_wrapper">
-        <i class="glyphicon glyphicon-remove"></i>
+        <i class="glyphicon glyphicon-trash pull-right text-danger"></i>
         <div class="side_node_text">${this.semanticAnnotation.bodyValue}</div>
         <div><a href="#">@${this.semanticAnnotation.creator}</a></div>
         <div class="side_note_date">${new Date(this.semanticAnnotation.created).toUTCString()}</div>
