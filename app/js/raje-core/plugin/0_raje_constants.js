@@ -40,6 +40,11 @@ const side_note_reply_selector = '.side_note_reply'
 const toggle_annotation_selector = '#toggleAnnotations'
 const toggle_sidebar_selector = '#toggleSidebar'
 
+const annotation_wrapper_selector = 'span[data-rash-annotation-type]'
+const semantic_annotation_selector = 'script[type="application/ld+json"]'
+const mce_semantic_annotation_selector = 'script[type="mce-application/ld+json"]'
+
+
 //#endregion
 
 const NON_EDITABLE_HEADER_SELECTOR = 'header.page-header.container.cgen'

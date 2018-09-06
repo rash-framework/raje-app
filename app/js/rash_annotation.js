@@ -149,7 +149,7 @@ class AnnotationContext {
 class Annotation {
   constructor(semanticAnnotation) {
 
-    const replaceCssSelector = (selector) => selector.replace('&gt;', '>')
+    //const replaceCssSelector = (selector) => selector.replace('&gt;', '>')
 
     this.semanticAnnotation = semanticAnnotation
     this.role = semanticAnnotation.Motivation

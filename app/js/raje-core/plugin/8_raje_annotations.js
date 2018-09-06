@@ -1,12 +1,9 @@
 const not_annotable_elements = `${NON_EDITABLE_HEADER_SELECTOR},${SIDEBAR_ANNOTATION},${INLINE_FORMULA_SELECTOR}`
 const annotatorPopupSelector = '#annotatorPopup'
 const annotatorFormPopupSelector = '#annotatorFormPopup'
-const annotationWrapper = 'span[data-rash-annotation-type]'
-
 const commenting = 'commenting'
 
 tinymce.PluginManager.add('raje_annotations', function (editor) {
-
 
   editor.on('click', e => {
 
@@ -29,7 +26,7 @@ tinymce.PluginManager.add('raje_annotations', function (editor) {
   editor.on('init', () => {
 
     // This is needed because tinymce changes "application" in "mce-application"
-    editor.$('script[type="mce-application/ld+json"]').each(function () {
+    editor.$(mce_semantic_annotation_selector).each(function () {
       $(this).attr('type', 'application/ld+json')
     })
 
@@ -48,14 +45,70 @@ tinymce.PluginManager.add('raje_annotations', function (editor) {
 
     let focusElement = editor.$(editor.selection.getNode())
 
-    if (focusElement.is('span[data-rash-annotation-type="wrap"]')) {
+    /**
+     * Fires if BACKSPACE or CANC are pressed
+     */
+    if (e.keyCode == 8 || e.keyCode == 46) {
 
+      hideAnnotationPopup()
+
+      if (editor.selection.getContent().indexOf('data-rash-annotation-type') != -1) {
+
+        //TODO use a function
+        editor.execCommand(DELETE_CMD)
+        e.preventDefault()
+
+        ANNOTATIONS.forEach(annotation => {
+
+          // Remove the script of the annotation
+          if (editor.$(annotation.note_selector).length == 0)
+            editor.undoManager.transact(function () {
+              editor.$(`${semantic_annotation_selector}[id=${annotation.id}]`).remove()
+              annotation.remove()
+              ANNOTATIONS.delete(annotation.id)
+            })
+        })
+      }
+    }
+
+    if (focusElement.is(annotation_wrapper_selector)) {
+
+      /**
+       * Fires if BACKSPACE or CANC are pressed
+       */
       if (e.keyCode == 13) {
 
         e.preventDefault()
         inline.exit()
       }
+
+      //TODO check when the entire selection is removed
+      /**
+       * Fires if BACKSPACE or CANC are pressed
+       */
+      if (e.keyCode == 8 || e.keyCode == 46) {
+
+        //TODO use a function
+        editor.execCommand(DELETE_CMD)
+        e.preventDefault()
+
+        ANNOTATIONS.forEach(annotation => {
+
+          // Remove the script of the annotation
+          if (editor.$(annotation.note_selector).length == 0)
+            editor.undoManager.transact(function () {
+              editor.$(`${semantic_annotation_selector}[id=${annotation.id}]`).remove()
+              annotation.remove()
+              ANNOTATIONS.delete(annotation.id)
+            })
+        })
+      }
     }
+  })
+
+  editor.on('keyPress', function () {
+
+    hideAnnotationPopup()
   })
 
   editor.on('ExecCommand', function (e) {
@@ -299,7 +352,7 @@ updateAnnotationsOnSave = article => {
   const parent = 'data-rash-original-parent-content'
   let attribute
 
-  article.find(annotationWrapper).each(function () {
+  article.find(annotation_wrapper_selector).each(function () {
 
     if ($(this).attr(content))
       attribute = content
