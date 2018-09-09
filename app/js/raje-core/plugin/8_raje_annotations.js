@@ -113,17 +113,18 @@ tinymce.PluginManager.add('raje_annotations', function (editor) {
 
   editor.on('ExecCommand', function (e) {
 
-    editor.$(toggle_annotation_selector).on('click', function () {
-      AnnotationContext.toggleAnnotation()
-    })
+    if (e.command == UNDO_CMD || e.command == REDO_CMD) {
+      
+      editor.$(toggle_annotation_selector).on('click', function () {
+        AnnotationContext.toggleAnnotation()
+      })
 
-    editor.$(toggle_sidebar_selector).on('click', function () {
-      AnnotationContext.toggleAnnotationToolbar()
-    })
+      editor.$(toggle_sidebar_selector).on('click', function () {
+        AnnotationContext.toggleAnnotationToolbar()
+      })
 
-    ANNOTATIONS.forEach(annotation => annotation.setEvents())
-
-    //if (e.command == UNDO_CMD || e.command == REDO_CMD) { }
+      ANNOTATIONS.forEach(annotation => annotation.setEvents())
+    }
   })
 })
 
