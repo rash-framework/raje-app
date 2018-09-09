@@ -189,6 +189,17 @@ class AnnotationContext {
     }
   }
 
+    /**
+   * 
+   * @param {*} titleAttribute 
+   */
+  static NormalizeAnnotationFromAttribute(titleAttribute) {
+
+    titleAttribute = titleAttribute.split(',')
+
+    AnnotationRaje.NormalizeAnnotationFromAttribute(titleAttribute)
+  }
+
   /**
    * 
    */
@@ -531,15 +542,23 @@ class AnnotationRaje extends Annotation {
 
     const instance = this
 
-    if (tinymce.activeEditor.$(this.side_note_selector).length)
-      tinymce.activeEditor.$(this.side_note_selector).on('mouseenter mouseleave', function () {
+    if (tinymce.activeEditor.$(this.side_note_selector).length){
+      tinymce.activeEditor.$(this.side_note_selector).on('mouseenter', function () {
         AnnotationContext.highlightAnnotationFromAttribute(tinymce.activeEditor.$(instance.side_note_selector).attr('title'))
       })
+      tinymce.activeEditor.$(this.side_note_selector).on('mouseleave', function () {
+        AnnotationContext.NormalizeAnnotationFromAttribute(tinymce.activeEditor.$(instance.side_note_selector).attr('title'))
+      })
+    }
 
-    if (tinymce.activeEditor.$(this.side_note_body_selector).length)
-      tinymce.activeEditor.$(this.side_note_body_selector).on('mouseenter mouseleave', function () {
+    if (tinymce.activeEditor.$(this.side_note_body_selector).length){
+      tinymce.activeEditor.$(this.side_note_body_selector).on('mouseenter', function () {
         AnnotationContext.highlightAnnotationFromAttribute(tinymce.activeEditor.$(instance.side_note_body_selector).attr('data-rash-annotation-id'))
       })
+      tinymce.activeEditor.$(this.side_note_body_selector).on('mouseleave', function () {
+        AnnotationContext.NormalizeAnnotationFromAttribute(tinymce.activeEditor.$(instance.side_note_body_selector).attr('data-rash-annotation-id'))
+      })
+    }
   }
 
   /**
@@ -946,7 +965,16 @@ class AnnotationRaje extends Annotation {
    */
   static highlightAnnotationFromAttribute(titleAttribute) {
     for (let id of titleAttribute)
-      tinymce.activeEditor.$(ANNOTATIONS.get(id).note_selector).toggleClass(selected_class)
+      tinymce.activeEditor.$(ANNOTATIONS.get(id).note_selector).addClass(selected_class)
+  }
+
+    /**
+   * 
+   * @param {*} titleAttribute 
+   */
+  static NormalizeAnnotationFromAttribute(titleAttribute) {
+    for (let id of titleAttribute)
+      tinymce.activeEditor.$(ANNOTATIONS.get(id).note_selector).removeClass(selected_class)
   }
 
   /**
