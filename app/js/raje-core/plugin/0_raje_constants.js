@@ -62,7 +62,11 @@ const MENU_SELECTOR = 'div[id^=mceu_][id$=-body][role=menu]'
 const DATA_UPGRADE = 'data-upgrade'
 const DATA_DOWNGRADE = 'data-downgrade'
 
+// Inline Errors
+const INLINE_ERRORS = 'Error, Inline elements can be ONLY created inside the same paragraph'
 
+// Annotation selected image error
+const ANNOTATION_ERROR_IMAGE_SELECTED = 'Ehm, do you really want to annotate pictures? :('
 
 
 
@@ -87,5 +91,4 @@ const DISABLE_SELECTOR_INLINE = 'table, img, pre, code'
 
 const SIDEBAR_ANNOTATION = 'aside#annotations'
 
-const INLINE_ERRORS = 'Error, Inline elements can be ONLY created inside the same paragraph'
 

@@ -133,6 +133,9 @@ tinymce.PluginManager.add('raje_annotations', function (editor) {
  */
 handleAnnotation = e => {
 
+  if (tinymce.activeEditor.selection.getContent().indexOf('img') > 0)
+    global.selectionError = ANNOTATION_ERROR_IMAGE_SELECTED
+
   // Show the popup
   showAnnotationPopup(e.clientX, e.clientY)
 }
@@ -249,6 +252,15 @@ showAnnotationPopup = (x, y) => {
  * 
  */
 showAnnotationFormPopup = () => {
+
+  if (global.selectionError) {
+    global.selectionError = null
+    tinymce.activeEditor.selection.collapse()
+    tinymce.activeEditor.focus()
+    hideAnnotationPopup()
+    return notify(ANNOTATION_ERROR_IMAGE_SELECTED, 'error')
+  }
+
 
   let annotatorFormPopup = $(`
     <div id="annotatorFormPopup">
