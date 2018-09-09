@@ -1,6 +1,6 @@
 {
   "name": "raje",
-  "version": "0.1.10",
+  "version": "0.2.0",
   "scripts": {
     "dist": "electron-packager ./app --all --out=./dist --icon=./build/icon --overwrite",
     "dist-win": "electron-packager ./app RAJE --overwrite --platform=win32 --icon=./build/icon --prune=true --out=./dist --version-string.CompanyName=CE --version-string.FileDescription=CE --version-string.ProductName='Electron Tutorial App'",
