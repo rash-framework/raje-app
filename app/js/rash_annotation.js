@@ -22,35 +22,95 @@ const toggle_sidebar_selector = '#toggleSidebar'
 
 class AnnotationContext {
 
+  /**
+   * 
+   * @param {*} semanticAnnotation 
+   */
   constructor(semanticAnnotation) {
 
-    // Execute Raje
+    let type
+
     try {
-      if (typeof tinymce.activeEditor != undefined)
-        this.annotation = new AnnotationRaje(semanticAnnotation)
+      type = (tinymce.activeEditor != null) ? raje_string : rash_string
     }
 
-    // Execute Rash
-    catch (Exception) {
-      this.annotation = new AnnotationRash(semanticAnnotation)
+    // Catch ReferenceError thrown by TinyMce if it isn't called
+    catch (ReferenceError) {
+      type = rash_string
+      console.log(ReferenceError)
+    }
+
+    switch (type) {
+
+      case raje_string:
+        this.annotation = new AnnotationRaje(semanticAnnotation)
+        break
+
+      case rash_string:
+        this.annotation = new AnnotationRash(semanticAnnotation)
+        break
     }
   }
 
+  /**
+   * 
+   */
   static render() {
 
-    // Execute Raje
+    let type
+
     try {
-      if (tinymce.activeEditor)
-        AnnotationRaje.render()
+      type = (tinymce.activeEditor != null) ? raje_string : rash_string
     }
 
-    // Execute Rash
-    catch (Exception) {
-      AnnotationRash.render()
+    // Catch ReferenceError thrown by TinyMce if it isn't called
+    catch (ReferenceError) {
+      type = rash_string
+      console.log(ReferenceError)
+    }
+
+    switch (type) {
+
+      case raje_string:
+        AnnotationRaje.render()
+        break
+
+      case rash_string:
+        AnnotationRash.render()
+        break
     }
   }
 
+  /**
+   * 
+   * @param {*} container 
+   * @param {*} offset 
+   * @param {*} path 
+   */
   static getOffset(container, offset, path) {
+
+    let type
+
+    try {
+      type = (tinymce.activeEditor != null) ? raje_string : rash_string
+    }
+
+    // Catch ReferenceError thrown by TinyMce if it isn't called
+    catch (ReferenceError) {
+      type = rash_string
+      console.log(ReferenceError)
+    }
+
+    switch (type) {
+
+      case raje_string:
+
+        break
+
+      case rash_string:
+
+        break
+    }
 
     // Execute Raje
     try {
@@ -64,63 +124,126 @@ class AnnotationContext {
     }
   }
 
-  // TODO change rash/raje
+  /**
+   * 
+   * @param {*} titleAttribute 
+   */
   static showAnnotationFromAttribute(titleAttribute) {
 
     AnnotationContext.toggleAnnotationToolbar()
-
     titleAttribute = titleAttribute.split(',')
 
+    let type
+
     try {
-      if (typeof tinymce.activeEditor != undefined)
+      type = (tinymce.activeEditor != null) ? raje_string : rash_string
+    }
+
+    // Catch ReferenceError thrown by TinyMce if it isn't called
+    catch (ReferenceError) {
+      type = rash_string
+      console.log(ReferenceError)
+    }
+
+    switch (type) {
+
+      case raje_string:
         AnnotationRaje.showAnnotationFromAttribute(titleAttribute)
-    }
+        break
 
-    // Execute Rash
-    catch (Exception) {
-      AnnotationRash.showAnnotationFromAttribute(titleAttribute)
+      case rash_string:
+        AnnotationRash.showAnnotationFromAttribute(titleAttribute)
+        break
     }
   }
 
+  /**
+   * 
+   * @param {*} titleAttribute 
+   */
   static highlightAnnotationFromAttribute(titleAttribute) {
+
     titleAttribute = titleAttribute.split(',')
 
+    let type
+
     try {
-      if (typeof tinymce.activeEditor != undefined)
-        AnnotationRaje.highlightAnnotationFromAttribute(titleAttribute)
+      type = (tinymce.activeEditor != null) ? raje_string : rash_string
     }
 
-    // Execute Rash
-    catch (Exception) {
-      AnnotationRash.highlightAnnotationFromAttribute(titleAttribute)
+    // Catch ReferenceError thrown by TinyMce if it isn't called
+    catch (ReferenceError) {
+      type = rash_string
+      console.log(ReferenceError)
+    }
+
+    switch (type) {
+
+      case raje_string:
+        AnnotationRaje.highlightAnnotationFromAttribute(titleAttribute)
+        break
+
+      case rash_string:
+        AnnotationRash.highlightAnnotationFromAttribute(titleAttribute)
+        break
     }
   }
 
+  /**
+   * 
+   */
   static toggleAnnotationToolbar() {
 
-    // Execute Raje
+    let type
+
     try {
-      if (typeof tinymce.activeEditor != undefined)
-        AnnotationRaje.toggleAnnotationToolbar()
+      type = (tinymce.activeEditor != null) ? raje_string : rash_string
     }
 
-    // Execute Rash
-    catch (Exception) {
-      AnnotationRash.toggleAnnotationToolbar()
+    // Catch ReferenceError thrown by TinyMce if it isn't called
+    catch (ReferenceError) {
+      type = rash_string
+      console.log(ReferenceError)
+    }
+
+    switch (type) {
+
+      case raje_string:
+        AnnotationRaje.toggleAnnotationToolbar()
+        break
+
+      case rash_string:
+        AnnotationRash.toggleAnnotationToolbar()
+        break
     }
   }
 
+  /**
+   * 
+   */
   static toggleAnnotation() {
 
-    // Execute Raje
+    let type
+
     try {
-      if (typeof tinymce.activeEditor != undefined)
-        AnnotationRaje.toggleAnnotation()
+      type = (tinymce.activeEditor != null) ? raje_string : rash_string
     }
 
-    // Execute Rash
-    catch (Exception) {
-      AnnotationRash.toggleAnnotation()
+    // Catch ReferenceError thrown by TinyMce if it isn't called
+    catch (ReferenceError) {
+      type = rash_string
+      console.log(ReferenceError)
+    }
+
+    switch (type) {
+
+      case raje_string:
+        AnnotationRaje.toggleAnnotation()
+        break
+
+      case rash_string:
+        AnnotationRash.toggleAnnotation()
+        break
     }
   }
 
@@ -147,6 +270,7 @@ class AnnotationContext {
 }
 
 class Annotation {
+
   constructor(semanticAnnotation) {
 
     //const replaceCssSelector = (selector) => selector.replace('&gt;', '>')
@@ -188,6 +312,16 @@ class Annotation {
         break
 
     }
+  }
+
+  _wrapElement(element) {
+
+    element.addClass('annotation_element')
+    element.attr('title', this.semanticAnnotation.id)
+    element.attr('data-rash-annotation-id', this.semanticAnnotation.id)
+
+    this.start_marker_selector = `.annotation_element[data-rash-annotation-id="${this.semanticAnnotation.id}"]`
+    this.end_marker_selector = `.annotation_element[data-rash-annotation-id="${this.semanticAnnotation.id}"]`
   }
 
   /**
@@ -616,8 +750,11 @@ class AnnotationRaje extends Annotation {
    */
   _removeMarkers() {
 
-    tinymce.activeEditor.$(this.start_marker_selector).remove()
-    tinymce.activeEditor.$(this.end_marker_selector).remove()
+    // Remove markers only if they aren't a wrap (the same element)
+    if (this.start_marker_selector != this.end_marker_selector) {
+      tinymce.activeEditor.$(this.start_marker_selector).remove()
+      tinymce.activeEditor.$(this.end_marker_selector).remove()
+    }
   }
 
   /**
@@ -713,14 +850,10 @@ class AnnotationRaje extends Annotation {
      * 
      * @param JQqueryObject element 
      */
-    const _analyzeContent = element => {
+    const _analyzeContent = node => {
 
-      for (let node of element.childNodes) {
+      do {
 
-        if (found)
-          break
-
-        // If the 
         if (node.nodeType == 1) {
 
           // If the element is the svg formula
@@ -729,7 +862,7 @@ class AnnotationRaje extends Annotation {
 
           // Or do the normal behaviour
           else
-            _analyzeContent(node)
+            _analyzeContent(node.firstChild)
         }
 
         // Act normally if the element is a text node
@@ -744,7 +877,13 @@ class AnnotationRaje extends Annotation {
 
           minOffset += node.length
         }
+
+        node = node.nextSibling
+
+        if (found)
+          break
       }
+      while (node != null)
     }
 
     let minOffset = 0
@@ -809,6 +948,7 @@ class AnnotationRash extends Annotation {
   constructor(semanticAnnotation) {
     super(semanticAnnotation)
   }
+
   /**
    * 
    */
@@ -1113,8 +1253,11 @@ class AnnotationRash extends Annotation {
    */
   _removeMarkers() {
 
-    $(this.start_marker_selector).remove()
-    $(this.end_marker_selector).remove()
+    // Remove markers only if they aren't a wrap (the same element)
+    if (this.start_marker_selector != this.end_marker_selector) {
+      $(this.start_marker_selector).remove()
+      $(this.end_marker_selector).remove()
+    }
   }
 
   /**
