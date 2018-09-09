@@ -681,7 +681,7 @@ class AnnotationRaje extends Annotation {
 
         // Or wrap its content in a note
         else
-          $(node).replaceWith(`<span data-rash-original-content="${text}" data-rash-annotation-index="${++index}" data-rash-annotation-type="wrap" title="#${this.semanticAnnotation.id}" data-rash-annotation-id="${this.semanticAnnotation.id}" class="cgen annotation_highlight">${text}</span>`)
+          $(node).replaceWith(`<span data-rash-original-content="${text.replace(/"/g, '&quot;')}" data-rash-annotation-index="${++index}" data-rash-annotation-type="wrap" title="#${this.semanticAnnotation.id}" data-rash-annotation-id="${this.semanticAnnotation.id}" class="cgen annotation_highlight">${text}</span>`)
       }
 
     })
@@ -1175,8 +1175,9 @@ class AnnotationRash extends Annotation {
 
       let text = node.nodeType !== 3 ? node.outerHTML : node.nodeValue
 
-      // TODO add the rash-original-content tag
       if (text.trim().length != 0) {
+
+        text = text.replace(/"/g, '\\"')
 
         // If the element is a block element, wrap its content inside a wrapper
         if ($(node).is('p,:header'))
@@ -1184,7 +1185,7 @@ class AnnotationRash extends Annotation {
 
         // Or wrap its content in a note
         else
-          $(node).replaceWith(`<span data-rash-original-content="${text}" data-rash-annotation-index="${++index}" data-rash-annotation-type="wrap" title="#${this.semanticAnnotation.id}" data-rash-annotation-id="${this.semanticAnnotation.id}" class="cgen annotation_highlight">${text}</span>`)
+        $(node).replaceWith(`<span data-rash-original-content="${text.replace(/"/g, '&quot;')}" data-rash-annotation-index="${++index}" data-rash-annotation-type="wrap" title="#${this.semanticAnnotation.id}" data-rash-annotation-id="${this.semanticAnnotation.id}" class="cgen annotation_highlight">${text}</span>`)
       }
 
     })
