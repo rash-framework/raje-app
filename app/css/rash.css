@@ -13,18 +13,15 @@ The licensor cannot revoke these freedoms as long as you follow the license term
 Under the following terms:
 * Attribution - You must give appropriate credit, provide a link to the license, and indicate if changes were made. You may do so in any reasonable manner, but not in any way that suggests the licensor endorses you or your use.
 */
+@namespace mathml url(http: //www.w3.org/1998/Math/MathML);
 
-@namespace mathml url(http://www.w3.org/1998/Math/MathML);
 /* Font */
-
 body {
   font-size: 12pt;
 }
 
 /* /END Font */
-
 /* Footnote counters */
-
 body {
   counter-reset: fn_pointer;
 }
@@ -41,9 +38,7 @@ section[role=doc-endnotes]>section[role=doc-endnote]:before {
 }
 
 /* /END Footnote counters */
-
 /* Figure, table and formula */
-
 img {
   max-width: 90%;
   height: auto;
@@ -101,9 +96,7 @@ th {
 }
 
 /* /END Figure, table and formula */
-
 /* Heading counters */
-
 body {
   counter-reset: h1;
 }
@@ -135,41 +128,37 @@ section:not([role=doc-abstract]):not([role=doc-bibliography]):not([role=doc-ackn
 
 section:not([role=doc-abstract]):not([role=doc-bibliography]):not([role=doc-acknowledgements]):not([role=doc-endnotes]) h2:before {
   counter-increment: h2;
-  content: counter(h1) "." counter(h2) ". ";
+  content: counter(h1) "."counter(h2) ". ";
 }
 
 section:not([role=doc-abstract]):not([role=doc-bibliography]):not([role=doc-acknowledgements]):not([role=doc-endnotes]) h3:before {
   counter-increment: h3;
-  content: counter(h1) "." counter(h2) "." counter(h3) ". ";
+  content: counter(h1) "."counter(h2) "."counter(h3) ". ";
 }
 
 section:not([role=doc-abstract]):not([role=doc-bibliography]):not([role=doc-acknowledgements]):not([role=doc-endnotes]) h4:before {
   counter-increment: h4;
-  content: counter(h1) "." counter(h2) "." counter(h3) "." counter(h4) ". ";
+  content: counter(h1) "."counter(h2) "."counter(h3) "."counter(h4) ". ";
 }
 
 section:not([role=doc-abstract]):not([role=doc-bibliography]):not([role=doc-acknowledgements]):not([role=doc-endnotes]) h5:before {
   counter-increment: h5;
-  content: counter(h1) "." counter(h2) "." counter(h3) "." counter(h4) "." counter(h5) ". ";
+  content: counter(h1) "."counter(h2) "."counter(h3) "."counter(h4) "."counter(h5) ". ";
 }
 
 section:not([role=doc-abstract]):not([role=doc-bibliography]):not([role=doc-acknowledgements]):not([role=doc-endnotes]) h6:before {
   counter-increment: h6;
-  content: counter(h1) "." counter(h2) "." counter(h3) "." counter(h4) "." counter(h5) "." counter(h6) ". ";
+  content: counter(h1) "."counter(h2) "."counter(h3) "."counter(h4) "."counter(h5) "."counter(h6) ". ";
 }
 
 /* /END Heading counters */
-
 /* Header */
-
 .title {
   font-size: 300%;
 }
 
 /* /END Header */
-
 /* Annotation */
-
 aside#annotations {
   position: absolute;
   width: 40px;
@@ -261,6 +250,10 @@ aside#annotations.active>div.side_note_body .side_note_reply {
   display: none;
 }
 
+aside#annotations.active>div.side_note_body .btnRemove:hover {
+  cursor: pointer;
+}
+
 aside#annotations.active>div.side_note_body .side_note_reply.active {
   display: block;
 }
@@ -291,9 +284,7 @@ aside#annotations.active>div.side_note_body .side_note_reply.active textarea {
 }
 
 /* /END Annotation */
-
 /* Footer */
-
 html {
   position: relative;
   min-height: 100%;
@@ -333,18 +324,14 @@ body {
 }
 
 /* /END Footer */
-
 /* Not cited */
-
 .notcited {
   color: red;
   cursor: help;
 }
 
 /* /END Not cited */
-
 /* Sections */
-
 body>section {
   padding-right: 15px;
   padding-left: 15px;
@@ -377,9 +364,7 @@ body>section:after {
 }
 
 /* /END Sections */
-
 /* Error */
-
 .error {
   color: red;
   font-weight: bold;
@@ -394,64 +379,73 @@ body>section:after {
 }
 
 /* /END Error */
-
 /* Reference list */
-
 section[role=doc-bibliography]>ul {
   list-style-type: decimal;
 }
 
 /* /END Reference list */
-
 /* ### Rules for printing the document */
-
 @media print {
   @page {
     size: A4;
     margin: 20mm 0mm 20mm 0mm;
   }
+
   html,
   body {
     width: 210mm;
     height: 297mm;
   }
+
   p {
     font-size: 10pt;
     text-align: justify;
   }
+
   pre {
     text-align: left;
   }
+
   figcaption,
   figure>p {
     text-align: center;
   }
+
   .title {
     font-size: 16pt !important;
   }
+
   h1 {
     font-size: 14pt !important;
   }
+
   h2 {
     font-size: 12pt !important;
   }
+
   h3 {
     font-size: 11pt !important;
   }
+
   h4,
   h5,
   h6 {
     font-size: 10pt !important;
   }
+
   pre {
     font-size: 8pt !important;
   }
+
   blockquote {
     font-size: 10pt !important;
   }
+
   address {
     font-size: 12pt !important;
   }
+
   table {
     max-width: 100%;
     font-size: 80%;

@@ -459,7 +459,7 @@ class AnnotationRaje extends Annotation {
 
     return `
       <div class="side_note_wrapper">
-        <i class="glyphicon glyphicon-trash pull-right text-danger"></i>
+        <i class="btnRemove glyphicon glyphicon-trash pull-right text-danger"></i>
         <div class="side_node_text">${this.semanticAnnotation.bodyValue}</div>
         <div><a href="#">@${this.semanticAnnotation.creator}</a></div>
         <div class="side_note_date">${new Date(this.semanticAnnotation.created).toUTCString()}</div>
@@ -494,9 +494,32 @@ class AnnotationRaje extends Annotation {
       replyElement.find(side_note_reply_button_selector).on('click', function () {
 
         const replayingText = replyElement.find('textarea')[0].value
+
         const parentAnnotationId = instance.getParentAnnotation().id
 
+        replyElement.find('textarea')[0].value = ''
+
         createAnnotationReplying(replayingText, parentAnnotationId)
+      })
+    }
+
+    const removeElement = tinymce.activeEditor.$(this.side_note_body_selector).find('.btnRemove')
+    if (removeElement.length) {
+
+      removeElement.off('click')
+      removeElement.on('click', function () {
+
+        tinymce.activeEditor.undoManager.transact(function () {
+
+          const parentSideNoteBody = tinymce.activeEditor.$(instance.side_note_body_selector).parents('.side_note_body').last()
+
+          instance.remove()
+
+          parentSideNoteBody.find(side_note_reply_selector).last().addClass(active_class)
+
+          if (instance.semanticAnnotation.Motivation == commenting)
+            AnnotationContext.toggleAnnotationToolbar()
+        })
       })
     }
   }
@@ -813,6 +836,8 @@ class AnnotationRaje extends Annotation {
       else if ($(this).attr(data_rash_original_parent_content))
         $(this).parent().replaceWith($(this).attr(data_rash_original_parent_content))
     })
+
+    tinymce.activeEditor.$(`script#${this.id}[type="application/ld+json"]`).remove()
   }
 
   /**
@@ -1185,7 +1210,7 @@ class AnnotationRash extends Annotation {
 
         // Or wrap its content in a note
         else
-        $(node).replaceWith(`<span data-rash-original-content="${text.replace(/"/g, '&quot;')}" data-rash-annotation-index="${++index}" data-rash-annotation-type="wrap" title="#${this.semanticAnnotation.id}" data-rash-annotation-id="${this.semanticAnnotation.id}" class="cgen annotation_highlight">${text}</span>`)
+          $(node).replaceWith(`<span data-rash-original-content="${text.replace(/"/g, '&quot;')}" data-rash-annotation-index="${++index}" data-rash-annotation-type="wrap" title="#${this.semanticAnnotation.id}" data-rash-annotation-id="${this.semanticAnnotation.id}" class="cgen annotation_highlight">${text}</span>`)
       }
 
     })
