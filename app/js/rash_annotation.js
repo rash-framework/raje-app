@@ -516,6 +516,7 @@ class AnnotationRaje extends Annotation {
       })
     }
 
+    // Remove annotation
     const removeElement = tinymce.activeEditor.$(this.side_note_body_selector).find('.btnRemove')
     if (removeElement.length) {
 
@@ -798,6 +799,8 @@ class AnnotationRaje extends Annotation {
       side_note.attr('title', `${side_note.attr('title')},${this.semanticAnnotation.id}`)
       side_note.text(parseInt(side_note.text(), 10) + parseInt(1, 10))
 
+      this.side_note_selector = annotation.side_note_selector
+
       this.top = annotation.top
     }
 
@@ -880,8 +883,35 @@ class AnnotationRaje extends Annotation {
    */
   remove() {
 
-    // Remove side note elements
-    tinymce.activeEditor.$(this.side_note_selector).remove()
+
+    const tmp = tinymce.activeEditor.$(this.side_note_selector)
+
+    let titleList = tmp.attr('title')
+    titleList = titleList.split(',')
+
+    if (titleList.length == 1)
+      // Remove side note elements
+      tinymce.activeEditor.$(this.side_note_selector).remove()
+
+    else {
+
+      for (let i = 0; i < titleList.length; i++)
+        if (titleList[i] == this.id)
+          //remove this element from array
+          titleList.splice(i, 1)
+
+      tinymce.activeEditor.$(this.side_note_selector).attr('title', titleList.join(','))
+
+      //Update text
+
+      let text = tinymce.activeEditor.$(this.side_note_selector).text()
+
+      text = parseInt(text) - 1
+
+      tinymce.activeEditor.$(this.side_note_selector).text(text)
+    }
+
+
     tinymce.activeEditor.$(this.side_note_body_selector).remove()
 
     // Replace notes with content or parent content
