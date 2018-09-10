@@ -782,7 +782,7 @@ class AnnotationRaje extends Annotation {
     this.coordinates = this._getCoordinates()
 
     // Get he average distance between the starting and the ending element
-    this.top = (this.coordinates.start.top + this.coordinates.end.top) / 2
+    this.top = (this.coordinates.start + this.coordinates.end) / 2
 
     let side_note
 
@@ -864,9 +864,14 @@ class AnnotationRaje extends Annotation {
     startRange.selectNode(tinymce.activeEditor.$(this.start_marker_selector)[0])
     endRange.selectNode(tinymce.activeEditor.$(this.end_marker_selector)[0])
 
+    startRange = startRange.getBoundingClientRect()
+    endRange = endRange.getBoundingClientRect()
+
+    const scroll = tinymce.DOM.getViewPort(tinymce.activeEditor.getWin()).y
+
     return {
-      start: startRange.getBoundingClientRect(),
-      end: endRange.getBoundingClientRect()
+      start: startRange.top + scroll,
+      end: endRange.top + scroll
     }
   }
 
@@ -1307,7 +1312,7 @@ class AnnotationRash extends Annotation {
     this.coordinates = this._getCoordinates()
 
     // Get he average distance between the starting and the ending element
-    this.top = (this.coordinates.start.top + this.coordinates.end.top) / 2
+    this.top = (this.coordinates.start + this.coordinates.end) / 2
 
     let side_note
 
@@ -1405,9 +1410,14 @@ class AnnotationRash extends Annotation {
     startRange.selectNode($(this.start_marker_selector)[0])
     endRange.selectNode($(this.end_marker_selector)[0])
 
+    startRange = startRange.getBoundingClientRect()
+    endRange = endRange.getBoundingClientRect()
+
+    const scroll = window.scrollY
+
     return {
-      start: startRange.getBoundingClientRect(),
-      end: endRange.getBoundingClientRect()
+      start: startRange.top + scroll,
+      end: endRange.top + scroll
     }
   }
 
