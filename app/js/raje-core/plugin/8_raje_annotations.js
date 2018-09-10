@@ -45,12 +45,17 @@ tinymce.PluginManager.add('raje_annotations', function (editor) {
 
     let focusElement = editor.$(editor.selection.getNode())
 
+    // Update sidebar height
+    if (editor.$(SIDEBAR_ANNOTATION)[0].clientHeight < editor.$('html')[0].offsetHeight)
+      editor.$(SIDEBAR_ANNOTATION).css('height', editor.$('html')[0].offsetHeight)
+
+    // Hide annotation popup
+    hideAnnotationPopup()
+
     /**
      * Fires if BACKSPACE or CANC are pressed
      */
     if (e.keyCode == 8 || e.keyCode == 46) {
-
-      hideAnnotationPopup()
 
       if (editor.selection.getContent().indexOf('data-rash-annotation-type') != -1) {
 
