@@ -66,7 +66,7 @@ const DATA_DOWNGRADE = 'data-downgrade'
 const INLINE_ERRORS = 'Error, Inline elements can be ONLY created inside the same paragraph'
 
 // Annotation selected image error
-const ANNOTATION_ERROR_IMAGE_SELECTED = 'Ehm, do you really want to annotate pictures? :('
+const ANNOTATION_ERROR_IMAGE_SELECTED = 'Ehm, do you really want to annotate figures? :('
 
 
 

@@ -189,7 +189,7 @@ class AnnotationContext {
     }
   }
 
-    /**
+  /**
    * 
    * @param {*} titleAttribute 
    */
@@ -522,14 +522,17 @@ class AnnotationRaje extends Annotation {
 
         tinymce.activeEditor.undoManager.transact(function () {
 
-          const parentSideNoteBody = tinymce.activeEditor.$(instance.side_note_body_selector).parents('.side_note_body').last()
+          if (confirm('Confirm annotation delete')) {
+            
+            const parentSideNoteBody = tinymce.activeEditor.$(instance.side_note_body_selector).parents('.side_note_body').last()
 
-          instance.remove()
+            instance.removeAll()
 
-          parentSideNoteBody.find(side_note_reply_selector).last().addClass(active_class)
+            parentSideNoteBody.find(side_note_reply_selector).last().addClass(active_class)
 
-          if (instance.semanticAnnotation.Motivation == commenting)
-            AnnotationContext.toggleAnnotationToolbar()
+            if (instance.semanticAnnotation.Motivation == commenting)
+              AnnotationContext.toggleAnnotationToolbar()
+          }
         })
       })
     }
@@ -542,7 +545,7 @@ class AnnotationRaje extends Annotation {
 
     const instance = this
 
-    if (tinymce.activeEditor.$(this.side_note_selector).length){
+    if (tinymce.activeEditor.$(this.side_note_selector).length) {
       tinymce.activeEditor.$(this.side_note_selector).on('mouseenter', function () {
         AnnotationContext.highlightAnnotationFromAttribute(tinymce.activeEditor.$(instance.side_note_selector).attr('title'))
       })
@@ -551,7 +554,7 @@ class AnnotationRaje extends Annotation {
       })
     }
 
-    if (tinymce.activeEditor.$(this.side_note_body_selector).length){
+    if (tinymce.activeEditor.$(this.side_note_body_selector).length) {
       tinymce.activeEditor.$(this.side_note_body_selector).on('mouseenter', function () {
         AnnotationContext.highlightAnnotationFromAttribute(tinymce.activeEditor.$(instance.side_note_body_selector).attr('data-rash-annotation-id'))
       })
@@ -855,7 +858,13 @@ class AnnotationRaje extends Annotation {
       else if ($(this).attr(data_rash_original_parent_content))
         $(this).parent().replaceWith($(this).attr(data_rash_original_parent_content))
     })
+  }
 
+  /**
+   * 
+   */
+  removeAll() {
+    this.remove()
     tinymce.activeEditor.$(`script#${this.id}[type="application/ld+json"]`).remove()
   }
 
@@ -968,7 +977,7 @@ class AnnotationRaje extends Annotation {
       tinymce.activeEditor.$(ANNOTATIONS.get(id).note_selector).addClass(selected_class)
   }
 
-    /**
+  /**
    * 
    * @param {*} titleAttribute 
    */
@@ -1332,6 +1341,14 @@ class AnnotationRash extends Annotation {
       else if ($(this).attr(data_rash_original_parent_content))
         $(this).parent().replaceWith($(this).attr(data_rash_original_parent_content))
     })
+  }
+
+  /**
+   * 
+   */
+  removeAll() {
+    this.remove()
+    $(`script#${this.id}[type="application/ld+json"]`).remove()
   }
 
   /**

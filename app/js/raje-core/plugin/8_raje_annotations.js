@@ -114,7 +114,7 @@ tinymce.PluginManager.add('raje_annotations', function (editor) {
   editor.on('ExecCommand', function (e) {
 
     if (e.command == UNDO_CMD || e.command == REDO_CMD) {
-      
+
       editor.$(toggle_annotation_selector).on('click', function () {
         AnnotationContext.toggleAnnotation()
       })
@@ -133,7 +133,7 @@ tinymce.PluginManager.add('raje_annotations', function (editor) {
  */
 handleAnnotation = e => {
 
-  if (tinymce.activeEditor.selection.getContent().indexOf('img') > 0)
+  if (tinymce.activeEditor.selection.getContent().indexOf('img') > 0 || tinymce.activeEditor.selection.getContent().indexOf('figure') > 0)
     global.selectionError = ANNOTATION_ERROR_IMAGE_SELECTED
 
   // Show the popup
@@ -258,7 +258,7 @@ showAnnotationFormPopup = () => {
     tinymce.activeEditor.selection.collapse()
     tinymce.activeEditor.focus()
     hideAnnotationPopup()
-    return notify(ANNOTATION_ERROR_IMAGE_SELECTED, 'error')
+    return notify(ANNOTATION_ERROR_IMAGE_SELECTED, 'error', 5000)
   }
 
 
