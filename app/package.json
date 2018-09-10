@@ -10,7 +10,7 @@
   "author": "Gianmarco Spinaci <spino9330@gmail.com>",
   "license": "ISC",
   "devDependencies": {
-    "electron": "^1.8.2-beta.3",
+    "electron": "^1.8.8",
     "gulp": "^3.9.1",
     "gulp-concat": "^2.6.1",
     "gulp-watch": "^4.3.11"
