@@ -332,6 +332,7 @@ class Annotation {
     element.addClass('annotation_element')
     element.attr('title', this.semanticAnnotation.id)
     element.attr('data-rash-annotation-id', this.semanticAnnotation.id)
+    element.attr('data-rash-annotation-type', 'wrap')
 
     this.start_marker_selector = `.annotation_element[data-rash-annotation-id="${this.semanticAnnotation.id}"]`
     this.end_marker_selector = `.annotation_element[data-rash-annotation-id="${this.semanticAnnotation.id}"]`
@@ -884,7 +885,7 @@ class AnnotationRaje extends Annotation {
   remove() {
 
 
-    const tmp = tinymce.activeEditor.$(this.side_note_selector)
+    const tmp = tinymce.activeEditor.$(this.side_note_selector).first()
 
     let titleList = tmp.attr('title')
     titleList = titleList.split(',')
