@@ -299,6 +299,8 @@ class Annotation {
     this.start_marker_selector = `span[data-rash-annotation-id="${this.semanticAnnotation.id}"][data-rash-annotation-role="${start_role}"]`
     this.end_marker_selector = `span[data-rash-annotation-id="${this.semanticAnnotation.id}"][data-rash-annotation-role="${end_role}"]`
 
+    this.script_selector = `script#${this.id}[type="application/ld+json"]`
+
     switch (this.semanticAnnotation.Motivation) {
 
       case commenting:
@@ -522,13 +524,37 @@ class AnnotationRaje extends Annotation {
 
         tinymce.activeEditor.undoManager.transact(function () {
 
-          if (confirm('Confirm annotation delete')) {
-            
-            const parentSideNoteBody = tinymce.activeEditor.$(instance.side_note_body_selector).parents('.side_note_body').last()
+          const side_note_body_selector = '.side_note_body'
+          const data_rash_annotation_id = 'data-rash-annotation-id'
+
+          const currentSideNoteBody = tinymce.activeEditor.$(instance.side_note_body_selector).first()
+
+          // Confirm delete
+          if (confirm('Confirm annotation delete?')) {
+
+            // Get the parent sideNote id
+            const parentSideNoteId = currentSideNoteBody.parents(side_note_body_selector).first().attr(data_rash_annotation_id)
+
+            // Check if the current sidenote has children annotation
+            if (currentSideNoteBody.find(side_note_body_selector).length) {
+
+              const childSideNoteId = currentSideNoteBody.find(side_note_body_selector).first().attr(data_rash_annotation_id)
+
+              // Update annotation target
+              ANNOTATIONS.get(childSideNoteId).semanticAnnotation.target = parentSideNoteId
+
+              ANNOTATIONS.get(childSideNoteId).updateScript()
+
+              let parent = tinymce.activeEditor.$(ANNOTATIONS.get(parentSideNoteId).side_note_body_selector).first()
+              let child = tinymce.activeEditor.$(ANNOTATIONS.get(childSideNoteId).side_note_body_selector).first()
+
+              // Append child node to parent node
+              parent.append(child)
+            }
 
             instance.removeAll()
 
-            parentSideNoteBody.find(side_note_reply_selector).last().addClass(active_class)
+            currentSideNoteBody.parents(side_note_body_selector).first().find(side_note_reply_selector).last().addClass(active_class)
 
             if (instance.semanticAnnotation.Motivation == commenting)
               AnnotationContext.toggleAnnotationToolbar()
@@ -800,6 +826,10 @@ class AnnotationRaje extends Annotation {
       tinymce.activeEditor.$(this.start_marker_selector).remove()
       tinymce.activeEditor.$(this.end_marker_selector).remove()
     }
+  }
+
+  updateScript() {
+    tinymce.activeEditor.$(this.script_selector).html(JSON.stringify(this.semanticAnnotation, null, 2))
   }
 
   /**
