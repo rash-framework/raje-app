@@ -181,7 +181,7 @@ jQuery.fn.extend({
       var author = list_of_authors[i]
       var author_element = $(`<address class="lead authors"></address>`)
       if (author['name'] != null) {
-        var name_element_string = `<strong class="author_name">${author.name}</strong>`
+        var name_element_string = `<strong class="author_name">${author.name}</strong> `
         if (author['email'] != null) {
           name_element_string += `<code class="email"><a href="mailto:${author.email}">${author.email}</a></code>`
         }

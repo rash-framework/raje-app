@@ -36,7 +36,7 @@ tinymce.PluginManager.add('raje_metadata', function (editor, url) {
     }
   })
 
-  editor.on('click', function (e) {
+  editor.on('click', function () {
     if ($(tinymce.activeEditor.selection.getNode()).is(HEADER_SELECTOR))
       openMetadataDialog()
   })
@@ -47,7 +47,11 @@ tinymce.PluginManager.add('raje_metadata', function (editor, url) {
      * 
      */
     getAllMetadata: function () {
-      let header = $(HEADER_SELECTOR)
+
+      // Get header from iframe only the first one
+      let header = tinymce.activeEditor.$(HEADER_SELECTOR).first()
+
+      // Get all metadata
       let subtitle = header.find('h1.title > small').text()
       let data = {
         subtitle: subtitle,
@@ -116,8 +120,10 @@ tinymce.PluginManager.add('raje_metadata', function (editor, url) {
      */
     update: function (updatedMetadata) {
 
+      // Remove all meta and links corresponding to metadata in head
       $('head meta[property], head link[property], head meta[name]').remove()
 
+      // Get all current metadata
       let currentMetadata = metadata.getAllMetadata()
 
       // Update title and subtitle
@@ -176,10 +182,99 @@ tinymce.PluginManager.add('raje_metadata', function (editor, url) {
         $('head').append(`<meta property="prism:keyword" content="${keyword}"/>`)
       })
 
-      tinymce.activeEditor.$('body').addHeaderHTML()
+      metadata.addHeaderHTML()
       setNonEditableHeader()
 
       tinymce.triggerSave()
+    },
+
+    /**
+     * 
+     */
+    addHeaderHTML: function () {
+
+      /* Reset header */
+      tinymce.activeEditor.$('header').remove()
+      tinymce.activeEditor.$('p.keywords').remove()
+  
+      /* Header title */
+      var header = tinymce.activeEditor.$('<header class="page-header container cgen" data-rash-original-content=""></header>')
+      tinymce.activeEditor.$(SIDEBAR_ANNOTATION).after(header)
+
+      var title_string = ''
+      var title_split = $('head title').html().split(" -- ")
+      if (title_split.length == 1) {
+        title_string = title_split[0]
+      } else {
+        title_string = `${title_split[0]}<br /><small>${title_split[1]}</small>`
+      }
+  
+      header.append(`<h1 class="title">${title_string}</h1>`)
+      /* /END Header title */
+  
+      /* Header author */
+      var list_of_authors = []
+      $('head meta[name="dc.creator"]').each(function () {
+        var current_value = $(this).attr('name')
+        var current_id = $(this).attr('about')
+        var current_name = $(this).attr('content')
+        var current_email = $(`head meta[about='${current_id}'][property='schema:email']`).attr('content')
+        var current_affiliations = []
+        $(`head link[about='${current_id}'][property='schema:affiliation']`).each(function () {
+          var cur_affiliation_id = $(this).attr('href')
+          current_affiliations.push($(`head meta[about='${cur_affiliation_id}'][property='schema:name']`).attr('content'))
+        })
+  
+        list_of_authors.push({
+          "name": current_name,
+          "email": current_email,
+          "affiliation": current_affiliations
+        })
+      })
+  
+      for (var i = 0; i < list_of_authors.length; i++) {
+        var author = list_of_authors[i]
+        var author_element = $(`<address class="lead authors"></address>`)
+        if (author['name'] != null) {
+          var name_element_string = `<strong class="author_name">${author.name}</strong> `
+          if (author['email'] != null) {
+            name_element_string += `<code class="email"><a href="mailto:${author.email}">${author.email}</a></code>`
+          }
+          author_element.append(name_element_string)
+        }
+  
+        for (var j = 0; j < author.affiliation.length; j++) {
+          author_element.append(`<br /><span class="affiliation\">${author.affiliation[j].replace(/\s+/g, " ").replace(/, ?/g, ", ").trim()}</span>`)
+        }
+        if (i == 0) {
+          author_element.insertAfter(tinymce.activeEditor.$("header h1"))
+        } else {
+          author_element.insertAfter(tinymce.activeEditor.$("header address:last-of-type"))
+        }
+      }
+      /* /END Header author */
+  
+      /* ACM subjects */
+      var categories = $("meta[name='dcterms.subject']")
+      if (categories.length > 0) {
+        var list_of_categories = $(`<p class="acm_subject_categories"><strong>ACM Subject Categories</strong></p>`)
+        categories.each(function () {
+          list_of_categories.append(`<br /><code>${$(this).attr("content").split(",").join(", ")}</code>`)
+        })
+        list_of_categories.appendTo(header)
+      }
+      /* /END ACM subjects */
+  
+      /* Keywords */
+      var keywords = $('meta[property="prism:keyword"]')
+      if (keywords.length > 0) {
+        var list_of_keywords = $('<ul class="list-inline"></ul>')
+        keywords.each(function () {
+          list_of_keywords.append(`<li><code>${$(this).attr("content")}</code></li>`)
+        })
+        $('<p class="keywords"><strong>Keywords</strong></p>').append(list_of_keywords).appendTo(header)
+      }
+      /* /END Keywords */
     }
   }
 

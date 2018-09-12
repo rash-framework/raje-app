@@ -36,10 +36,7 @@ if (hasBackend) {
 
     //attach whole body inside a placeholder div
     $('body').html(`<div id="raje_root">${$('body').html()}</div>`)
-
-    // 
-    setNonEditableHeader()
-
+    
     //
     mathml2svgAllFormulas()
 
@@ -133,6 +130,9 @@ if (hasBackend) {
         editor.on('init', function (e) {
 
           editor.execCommand('mceFullScreen')
+
+          // 
+          setNonEditableHeader()
 
           // Move caret at the first h1 element of main section
           // Or right after heading
@@ -432,8 +432,11 @@ if (hasBackend) {
    * 
    */
   function setNonEditableHeader() {
-    $(HEADER_SELECTOR).addClass('mceNonEditable')
-    $(SIDEBAR_ANNOTATION).addClass('mceNonEditable')
+
+    tinymce.activeEditor.$(HEADER_SELECTOR).addClass('mceNonEditable')
+    tinymce.activeEditor.$(SIDEBAR_ANNOTATION).addClass('mceNonEditable')
+
+    tinymce.activeEditor.$(HEADER_SELECTOR).attr('contenteditable', false)
   }
 
   /**
