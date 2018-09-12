@@ -184,9 +184,9 @@ tinymce.PluginManager.add('raje_section', function (editor) {
                 if (!endnote.prev(ENDNOTE_SELECTOR).length && !endnote.next(ENDNOTE_SELECTOR).length)
                   $(ENDNOTES_SELECTOR).remove()
 
-                else 
+                else
                   tinymce.activeEditor.execCommand(DELETE_CMD)
-                
+
 
                 updateReferences()
 
@@ -420,7 +420,7 @@ section = {
       if (text.substring(text.length - 1) == '#')
         level++
 
-        text = text.substring(0, text.length - 1)
+      text = text.substring(0, text.length - 1)
     }
 
     return level
@@ -689,34 +689,34 @@ section = {
   addEndnote: function (id) {
 
     // Add the section if it not exists
-    if (!$(ENDNOTE_SELECTOR).length) {
+    if (!tinymce.activeEditor.$(ENDNOTE_SELECTOR).length) {
 
-      let endnotes = $(`<section id="doc-endnotes" role="doc-endnotes"><h1 data-rash-original-content="">Footnotes</h1></section>`)
+      let endnotes = tinymce.activeEditor.$(`<section id="doc-endnotes" role="doc-endnotes"><h1 data-rash-original-content="">Footnotes</h1></section>`)
 
       // Insert this section after bibliography section
       // OR after acknowledgements section
       // OR after non special section selector
       // OR after abstract section
       // OR after non editable header 
-      if ($(BIBLIOGRAPHY_SELECTOR).length)
-        $(BIBLIOGRAPHY_SELECTOR).after(endnotes)
+      if (tinymce.activeEditor.$(BIBLIOGRAPHY_SELECTOR).length)
+        tinymce.activeEditor.$(BIBLIOGRAPHY_SELECTOR).after(endnotes)
 
-      else if ($(ACKNOWLEDGEMENTS_SELECTOR).length)
-        $(ACKNOWLEDGEMENTS_SELECTOR).after(endnotes)
+      else if (tinymce.activeEditor.$(ACKNOWLEDGEMENTS_SELECTOR).length)
+        tinymce.activeEditor.$(ACKNOWLEDGEMENTS_SELECTOR).after(endnotes)
 
-      else if ($(MAIN_SECTION_SELECTOR).length)
-        $(MAIN_SECTION_SELECTOR).last().after(endnotes)
+      else if (tinymce.activeEditor.$(MAIN_SECTION_SELECTOR).length)
+        tinymce.activeEditor.$(MAIN_SECTION_SELECTOR).last().after(endnotes)
 
-      else if ($(ABSTRACT_SELECTOR).length)
-        $(ABSTRACT_SELECTOR).after(endnotes)
+      else if (tinymce.activeEditor.$(ABSTRACT_SELECTOR).length)
+        tinymce.activeEditor.$(ABSTRACT_SELECTOR).after(endnotes)
 
       else
-        $(NON_EDITABLE_HEADER_SELECTOR).after(endnotes)
+        tinymce.activeEditor.$(NON_EDITABLE_HEADER_SELECTOR).after(endnotes)
     }
 
     // Create and append the new endnote
-    let endnote = $(`<section role="doc-endnote" id="${id}"><p><br/></p></section>`)
-    $(ENDNOTES_SELECTOR).append(endnote)
+    let endnote = tinymce.activeEditor.$(`<section role="doc-endnote" id="${id}"><p><br/></p></section>`)
+    tinymce.activeEditor.$(ENDNOTES_SELECTOR).append(endnote)
   },
 
   /**
