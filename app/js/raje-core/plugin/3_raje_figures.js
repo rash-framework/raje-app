@@ -249,18 +249,16 @@ tinymce.PluginManager.add('raje_image', function (editor, url) {
   // Because some behaviours aren't accepted, RAJE must check selection and accept backspace, canc and enter press
   editor.on('keyDown', function (e) {
 
-
     // keyCode 8 is backspace
     if (e.keyCode == 8)
-      return handleFigureDelete(tinymce.activeEditor.selection)
+      return handleFigureDelete(editor.selection)
 
     if (e.keyCode == 46)
-      return handleFigureCanc(tinymce.activeEditor.selection)
+      return handleFigureCanc(editor.selection)
 
     // Handle enter key in figcaption
     if (e.keyCode == 13)
-      return handleFigureEnter(tinymce.activeEditor.selection)
-
+      return handleFigureEnter(editor.selection)
   })
 
   image = {
@@ -995,14 +993,22 @@ function handleFigureDelete(sel) {
   try {
 
     // Get reference of start and end node
-    let startNode = $(sel.getRng().startContainer)
+    let startNode = tinymce.activeEditor.$(sel.getRng().startContainer)
     let startNodeParent = startNode.parents(FIGURE_SELECTOR)
 
-    let endNode = $(sel.getRng().endContainer)
+    let endNode = tinymce.activeEditor.$(sel.getRng().endContainer)
     let endNodeParent = endNode.parents(FIGURE_SELECTOR)
 
     // If at least selection start or end is inside the figure
     if (startNodeParent.length || endNodeParent.length) {
+
+      // If the selection selects only the image
+      if (tinymce.activeEditor.$(sel.getContent()).is('img')) {
+        tinymce.activeEditor.undoManager.transact(function () {
+          startNode.parents(FIGURE_SELECTOR).remove()
+        })
+        return false
+      }
 
       // If selection wraps entirely a figure from the start of first element (th in table) and selection ends
       if (endNode.parents('figcaption').length) {
@@ -1060,14 +1066,22 @@ function handleFigureDelete(sel) {
 function handleFigureCanc(sel) {
 
   // Get reference of start and end node
-  let startNode = $(sel.getRng().startContainer)
+  let startNode = tinymce.activeEditor.$(sel.getRng().startContainer)
   let startNodeParent = startNode.parents(FIGURE_SELECTOR)
 
-  let endNode = $(sel.getRng().endContainer)
+  let endNode = tinymce.activeEditor.$(sel.getRng().endContainer)
   let endNodeParent = endNode.parents(FIGURE_SELECTOR)
 
   // If at least selection start or end is inside the figure
   if (startNodeParent.length || endNodeParent.length) {
+
+    // If the selection selects only the image
+    if (tinymce.activeEditor.$(sel.getContent()).is('img')) {
+      tinymce.activeEditor.undoManager.transact(function () {
+        startNode.parents(FIGURE_SELECTOR).remove()
+      })
+      return false
+    }
 
     // If selection doesn't start and end in the same figure, but one beetwen start or end is inside the figcaption, must block
     if (startNode.parents('figcaption').length != endNode.parents('figcaption').length && (startNode.parents('figcaption').length || endNode.parents('figcaption').length))
