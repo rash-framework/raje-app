@@ -36,7 +36,7 @@ if (hasBackend) {
 
     //attach whole body inside a placeholder div
     $('body').html(`<div id="raje_root">${$('body').html()}</div>`)
-    
+
     //
     mathml2svgAllFormulas()
 
@@ -437,6 +437,7 @@ if (hasBackend) {
     tinymce.activeEditor.$(SIDEBAR_ANNOTATION).addClass('mceNonEditable')
 
     tinymce.activeEditor.$(HEADER_SELECTOR).attr('contenteditable', false)
+    tinymce.activeEditor.$(SIDEBAR_ANNOTATION).attr('contenteditable', false)
   }
 
   /**
