@@ -25,6 +25,12 @@ let raje_const = {
       path.join(path.normalize(`${__dirname}/..`), '/css'),
       path.join(path.normalize(`${__dirname}/..`), '/fonts'),
       path.join(path.normalize(`${__dirname}/..`), '/img')
+    ],
+    assets_rel: [
+      'js',
+      'css',
+      'fonts',
+      'img'
     ]
   },
   strings: {
@@ -36,7 +42,11 @@ let raje_const = {
       save_success: 'Hooray! all changes has been saved!',
       error_type: 'error'
     }
-  }
+  },
+  compareExcludeAssets: [
+    'js/raje-core/plugin/*.js',
+    'js/tinymce'
+  ]
 
 }
 

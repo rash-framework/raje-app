@@ -29,6 +29,8 @@ const RAJE_STORAGE = require('./modules/raje_storage.js')
 const RAJE_GITHUB = require('./modules/raje_github.js')
 const RAJE_CONST = require('./modules/raje_const')
 
+
+
 let splashWindow
 let editorWindow
 
@@ -129,31 +131,12 @@ const alreadyExistingArticle = localRootPath => {
         RAJE_FS.addRajeCoreInArticle(editorWindowUrl)
           .then(() =>
             RAJE_FS._copyAssets(global.articleSettings.savePath)
-            .then(assets => showEditor(editorWindowUrl))
+            .then((data) => {
+              showEditor(editorWindowUrl)
+            })
           )
       }
     })
-
-  /*
-  // Check if the folder exists
-  RAJE_FS.checkIfExists(global.articleSettings.savePath, exists => {
-    if (exists)
-      // Copy the entire asset set inside the existing directory
-      RAJE_FS.copyAssets(global.articleSettings.savePath, err => {
-        if (err) throw err
-
-        // Add the already created article here
-        RAJE_STORAGE.pushRecentArticleEntry(RAJE_STORAGE.createRecentArticleEntry(global.articleSettings.savePath, global.articleSettings.folderName))
-
-        // Add the init_rajemce script
-        RAJE_FS.addRajeCoreInArticle(editorWindowUrl, err => {
-          this.showEditor(editorWindowUrl)
-        })
-      })
-
-    else
-      openSplash()
-    */
 }
 
 const showEditor = editorWindowUrl => {
@@ -166,6 +149,8 @@ const showEditor = editorWindowUrl => {
   })
 
   windowManager.get(RAJE_CONST.windows.editor).object.on('close', event => {
+
+    global.articleSettings.hasChanged = false
 
     // If the document is in hasChanged mode (need to be saved)
     if (global.articleSettings.hasChanged) {
@@ -212,7 +197,7 @@ const showEditor = editorWindowUrl => {
   /**
    * When the editor is closed, remove rajemce from the article if is still there
    */
-  windowManager.get(RAJE_CONST.windows.editor).object.on('closed', event => {
+  windowManager.get(RAJE_CONST.windows.editor).object.on('closed', () => {
 
     openSplash()
 

@@ -33,6 +33,7 @@
     "octonode": "^0.7.13",
     "path": "^0.12.7",
     "request": "^2.79.0",
+    "sleep": "^5.2.3",
     "superagent": "^3.8.0",
     "watchjs": "0.0.0"
   }

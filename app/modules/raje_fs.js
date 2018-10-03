@@ -2,7 +2,6 @@ const fs = require('fs-extra')
 const cheerio = require('cheerio')
 const entities = require('entities')
 const path = require('path')
-const md5 = require('md5')
 const dircompare = require('dir-compare')
 const url = require('url')
 
@@ -59,36 +58,65 @@ const RAJE_FS = {
    */
   _copyAssets: toDir => {
 
-    return new Promise(resolve => {
+    return Promise.all(RAJE_CONST.dirs.assets.map(fromDir => {
 
-      resolve(RAJE_CONST.dirs.assets.map(fromDir => {
+        return new Promise((resolve, reject) => {
 
-        // Set the path for the directory asset
-        let toDirAsset = path.join(toDir, path.parse(fromDir).name)
+          // Set the path for the directory asset
+          const toDirAsset = path.join(toDir, path.parse(fromDir).name)
 
-        // If the directory doesn't exists, copy the content from the source
-        if (!fs.existsSync(toDirAsset))
-          return fs.copy(fromDir, toDirAsset).catch(error => console.log(error))
+          // If the directory doesn't exists, copy the content from the source
+          if (!fs.pathExistsSync(toDirAsset)) {
+            return resolve(fs.copy(fromDir, toDirAsset))
+          }
 
-        else
-          return RAJE_FS._compareAssets(toDirAsset, fromDir)
-          .then(diffSet => {
-            diffSet.map(file => {
+          // If the directory exists 
+          else {
+            return resolve(RAJE_FS._compareAssets(toDirAsset, fromDir))
+          }
+        })
+      }))
 
+      // Manipulate the set of differente files
+      .then(diffSet => {
+
+        // Create a single set of files
+        let set = []
+        for (let diffDir of diffSet) {
+          set.push(...diffDir)
+        }
+
+        return Promise.all(set.map(file => {
+
+            return new Promise((resolve, reject) => {
               switch (file.state) {
 
                 case 'distinct':
-                  fs.copy(path.join(file.path1, file.name1), path.join(file.path2, file.name2))
-                  break
+                  return resolve(fs.copySync(path.join(file.path1, file.name1), path.join(file.path2, file.name2)))
 
                 case 'left':
-                  fs.copy(path.join(file.path1, file.name1), path.join(toDirAsset, file.name1))
+
+                  // Look up for the right folder in the path
+                  for (asset_rel of RAJE_CONST.dirs.assets_rel) {
+                    if (file.path1.indexOf(asset_rel) > 0) {
+
+                      // If the folder is there return the copy
+                      const toFilePath = path.normalize(path.join(toDir, asset_rel, file.path1.split(asset_rel).slice(-1).pop(), file.name1))
+                      return resolve(fs.copySync(path.join(file.path1, file.name1), toFilePath))
+                    }
+                  }
+
+                  // If something is not ok
+                  return resolve(false)
               }
             })
-          })
-          .catch(error => console.log(error))
-      }))
-    })
+          }))
+
+          // Return the files
+          .then(result => result)
+      })
+      .catch(error =>
+        error)
   },
 
   /**
@@ -99,15 +127,18 @@ const RAJE_FS = {
     // Set the constants
     const keywords = ['distinct', 'left']
     const options = {
-      compareContent: true
+      compareContent: true,
+      excludeFilter: RAJE_CONST.compareExcludeAssets.join(',')
     }
 
-    return new Promise((resolve) => {
+    return new Promise((resolve, reject) => {
 
-      if (fs.existsSync(fromDir) && fs.existsSync(toDir))
+      // If the starting directory exists
+      if (!fs.existsSync(fromDir))
+        fs.mkdirpSync(fromDir)
 
-        // Compare all files 
-        dircompare.compare(fromDir, toDir, options)
+      // Compare all files 
+      dircompare.compare(fromDir, toDir, options)
         .then(result => {
 
           // Create the set of different files
@@ -121,6 +152,8 @@ const RAJE_FS = {
 
           resolve(diffSet)
         })
+        .catch(error =>
+          reject(error))
     })
   },
 
